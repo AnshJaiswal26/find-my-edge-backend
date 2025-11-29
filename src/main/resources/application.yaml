@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: find-my-edge
+
+
+google:
+  sheet:
+    id: 1qfPki9e98uhCRl5maq5-0bUcuZTRX9bbaO3iBnQQTZk
