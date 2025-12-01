@@ -1,7 +1,7 @@
-package com.example.find_my_edge.controller;
+package com.example.find_my_edge.sheets.controller;
 
-import com.example.find_my_edge.dto.GoogleSheetRequest;
-import com.example.find_my_edge.service.GoogleSheetService;
+import com.example.find_my_edge.sheets.dto.GoogleSheetRequest;
+import com.example.find_my_edge.sheets.service.GoogleSheetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

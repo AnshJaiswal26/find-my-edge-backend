@@ -1,4 +1,4 @@
-package com.example.find_my_edge.dto;
+package com.example.find_my_edge.sheets.dto;
 
 
 import lombok.Data;

@@ -2,7 +2,21 @@ spring:
   application:
     name: find-my-edge
 
+  datasource:
+    url: jdbc:mysql://localhost:3306/find_my_edge
+    username: root
+    password: Ansh@2004
 
-google:
-  sheet:
-    id: 1qfPki9e98uhCRl5maq5-0bUcuZTRX9bbaO3iBnQQTZk
+  jpa:
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+
+
+
+
+
+

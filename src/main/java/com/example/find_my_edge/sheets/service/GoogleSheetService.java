@@ -1,6 +1,6 @@
-package com.example.find_my_edge.service;
+package com.example.find_my_edge.sheets.service;
 
-import com.example.find_my_edge.dto.GoogleSheetRequest;
+import com.example.find_my_edge.sheets.dto.GoogleSheetRequest;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.sheets.v4.Sheets;
@@ -9,7 +9,6 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
