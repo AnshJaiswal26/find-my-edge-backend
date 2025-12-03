@@ -3,6 +3,7 @@ package com.example.find_my_edge.core.backtest.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -10,5 +11,6 @@ import java.util.List;
 public class TradeRecordsResponse {
 
     Long tradeId;
+    Timestamp createdAt;
     List<FieldDataResponse> fields;
 }

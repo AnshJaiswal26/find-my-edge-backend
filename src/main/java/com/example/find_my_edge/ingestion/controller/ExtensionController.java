@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/extension")
+@CrossOrigin("*")
 @RequiredArgsConstructor
 public class ExtensionController {
 
@@ -20,11 +21,7 @@ public class ExtensionController {
 
     @GetMapping
     public ResponseEntity<List<TradeRecordsResponse>> getTradeRecords() {
-        List<TradeRecordsResponse> records = tradeFieldService.getTradeRecords();
-        return new ResponseEntity<>(
-                records,
-                HttpStatus.OK
-        );
+        return tradeFieldService.getTradeRecords();
     }
 
     @PostMapping
@@ -37,14 +34,10 @@ public class ExtensionController {
     }
 
     @PutMapping("/{tradeId}")
-    public ResponseEntity<TradeRecordsResponse> updateTradeRecords(@PathVariable Long tradeId, @RequestBody List<FieldDataRequest> request) {
-        TradeRecordsResponse records = tradeFieldService.updateTradeRecords(
+    public ResponseEntity<?> updateTradeRecords(@PathVariable Long tradeId, @RequestBody List<FieldDataRequest> request) {
+        return tradeFieldService.updateTradeRecords(
                 tradeId,
                 request
-        );
-        return new ResponseEntity<>(
-                records,
-                HttpStatus.OK
         );
     }
 

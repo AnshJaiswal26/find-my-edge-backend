@@ -15,9 +15,8 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -30,74 +29,73 @@ public class TradeFieldService {
 
 
     public TradeRecordsResponse addTradeRecords(List<FieldDataRequest> fields) {
-        Trade trade = tradeRepository.save(new Trade());
-        List<TradeField> tradeFields = fields.stream()
-                                             .map(field -> toEntity(
-                                                     trade.getId(),
-                                                     field
-                                             ))
-                                             .toList();
+        Trade trade = new Trade();
 
-        List<TradeField> savedTradeFields = tradeFieldRepository.saveAll(tradeFields);
-        return new TradeRecordsResponse(
-                trade.getId(),
-                savedTradeFields.stream()
-                                .map(this::toFieldDataResponseDto)
-                                .toList()
-        );
+        for (FieldDataRequest dto : fields) {
+            TradeField field = toEntity(dto);
+            field.setTrade(trade);
+            trade.getFields()
+                 .add(field);
+        }
+
+        Trade saved = tradeRepository.save(trade);
+        return toTradeRecordsResponseDto(saved);
     }
 
-    public List<TradeRecordsResponse> getTradeRecords() {
-        List<TradeField> fields = tradeFieldRepository.findAll();
 
-        return fields.stream()
-                     .collect(Collectors.groupingBy(
-                             TradeField::getTradeId,
-                             LinkedHashMap::new,
-                             Collectors.toList()
-                     ))
-                     .entrySet()
-                     .stream()
-                     .map(e -> toTradeRecordsResponseDto(
-                             e.getKey(),
-                             e.getValue()
-                     ))
-                     .toList();
+    public ResponseEntity<List<TradeRecordsResponse>> getTradeRecords() {
+        List<Trade> trades = tradeRepository.findAll();
 
+        List<TradeRecordsResponse> records = trades.stream()
+                                                   .map(this::toTradeRecordsResponseDto)
+                                                   .toList();
+
+        return new ResponseEntity<>(
+                records,
+                HttpStatus.OK
+        );
     }
 
     @Transactional
-    public TradeRecordsResponse updateTradeRecords(Long tradeId, List<FieldDataRequest> fields) {
-        tradeFieldRepository.deleteAllByTradeId(tradeId);
-        List<TradeField> tradeFields = fields.stream()
-                                             .map(field -> toEntity(
-                                                     tradeId,
-                                                     field
-                                             ))
-                                             .toList();
+    public ResponseEntity<?> updateTradeRecords(Long tradeId, List<FieldDataRequest> fields) {
+        Trade trade = tradeRepository.findById(tradeId)
+                                     .orElse(null);
+        if (trade == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
-        tradeFieldRepository.saveAll(tradeFields);
+        trade.getFields()
+             .clear();
 
-        return toTradeRecordsResponseDto(
-                tradeId,
-                tradeFields
-        );
+        for (FieldDataRequest dto : fields) {
+            TradeField field = toEntity(dto);
+            field.setTrade(trade);
+            trade.getFields()
+                 .add(field);
+        }
+
+        Trade saved = tradeRepository.save(trade);
+
+        return ResponseEntity.ok(toTradeRecordsResponseDto(saved));
     }
 
 
     @Transactional
     public ResponseEntity<?> deleteTradeRecord(Long tradeId) {
-        tradeFieldRepository.deleteAllByTradeId(tradeId);
+        tradeRepository.deleteById(tradeId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
-    private TradeRecordsResponse toTradeRecordsResponseDto(Long tradeId, List<TradeField> tradeFields) {
+    private TradeRecordsResponse toTradeRecordsResponseDto(Trade trade) {
+
         return new TradeRecordsResponse(
-                tradeId,
-                tradeFields.stream()
-                           .map(this::toFieldDataResponseDto)
-                           .toList()
+                trade.getId(),
+                trade.getCreatedAt(),
+                trade.getFields()
+                     .stream()
+                     .map(this::toFieldDataResponseDto)
+                     .toList()
         );
     }
 
@@ -116,9 +114,7 @@ public class TradeFieldService {
                         e
                 );
             }
-
         }
-
         return new FieldDataResponse(
                 field.getId(),
                 field.getLabel(),
@@ -129,7 +125,8 @@ public class TradeFieldService {
         );
     }
 
-    public TradeField toEntity(Long tradeId, FieldDataRequest dto) {
+
+    public TradeField toEntity(FieldDataRequest dto) {
         String jsonOptions = null;
 
         if (dto.getOptions() != null) {
@@ -144,7 +141,6 @@ public class TradeFieldService {
             }
         }
         return new TradeField(
-                tradeId,
                 dto.getLabel(),
                 dto.getType(),
                 dto.getValue(),
@@ -152,6 +148,4 @@ public class TradeFieldService {
                 jsonOptions
         );
     }
-
-
 }

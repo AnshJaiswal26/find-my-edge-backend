@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,7 +37,8 @@ public class GoogleSheetService {
                 GoogleNetHttpTransport.newTrustedTransport(),
                 JacksonFactory.getDefaultInstance(),
                 new HttpCredentialsAdapter(credentials)
-        ).setApplicationName("FindMyEdge").build();
+        ).setApplicationName("FindMyEdge")
+         .build();
 
     }
 
@@ -48,11 +48,15 @@ public class GoogleSheetService {
             String spreadsheetId = request.getSheetId();
             String range = request.getSheetName() + "!A1";
 
-            ValueRange body = new ValueRange().setValues(List.of(new ArrayList<>(request.getData())));
+            ValueRange body = new ValueRange().setValues(request.getData());
 
             sheets.spreadsheets()
                   .values()
-                  .append(spreadsheetId, range, body)
+                  .append(
+                          spreadsheetId,
+                          range,
+                          body
+                  )
                   .setValueInputOption("USER_ENTERED")
                   .execute();
 
@@ -60,7 +64,10 @@ public class GoogleSheetService {
             System.out.println(e.getMessage());
         }
 
-        return new ResponseEntity<>("Row inserted!", HttpStatus.OK);
+        return new ResponseEntity<>(
+                "Row inserted!",
+                HttpStatus.OK
+        );
     }
 
 
@@ -68,8 +75,14 @@ public class GoogleSheetService {
 
         List<String> sheetNames = null;
         try {
-            Spreadsheet spreadsheet = sheets.spreadsheets().get(sheetId).execute();
-            sheetNames = spreadsheet.getSheets().stream().map(sheet -> sheet.getProperties().getTitle()).toList();
+            Spreadsheet spreadsheet = sheets.spreadsheets()
+                                            .get(sheetId)
+                                            .execute();
+            sheetNames = spreadsheet.getSheets()
+                                    .stream()
+                                    .map(sheet -> sheet.getProperties()
+                                                       .getTitle())
+                                    .toList();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -78,6 +91,9 @@ public class GoogleSheetService {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        return new ResponseEntity<>(sheetNames, HttpStatus.OK);
+        return new ResponseEntity<>(
+                sheetNames,
+                HttpStatus.OK
+        );
     }
 }

@@ -1,10 +1,10 @@
 package com.example.find_my_edge.core.backtest.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 
 @Entity
-@Getter
+@Data
 public class TradeField {
 
     public TradeField() {
@@ -16,7 +16,9 @@ public class TradeField {
     private Long id;
 
 
-    private Long tradeId;
+    @ManyToOne
+    @JoinColumn(name = "trade_id")
+    private Trade trade;
 
     private String label;
     private String type;
@@ -26,8 +28,7 @@ public class TradeField {
     @Column(columnDefinition = "JSON")
     private String options;
 
-    public TradeField(Long tradeId, String label, String type, String value, String mappedWith, String options) {
-        this.tradeId = tradeId;
+    public TradeField(String label, String type, String value, String mappedWith, String options) {
         this.label = label;
         this.type = type;
         this.value = value;

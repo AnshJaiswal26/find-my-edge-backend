@@ -15,8 +15,8 @@ spring:
         hibernate:
           format_sql: true
 
-
-
+  jackson:
+    time-zone: Asia/Kolkata
 
 
 

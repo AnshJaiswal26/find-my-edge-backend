@@ -4,11 +4,10 @@ package com.example.find_my_edge.sheets.dto;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Objects;
 
 @Data
 public class GoogleSheetRequest {
     private String sheetName;
     private String sheetId;
-    private List<Objects> data;
+    private List<List<Object>> data;
 }
