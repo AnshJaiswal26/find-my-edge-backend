@@ -1,21 +1,24 @@
 package com.example.find_my_edge.core.backtest.service;
 
+import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.utils.JsonUtil;
 import com.example.find_my_edge.core.backtest.dto.FieldDataRequest;
 import com.example.find_my_edge.core.backtest.dto.FieldDataResponse;
 import com.example.find_my_edge.core.backtest.dto.TradeRecordsResponse;
 import com.example.find_my_edge.core.backtest.entity.Trade;
 import com.example.find_my_edge.core.backtest.entity.TradeField;
-import com.example.find_my_edge.core.backtest.repository.TradeFieldRepository;
 import com.example.find_my_edge.core.backtest.repository.TradeRepository;
+import com.example.find_my_edge.common.exceptions.TradeNotFound;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Service
@@ -23,12 +26,8 @@ import java.util.List;
 public class TradeFieldService {
 
     private final TradeRepository tradeRepository;
-    private final TradeFieldRepository tradeFieldRepository;
 
-    private final ObjectMapper objectMapper;
-
-
-    public TradeRecordsResponse addTradeRecords(List<FieldDataRequest> fields) {
+    public ResponseEntity<ApiResponse<?>> addTradeRecords(List<FieldDataRequest> fields) {
         Trade trade = new Trade();
 
         for (FieldDataRequest dto : fields) {
@@ -39,30 +38,42 @@ public class TradeFieldService {
         }
 
         Trade saved = tradeRepository.save(trade);
-        return toTradeRecordsResponseDto(saved);
+
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                           .success(true)
+                           .status(HttpStatus.OK.value())
+                           .message("Trade Record added successfully")
+                           .data(toTradeRecordsResponseDto(saved))
+                           .meta(Map.of("empty", false, "count", 1))
+                           .build()
+        );
     }
 
 
-    public ResponseEntity<List<TradeRecordsResponse>> getTradeRecords() {
+    public ResponseEntity<ApiResponse<?>> getTradeRecords() {
         List<Trade> trades = tradeRepository.findAll();
 
         List<TradeRecordsResponse> records = trades.stream()
                                                    .map(this::toTradeRecordsResponseDto)
                                                    .toList();
 
-        return new ResponseEntity<>(
-                records,
-                HttpStatus.OK
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                           .success(true)
+                           .status(HttpStatus.OK.value())
+                           .message("Trade Records found successfully")
+                           .data(records)
+                           .meta(Map.of("empty", false, "count", records.size()))
+                           .build()
         );
     }
 
     @Transactional
-    public ResponseEntity<?> updateTradeRecords(Long tradeId, List<FieldDataRequest> fields) {
-        Trade trade = tradeRepository.findById(tradeId)
-                                     .orElse(null);
-        if (trade == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<ApiResponse<?>> updateTradeRecords(Long tradeId, List<FieldDataRequest> fields) {
+        Optional<Trade> tradeOptional = tradeRepository.findById(tradeId);
+
+        Trade trade = tradeOptional.orElseThrow(() -> new TradeNotFound("Trade not found with id " + tradeId));
 
         trade.getFields()
              .clear();
@@ -76,70 +87,63 @@ public class TradeFieldService {
 
         Trade saved = tradeRepository.save(trade);
 
-        return ResponseEntity.ok(toTradeRecordsResponseDto(saved));
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                           .success(true)
+                           .status(HttpStatus.OK.value())
+                           .message("Trade Record updated successfully")
+                           .data(toTradeRecordsResponseDto(saved))
+                           .meta(Map.of("empty", false, "count", 1))
+                           .build()
+        );
     }
 
 
     @Transactional
-    public ResponseEntity<?> deleteTradeRecord(Long tradeId) {
+    public ResponseEntity<ApiResponse<?>> deleteTradeRecord(Long tradeId) {
         tradeRepository.deleteById(tradeId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                           .success(true)
+                           .status(HttpStatus.OK.value())
+                           .message("Trade Record deleted successfully")
+                           .data(null)
+                           .meta(Map.of("empty", true, "count", 0))
+                           .build()
+        );
     }
 
 
     private TradeRecordsResponse toTradeRecordsResponseDto(Trade trade) {
 
         return new TradeRecordsResponse(
-                trade.getId(),
-                trade.getCreatedAt(),
-                trade.getFields()
-                     .stream()
-                     .map(this::toFieldDataResponseDto)
-                     .toList()
+                trade.getId(), trade.getCreatedAt(), trade.getFields()
+                                                          .stream()
+                                                          .map(this::toFieldDataResponseDto)
+                                                          .toList()
         );
     }
 
     private FieldDataResponse toFieldDataResponseDto(TradeField field) {
-        List<String> options = null;
-        if (field.getOptions() != null) {
-            try {
-                options = objectMapper.readValue(
-                        field.getOptions(),
-                        new TypeReference<List<String>>() {
-                        }
-                );
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Failed to parse options to JSON",
-                        e
-                );
-            }
-        }
+        List<String> options = field.getOptions() != null
+                               ? JsonUtil.toList(field.getOptions())
+                               : null;
+
         return new FieldDataResponse(
                 field.getId(),
                 field.getLabel(),
                 field.getType(),
                 field.getValue(),
-                field.getMappedWith(),
-                options
+                field.getMappedWith(), options
         );
     }
 
 
     public TradeField toEntity(FieldDataRequest dto) {
-        String jsonOptions = null;
+        String jsonOptions = dto.getOptions() != null
+                             ? JsonUtil.toJSON(dto.getOptions())
+                             : null;
 
-        if (dto.getOptions() != null) {
-            try {
-                jsonOptions = objectMapper.writeValueAsString(dto.getOptions());
-
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Failed to convert options to JSON",
-                        e
-                );
-            }
-        }
         return new TradeField(
                 dto.getLabel(),
                 dto.getType(),

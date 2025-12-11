@@ -1,14 +1,13 @@
 package com.example.find_my_edge.sheets.controller;
 
+import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.sheets.dto.GoogleSheetRequest;
 import com.example.find_my_edge.sheets.service.GoogleSheetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
-@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/sheets")
 @RequiredArgsConstructor
@@ -16,14 +15,14 @@ public class GoogleSheetController {
 
     private final GoogleSheetService googleSheetService;
 
-    @GetMapping
-    public ResponseEntity<List<String>> getAllSheets(@RequestParam String sheetId) {
+    @GetMapping("/{sheetId}")
+    public ResponseEntity<ApiResponse<?>> getAllSheets(@PathVariable String sheetId) {
         return googleSheetService.getSheetNames(sheetId);
     }
 
-    @PostMapping("/append")
-    public ResponseEntity<String> insertGoogleSheetData(@RequestBody GoogleSheetRequest request) {
-        return googleSheetService.appendDataToSheet(request);
+    @PostMapping("/{sheetId}")
+    public ResponseEntity<ApiResponse<?>> insertGoogleSheetData(@PathVariable String sheetId, @RequestBody GoogleSheetRequest request) {
+        return googleSheetService.appendDataToSheet(sheetId, request);
     }
 
 }
