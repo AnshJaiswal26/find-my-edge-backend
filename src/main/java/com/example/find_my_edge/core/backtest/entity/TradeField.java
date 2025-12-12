@@ -8,7 +8,6 @@ import lombok.Data;
 public class TradeField {
 
     public TradeField() {
-
     }
 
     @Id
@@ -24,15 +23,18 @@ public class TradeField {
     private String type;
     private String value;
     private String mappedWith;
+    private int mappedColumn;
+
 
     @Column(columnDefinition = "JSON")
     private String options;
 
-    public TradeField(String label, String type, String value, String mappedWith, String options) {
+    public TradeField(String label, String type, String value, String mappedWith, int mappedColumn, String options) {
         this.label = label;
         this.type = type;
         this.value = value;
         this.mappedWith = mappedWith;
+        this.mappedColumn = mappedColumn;
         this.options = options;
     }
 

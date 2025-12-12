@@ -16,12 +16,12 @@ public class GoogleSheetController {
     private final GoogleSheetService googleSheetService;
 
     @GetMapping("/{sheetId}")
-    public ResponseEntity<ApiResponse<?>> getAllSheets(@PathVariable String sheetId) {
+    public ResponseEntity<ApiResponse<Object>> getAllSheets(@PathVariable String sheetId) {
         return googleSheetService.getSheetNames(sheetId);
     }
 
     @PostMapping("/{sheetId}")
-    public ResponseEntity<ApiResponse<?>> insertGoogleSheetData(@PathVariable String sheetId, @RequestBody GoogleSheetRequest request) {
+    public ResponseEntity<ApiResponse<Object>> insertGoogleSheetData(@PathVariable String sheetId, @RequestBody GoogleSheetRequest request) {
         return googleSheetService.appendDataToSheet(sheetId, request);
     }
 

@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -134,7 +133,9 @@ public class TradeFieldService {
                 field.getLabel(),
                 field.getType(),
                 field.getValue(),
-                field.getMappedWith(), options
+                field.getMappedWith(),
+                field.getMappedColumn(),
+                options
         );
     }
 
@@ -149,6 +150,7 @@ public class TradeFieldService {
                 dto.getType(),
                 dto.getValue(),
                 dto.getMappedWith(),
+                dto.getMappedColumn(),
                 jsonOptions
         );
     }

@@ -15,5 +15,6 @@ public class FieldDataRequest {
     String type;
     String value;
     String mappedWith;
+    int mappedColumn;
     List<String> options;
 }

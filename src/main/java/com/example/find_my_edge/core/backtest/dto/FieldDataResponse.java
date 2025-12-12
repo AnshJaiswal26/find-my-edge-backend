@@ -13,5 +13,6 @@ public class FieldDataResponse {
     private String type;
     private String value;
     private String mappedWith;
+    private int mappedColumn;
     private List<String> options;
 }
