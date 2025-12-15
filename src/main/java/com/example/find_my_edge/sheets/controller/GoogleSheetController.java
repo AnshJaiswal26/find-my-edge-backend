@@ -1,7 +1,7 @@
 package com.example.find_my_edge.sheets.controller;
 
 import com.example.find_my_edge.common.response.ApiResponse;
-import com.example.find_my_edge.sheets.dto.GoogleSheetRequest;
+import com.example.find_my_edge.sheets.dto.SheetRequest;
 import com.example.find_my_edge.sheets.service.GoogleSheetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class GoogleSheetController {
     }
 
     @PostMapping("/{sheetId}")
-    public ResponseEntity<ApiResponse<Object>> insertGoogleSheetData(@PathVariable String sheetId, @RequestBody GoogleSheetRequest request) {
+    public ResponseEntity<ApiResponse<Object>> insertGoogleSheetData(@PathVariable String sheetId, @RequestBody SheetRequest request) {
         return googleSheetService.appendDataToSheet(sheetId, request);
     }
 
