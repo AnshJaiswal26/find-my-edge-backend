@@ -1,17 +1,20 @@
 package com.example.find_my_edge.common.utils;
 
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-public class JsonUtil {
+public final class JsonUtil {
+
+    private JsonUtil() {
+        throw new AssertionError("Utility Class");
+    }
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static String toJSON(List<String> list) {
+        if (list == null) return null;
         try {
             return mapper.writeValueAsString(list);
         } catch (Exception e) {
@@ -19,25 +22,13 @@ public class JsonUtil {
         }
     }
 
-    public static List<String> toList(String json) {
+    public static <T> T fromJson(String json, TypeReference<T> type) {
+        if (json == null) return null;
         try {
-            return mapper.readValue(
-                    json, new TypeReference<List<String>>() {
-                    }
-            );
+            return mapper.readValue(json, type);
         } catch (Exception e) {
             throw new RuntimeException("Failed to convert JSON to List", e);
         }
     }
 
-    public static Map<String, Object> toMap(String json) {
-        try {
-            return mapper.readValue(
-                    json, new TypeReference<Map<String, Object>>() {
-                    }
-            );
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert JSON to List", e);
-        }
-    }
 }

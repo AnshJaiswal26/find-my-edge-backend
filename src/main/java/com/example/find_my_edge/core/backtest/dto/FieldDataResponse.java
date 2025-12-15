@@ -1,12 +1,12 @@
 package com.example.find_my_edge.core.backtest.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class FieldDataResponse {
     private Long id;
     private String label;

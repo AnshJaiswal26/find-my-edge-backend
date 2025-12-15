@@ -18,17 +18,17 @@ public class ExtensionController {
 
 
     @GetMapping
-    public ResponseEntity<ApiResponse<?>> getTradeRecords() {
+    public ResponseEntity<ApiResponse<Object>> getTradeRecords() {
         return tradeFieldService.getTradeRecords();
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> addTradeFields(@RequestBody List<FieldDataRequest> request) {
+    public ResponseEntity<ApiResponse<Object>> addTradeFields(@RequestBody List<FieldDataRequest> request) {
         return tradeFieldService.addTradeRecords(request);
     }
 
     @PutMapping("/{tradeId}")
-    public ResponseEntity<ApiResponse<?>> updateTradeRecords(@PathVariable Long tradeId, @RequestBody List<FieldDataRequest> request) {
+    public ResponseEntity<ApiResponse<Object>> updateTradeRecords(@PathVariable Long tradeId, @RequestBody List<FieldDataRequest> request) {
         return tradeFieldService.updateTradeRecords(
                 tradeId,
                 request
@@ -36,7 +36,7 @@ public class ExtensionController {
     }
 
     @DeleteMapping("/{tradeId}")
-    public ResponseEntity<ApiResponse<?>> deleteTradeRecords(@PathVariable Long tradeId) {
+    public ResponseEntity<ApiResponse<Object>> deleteTradeRecords(@PathVariable Long tradeId) {
         return tradeFieldService.deleteTradeRecord(tradeId);
     }
 }

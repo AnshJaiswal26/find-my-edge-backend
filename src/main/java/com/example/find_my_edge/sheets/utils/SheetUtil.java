@@ -1,15 +1,17 @@
 package com.example.find_my_edge.sheets.utils;
 
-import com.example.find_my_edge.sheets.dto.SheetRequest;
 import com.google.api.services.sheets.v4.model.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 
-public class SheetUtil {
+public final class SheetUtil {
+
+    private  SheetUtil(){
+        throw new AssertionError("Utility Class");
+    }
 
     public static String indexToLetter(int index) {
         index++; // convert 0-based → 1-based
@@ -34,11 +36,11 @@ public class SheetUtil {
     }
 
     public static DataValidationRule dropdownRule(List<String> options) {
-        return new DataValidationRule().setCondition(new BooleanCondition().setType("ONE_OF_LIST")
-                                                                           .setValues(options.stream()
-                                                                                             .map(o -> new ConditionValue().setUserEnteredValue(
-                                                                                                     o))
-                                                                                             .toList()))
+        return new DataValidationRule().setCondition(
+                                               new BooleanCondition().setType("ONE_OF_LIST")
+                                                                     .setValues(options.stream()
+                                                                                       .map(o -> new ConditionValue().setUserEnteredValue(o))
+                                                                                       .toList()))
                                        .setShowCustomUi(true);
     }
 
