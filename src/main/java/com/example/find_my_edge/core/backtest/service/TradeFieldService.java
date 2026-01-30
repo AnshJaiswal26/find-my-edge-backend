@@ -1,5 +1,6 @@
 package com.example.find_my_edge.core.backtest.service;
 
+import com.example.find_my_edge.common.enums.ResponseState;
 import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.core.backtest.dto.FieldDataRequest;
 import com.example.find_my_edge.core.backtest.dto.TradeRecordsResponse;
@@ -41,8 +42,8 @@ public class TradeFieldService {
         Trade saved = tradeRepository.save(trade);
 
         return ResponseEntity.ok(ApiResponse.builder()
-                                            .success(true)
-                                            .status(HttpStatus.OK.value())
+                                            .state(ResponseState.SUCCESS)
+                                            .httpStatus(HttpStatus.OK.value())
                                             .message("Trade Record added successfully")
                                             .data(tradeMapper.toResponse(saved))
                                             .meta(Map.of("empty", false, "count", 1))
@@ -58,8 +59,8 @@ public class TradeFieldService {
                                                    .toList();
 
         return ResponseEntity.ok(ApiResponse.builder()
-                                            .success(true)
-                                            .status(HttpStatus.OK.value())
+                                            .state(ResponseState.SUCCESS)
+                                            .httpStatus(HttpStatus.OK.value())
                                             .message("Trade Records found successfully")
                                             .data(records)
                                             .meta(Map.of("empty", false, "count", records.size()))
@@ -85,8 +86,8 @@ public class TradeFieldService {
         Trade saved = tradeRepository.save(trade);
 
         return ResponseEntity.ok(ApiResponse.builder()
-                                            .success(true)
-                                            .status(HttpStatus.OK.value())
+                                            .state(ResponseState.SUCCESS)
+                                            .httpStatus(HttpStatus.OK.value())
                                             .message("Trade Record updated successfully")
                                             .data(tradeMapper.toResponse(saved))
                                             .meta(Map.of("empty", false, "count", 1))
@@ -97,8 +98,8 @@ public class TradeFieldService {
     public ResponseEntity<ApiResponse<Object>> deleteTradeRecord(Long tradeId) {
         tradeRepository.deleteById(tradeId);
         return ResponseEntity.ok(ApiResponse.builder()
-                                            .success(true)
-                                            .status(HttpStatus.OK.value())
+                                            .state(ResponseState.SUCCESS)
+                                            .httpStatus(HttpStatus.OK.value())
                                             .message("Trade Record deleted successfully")
                                             .data(null)
                                             .meta(Map.of("empty", true, "count", 0))

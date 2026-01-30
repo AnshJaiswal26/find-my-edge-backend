@@ -6,10 +6,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public final class SheetUtil {
 
-    private  SheetUtil(){
+    private SheetUtil() {
         throw new AssertionError("Utility Class");
     }
 
@@ -51,28 +52,51 @@ public final class SheetUtil {
                               .setEndColumnIndex(col + 1);
     }
 
-    public static ExtendedValue buildValue(Object value, String type) {
+    public static CellData buildCell(Object value, String type) {
+        CellData cell = new CellData();
+
+        BiFunction<String, String, CellFormat> biFunction = (format, pattern) -> new CellFormat().setNumberFormat(
+                new NumberFormat().setType(format).setPattern(pattern)
+        );
 
         return switch (type) {
-
-            case "number" -> new ExtendedValue().setNumberValue(Double.parseDouble(value.toString()));
+            case "number" -> {
+                cell.setUserEnteredValue(
+                        new ExtendedValue().setNumberValue(Double.parseDouble(value.toString()))
+                );
+                yield cell;
+            }
 
             case "time" -> {
                 LocalTime time = LocalTime.parse(value.toString());
                 double fractionOfDay = (time.toSecondOfDay()) / 86400.0;
-                yield new ExtendedValue().setNumberValue(fractionOfDay);
+
+                cell.setUserEnteredValue(
+                        new ExtendedValue().setNumberValue(fractionOfDay)
+                ).setUserEnteredFormat(biFunction.apply("TIME", "hh:mm:ss AM/PM"));
+
+                yield cell;
             }
 
-            case "formula" -> new ExtendedValue().setFormulaValue(value.toString());
+            case "formula" -> cell.setUserEnteredValue(
+                    new ExtendedValue().setFormulaValue(value.toString())
+            );
 
             case "date" -> {
                 LocalDate date = LocalDate.parse(value.toString());
                 LocalDate base = LocalDate.of(1899, 12, 30);
                 double between = ChronoUnit.DAYS.between(base, date);
-                yield new ExtendedValue().setNumberValue(between);
+
+                cell.setUserEnteredValue(
+                        new ExtendedValue().setNumberValue(between)
+                ).setUserEnteredFormat(biFunction.apply("DATE", "dd-MMM-yy"));
+
+                yield cell;
             }
 
-            default -> new ExtendedValue().setStringValue(value.toString());
+            default -> cell.setUserEnteredValue(
+                    new ExtendedValue().setStringValue(value.toString())
+            );
         };
 
     }

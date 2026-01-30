@@ -1,5 +1,6 @@
 package com.example.find_my_edge.common.exceptions;
 
+import com.example.find_my_edge.common.enums.ResponseState;
 import com.example.find_my_edge.common.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleTradeNotFound(TradeNotFound ex, HttpServletRequest request) {
 
         ApiResponse<?> response = ApiResponse.builder()
-                                             .success(false)
-                                             .status(HttpStatus.NOT_FOUND.value())
+                                             .state(ResponseState.ERROR)
+                                             .httpStatus(HttpStatus.NOT_FOUND.value())
                                              .message(ex.getMessage())
                                              .data(null)
                                              .meta(Map.of(
@@ -36,8 +37,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleSheetFetchException(SheetFetchException ex, HttpServletRequest request) {
 
         ApiResponse<?> response = ApiResponse.builder()
-                                             .success(false)
-                                             .status(HttpStatus.NOT_FOUND.value())
+                                             .state(ResponseState.ERROR)
+                                             .httpStatus(HttpStatus.NOT_FOUND.value())
                                              .message(ex.getMessage())
                                              .data(null)
                                              .meta(Map.of(

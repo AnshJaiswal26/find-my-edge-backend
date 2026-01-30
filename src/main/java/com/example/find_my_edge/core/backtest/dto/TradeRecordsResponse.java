@@ -9,7 +9,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class TradeRecordsResponse {
-
     Long tradeId;
     Timestamp createdAt;
     List<FieldDataResponse> fields;

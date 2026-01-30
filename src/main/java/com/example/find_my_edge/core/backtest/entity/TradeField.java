@@ -32,5 +32,4 @@ public class TradeField {
     @Column(columnDefinition = "JSON")
     private String options;
 
-
 }

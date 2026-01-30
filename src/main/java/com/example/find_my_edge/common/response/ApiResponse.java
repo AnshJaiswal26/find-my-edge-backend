@@ -1,5 +1,7 @@
 package com.example.find_my_edge.common.response;
 
+import com.example.find_my_edge.common.enums.ResponseState;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +14,11 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApiResponse<T> {
-    private boolean success;
-    private int status;
+    private int httpStatus;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private ResponseState state;
+
     private String message;
     private T data;
     private Map<String, Object> meta;

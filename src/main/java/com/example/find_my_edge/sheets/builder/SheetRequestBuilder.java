@@ -1,13 +1,14 @@
 package com.example.find_my_edge.sheets.builder;
 
-import com.example.find_my_edge.sheets.dto.SheetRequest;
+import com.example.find_my_edge.sheets.dto.SheetPayload;
 import com.google.api.services.sheets.v4.model.*;
 import com.example.find_my_edge.sheets.utils.SheetUtil;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class SheetRequestBuilder {
 
@@ -28,64 +29,73 @@ public class SheetRequestBuilder {
                                               .setRule(dataValidationRule));
     }
 
-    private Request generateUpdateCellsRequest(int rowIndex, List<CellData> cellData) {
+    private Request generateSingleCellUpdateRequest(int rowIndex, int colIndex, CellData cellData, String type) {
 
-        return new Request().setUpdateCells(new UpdateCellsRequest().setRows(List.of(new RowData().setValues(cellData)))
-                                                                    .setFields("userEnteredValue")
-                                                                    .setStart(new GridCoordinate().setSheetId(sheetId)
-                                                                                                  .setRowIndex(rowIndex)
-                                                                                                  .setColumnIndex(0)));
-    }
-
-    private ExtendedValue resolveCellValues(SheetRequest.Payload payload, boolean isHeader) {
-
-        if (payload == null) {
-            return new ExtendedValue().setStringValue("");
+        if (rowIndex == 0) {
+            cellData.setUserEnteredFormat(
+                    new CellFormat().setTextFormat(
+                            new TextFormat().setBold(true)
+                    )
+            );
         }
 
-        if (isHeader) {
-            return SheetUtil.buildValue(payload.getLabel(), "text");
-        }
+        String field = switch (type) {
+            case "number", "time", "date" -> "userEnteredValue,userEnteredFormat.numberFormat";
+            default -> "userEnteredValue";
+        };
 
-        return SheetUtil.buildValue(payload.getValue(), payload.getType());
+
+        return new Request().setUpdateCells(
+                new UpdateCellsRequest()
+                        .setStart(new GridCoordinate()
+                                          .setSheetId(sheetId)
+                                          .setRowIndex(rowIndex)
+                                          .setColumnIndex(colIndex))
+                        .setRows(List.of(new RowData().setValues(List.of(cellData))))
+                        .setFields(rowIndex == 0
+                                   ? "userEnteredValue,userEnteredFormat.textFormat.bold"
+                                   : field)
+        );
     }
 
-    private Request buildUpdateCellsRequest(int rowIndex, int maxCol, Map<Integer, SheetRequest.Payload> columnMap) {
-        List<CellData> cellData = new ArrayList<>();
+    private void buildUpdateCellsRequest(int rowIndex, List<SheetPayload> payloads) {
         boolean isHeader = rowIndex == 0;
 
-        for (int colIndex = 0; colIndex < maxCol; colIndex++) {
+        for (SheetPayload payload : payloads) {
+            int colIndex = payload.getMappedColumn();
+            String type = payload.getType();
 
-            SheetRequest.Payload payload = columnMap.get(colIndex);
+            CellData cellData = isHeader
+                                ? new CellData().setUserEnteredValue(new ExtendedValue().setStringValue(payload.getLabel()))
+                                : SheetUtil.buildCell(payload.getValue(), type);
 
-            ExtendedValue extendedValue = resolveCellValues(payload, isHeader);
-            cellData.add(new CellData().setUserEnteredValue(extendedValue));
+            Request valueRequest = generateSingleCellUpdateRequest(rowIndex, colIndex, cellData, type);
+            requests.add(valueRequest);
 
-            if (payload != null && payload.getType()
-                                          .equals("dropdown") && !isHeader) {
-                Request request = generateDropdownValidationRequest(rowIndex, colIndex, payload.getOptions());
-                requests.add(request);
+            if (payload.getType()
+                       .equals("dropdown") && !isHeader) {
+                Request dropdownRequest = generateDropdownValidationRequest(rowIndex, colIndex, payload.getOptions());
+                requests.add(dropdownRequest);
             }
         }
 
-        return generateUpdateCellsRequest(rowIndex, cellData);
     }
 
     // ---------- VALUES ----------
-    public SheetRequestBuilder setRowValues(
-            int rowIndex,
-            Map<Integer, SheetRequest.Payload> columnMap
-    ) {
+    public SheetRequestBuilder setRowValues(int rowIndex, List<List<SheetPayload>> payloadsList) {
 
-        int maxCol = Collections.max(columnMap.keySet()) + 1;
+        for (var payloads : payloadsList) {
 
-        if (rowIndex == 0) {
-            requests.add(buildUpdateCellsRequest(0, maxCol, columnMap));
+            if (rowIndex == 0) {
+                buildUpdateCellsRequest(0, payloads);
+            }
+
+            int dataRow = rowIndex == 0 ? 1 : rowIndex;
+
+            buildUpdateCellsRequest(dataRow, payloads);
+
+            rowIndex++;
         }
-
-        int dataRow = rowIndex == 0 ? 1 : rowIndex;
-
-        requests.add(buildUpdateCellsRequest(dataRow, maxCol, columnMap));
 
         return this;
     }

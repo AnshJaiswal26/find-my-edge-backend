@@ -1,8 +1,10 @@
 package com.example.find_my_edge.sheets.service;
 
+import com.example.find_my_edge.common.enums.ResponseState;
 import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.common.exceptions.SheetFetchException;
 import com.example.find_my_edge.sheets.builder.SheetRequestBuilder;
+import com.example.find_my_edge.sheets.dto.SheetPayload;
 import com.example.find_my_edge.sheets.dto.SheetRequest;
 import com.example.find_my_edge.sheets.utils.SheetUtil;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -14,15 +16,43 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class GoogleSheetService {
 
+    private static final Pattern COLUMN_ERROR_PATTERN =
+            Pattern.compile("columnIndex\\[(\\d+)] is after last column in grid\\[(\\d+)]");
+
     private final Sheets sheets;
+    private final SheetWriteQueue sheetWriteQueue;
+    private final SseEmitterRegistry sseEmitterRegistry;
+
+    public String buildColumnOutOfRangeMessage(String errorMessage) {
+        Matcher matcher = COLUMN_ERROR_PATTERN.matcher(errorMessage);
+
+        if (!matcher.find()) {
+            return "Invalid column mapping: column index is outside the sheet range.";
+        }
+
+        int requestedIndex = Integer.parseInt(matcher.group(1));
+        int maxIndex = Integer.parseInt(matcher.group(2)); // grid is count-based
+
+        String requestedCol = SheetUtil.indexToLetter(requestedIndex);
+        String maxCol = SheetUtil.indexToLetter(maxIndex);
+
+        return String.format(
+                "Invalid column mapping: column \"%s\" does not exist. " +
+                "The sheet only contains columns up to \"%s\".",
+                requestedCol,
+                maxCol
+        );
+    }
+
 
     public int getFirstEmptyRowIndex(String spreadsheetId, String sheetName) throws IOException {
         ValueRange response = sheets.spreadsheets()
@@ -33,35 +63,122 @@ public class GoogleSheetService {
                                                             .size();
     }
 
-    public ResponseEntity<ApiResponse<Object>> appendDataToSheet(String spreadsheetId, SheetRequest request) {
-        String sheetName = request.getSheetName();
-        int sheetId = request.getSheetId();
-        Map<Integer, SheetRequest.Payload> columnMap = request.getColumnMap();
+    private int appendToSheet(String spreadsheetId, SheetRequest request) throws IOException {
 
-        int maxCol = Collections.max(columnMap.keySet()) + 1;
+        String sheetName = request.getSheetName();
+        Integer sheetId = request.getSheetId();
+        Integer sheetRowIndex = request.getRowIndex();
+        List<List<SheetPayload>> payloadsList = request.getPayloadsList();
+
+        int rowIndex = sheetRowIndex != null
+                       ? sheetRowIndex
+                       : getFirstEmptyRowIndex(spreadsheetId, sheetName);
+
+        List<Request> requests = new SheetRequestBuilder(sheetId)
+                .setRowValues(rowIndex, payloadsList)
+                .build();
+
+        sheets.spreadsheets()
+              .batchUpdate(
+                      spreadsheetId,
+                      new BatchUpdateSpreadsheetRequest().setRequests(requests)
+              )
+              .execute();
+
+        return rowIndex;
+    }
+
+
+    private void handleAutosave(String spreadsheetId, SheetRequest request) {
+        String syncId = request.getSyncId();
 
         try {
-            int rowIndex = getFirstEmptyRowIndex(spreadsheetId, sheetName);
+            int rowIndex = appendToSheet(spreadsheetId, request);
 
-            List<Request> requests = new SheetRequestBuilder(sheetId).setRowValues(rowIndex, columnMap)
-                                                                     .build();
+            sseEmitterRegistry.send(
+                    syncId,
+                    ApiResponse.builder()
+                               .state(ResponseState.SUCCESS)
+                               .httpStatus(HttpStatus.OK.value())
+                               .message("Saved to Sheets ✓")
+                               .data(Map.of("rowIndex", rowIndex))
+                               .build()
+            );
 
-            // EXECUTE ALL IN ONE CALL
-            sheets.spreadsheets()
-                  .batchUpdate(spreadsheetId, new BatchUpdateSpreadsheetRequest().setRequests(requests))
-                  .execute();
+        } catch (GoogleJsonResponseException e) {
+            sseEmitterRegistry.send(
+                    syncId,
+                    ApiResponse.builder()
+                               .state(ResponseState.ERROR)
+                               .httpStatus(HttpStatus.BAD_REQUEST.value())
+                               .message(
+                                       buildColumnOutOfRangeMessage(
+                                               e.getDetails().getMessage()
+                                       )
+                               )
+                               .build()
+            );
 
-            return ResponseEntity.ok(ApiResponse.builder()
-                                                .success(true)
-                                                .status(HttpStatus.OK.value())
-                                                .message("Row inserted successfully")
-                                                .build());
+        } catch (Exception e) {
+            sseEmitterRegistry.send(
+                    syncId,
+                    ApiResponse.builder()
+                               .state(ResponseState.ERROR)
+                               .httpStatus(HttpStatus.BAD_REQUEST.value())
+                               .message(e.getMessage())
+                               .build()
+            );
+
+        } finally {
+            sseEmitterRegistry.complete(syncId);
+        }
+    }
+
+
+    private ApiResponse<Object> handleManualSave(String spreadsheetId, SheetRequest request) {
+        try {
+            int rowIndex = appendToSheet(spreadsheetId, request);
+
+            return ApiResponse.builder()
+                              .state(ResponseState.SUCCESS)
+                              .httpStatus(HttpStatus.OK.value())
+                              .message("Saved to Sheets ✓")
+                              .data(Map.of("rowIndex", rowIndex))
+                              .build();
+
         } catch (GoogleJsonResponseException e) {
             throw new SheetFetchException(
-                    "Column '" + SheetUtil.indexToLetter(maxCol - 1) + "' does not exist in the '" + sheetName + "'");
+                    buildColumnOutOfRangeMessage(
+                            e.getDetails().getMessage()
+                    )
+            );
         } catch (IOException e) {
             throw new SheetFetchException(e.getMessage());
         }
+    }
+
+
+    public ResponseEntity<ApiResponse<Object>> appendDataToSheet(String spreadsheetId, SheetRequest request) {
+
+        if (Boolean.TRUE.equals(request.getAutosave())) {
+
+            sheetWriteQueue.submit(
+                    () -> handleAutosave(spreadsheetId, request)
+            );
+
+            return ResponseEntity.ok(
+                    ApiResponse.builder()
+                               .state(ResponseState.QUEUED)
+                               .httpStatus(HttpStatus.OK.value())
+                               .message("Sheet request queued")
+                               .build()
+            );
+        }
+
+        ApiResponse<Object> response =
+                handleManualSave(spreadsheetId, request);
+
+        return ResponseEntity.ok(response);
     }
 
 
@@ -84,8 +201,8 @@ public class GoogleSheetService {
                                                                  .toList();
 
             return ResponseEntity.ok(ApiResponse.builder()
-                                                .success(true)
-                                                .status(HttpStatus.OK.value())
+                                                .state(ResponseState.SUCCESS)
+                                                .httpStatus(HttpStatus.OK.value())
                                                 .message("Google sheets connected successfully")
                                                 .data(sheetDetails)
                                                 .meta(Map.of(
@@ -97,6 +214,5 @@ public class GoogleSheetService {
             throw new SheetFetchException("Invalid Sheet ID or the sheet is not accessible.");
         }
     }
-
 
 }
