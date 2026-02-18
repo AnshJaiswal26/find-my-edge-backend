@@ -1,10 +1,16 @@
 package com.example.find_my_edge.core.schema.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ExpressionDto {
 
     private String type;   // "binary", "key", "constant", "function"

@@ -1,35 +1,65 @@
 package com.example.find_my_edge.core.schema.dto;
 
+import com.example.find_my_edge.core.schema.enums.FieldType;
+import com.example.find_my_edge.core.schema.enums.SchemaSource;
+import com.example.find_my_edge.core.schema.enums.SemanticType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SchemaRequest {
 
-    private UUID id;                 // null when creating new
-    private String key;              // "pnl", "duration"
-    private String label;            // Display name
+    private String id;
+    private String label;
 
-    private String mode;
-    private String type;
+    /* TYPE */
+    @Builder.Default
+    private FieldType type = FieldType.TEXT;
 
-//    private SchemaSource source;     // SYSTEM | USER | COMPUTED
-//    private ComputeType computeType; // ROW | WINDOW | GLOBAL | GROUP
-//
-//    private ValueType valueType;     // NUMBER | TEXT | TIME | DATE | RATIO | CURRENCY
+    @Builder.Default
+    private SemanticType semanticType = SemanticType.STRING;
 
-    private Boolean editable;
-    private Long initialValue;
+    /* COMPUTATION */
+    @Builder.Default
+    private String mode = "row";
 
-    private ExpressionDto expression;     // Only for COMPUTED
-    private String formula;               // Human-readable version
+    private ExpressionDto ast;
 
-    private List<String> dependencies;    // ["entry", "exit"]
+    @Builder.Default
+    private String formula = "";
 
-    private DisplayDto display;
+    @Builder.Default
+    private List<String> dependencies = new ArrayList<>();
 
-    private List<ColorRuleDto> colorRules;
-    private List<String> options;      // For select type
+    /* SOURCE */
+    @Builder.Default
+    private SchemaSource source = SchemaSource.USER;
+
+    /* BEHAVIOR */
+    @Builder.Default
+    private Boolean editable = false;
+
+    @Builder.Default
+    private Long initialValue = 0L;
+
+    /* DISPLAY */
+    @Builder.Default
+    private DisplayDto display = new DisplayDto("", 2);
+
+    /* UI */
+    @Builder.Default
+    private List<ColorRuleDto> colorRules = new ArrayList<>();
+
+    @Builder.Default
+    private List<String> options = new ArrayList<>();
+
 }

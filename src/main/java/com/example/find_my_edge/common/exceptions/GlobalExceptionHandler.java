@@ -15,8 +15,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(TradeNotFound.class)
-    public ResponseEntity<ApiResponse<?>> handleTradeNotFound(TradeNotFound ex, HttpServletRequest request) {
+    @ExceptionHandler(TradeNotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleTradeNotFound(TradeNotFoundException ex, HttpServletRequest request) {
 
         ApiResponse<?> response = ApiResponse.builder()
                                              .state(ResponseState.ERROR)
@@ -50,4 +50,44 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+
+    @ExceptionHandler(SchemaNotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleSchemaException(SchemaNotFoundException ex, HttpServletRequest request) {
+
+        ApiResponse<?> response = ApiResponse.builder()
+                                             .state(ResponseState.ERROR)
+                                             .httpStatus(HttpStatus.NOT_FOUND.value())
+                                             .message(ex.getMessage())
+                                             .data(null)
+                                             .meta(Map.of(
+                                                     "timestamp", LocalDateTime.now()
+                                                                               .toString(), "path",
+                                                     request.getRequestURI()
+                                             ))
+                                             .build();
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(SchemaDependencyException.class)
+    public ResponseEntity<ApiResponse<?>> handleSchemaDependencyException(
+            SchemaDependencyException ex,
+            HttpServletRequest request
+    ) {
+
+        ApiResponse<?> response = ApiResponse.builder()
+                                             .state(ResponseState.ERROR)
+                                             .httpStatus(HttpStatus.CONFLICT.value())
+                                             .message(ex.getMessage())
+                                             .data(null)
+                                             .meta(Map.of(
+                                                     "timestamp", LocalDateTime.now().toString(),
+                                                     "path", request.getRequestURI()
+                                             ))
+                                             .build();
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
 }
