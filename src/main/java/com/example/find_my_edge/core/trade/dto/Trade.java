@@ -1,46 +1,26 @@
 package com.example.find_my_edge.core.trade.dto;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class Trade {
-    private String id;
-    private String date;
-    private String entryTime;
-    private String exitTime;
-    private String symbol;
+    private String id; // reserved
 
-    private double entry;
-    private double exit;
-    private int qty;
+    private Map<String, String> values = new HashMap<>();
 
-    private long duration;
-    private double pnl;
-    private double cumulativePnl;
-    private double capital;
+    @JsonAnyGetter
+    public Map<String, String> getValues() {
+        return values;
+    }
 
-    private double risk;
-    private double riskReward;
-    private double charges;
-
-    @Override
-    public String toString() {
-        return "Trade{" +
-               "tradeId='" + id + '\'' +
-               ", date='" + date + '\'' +
-               ", entryTime='" + entryTime + '\'' +
-               ", exitTime='" + exitTime + '\'' +
-               ", duration=" + duration +
-               ", symbol='" + symbol + '\'' +
-               ", entry=" + entry +
-               ", exit=" + exit +
-               ", qty=" + qty +
-               ", pnl=" + pnl +
-               ", cumulativePnl=" + cumulativePnl +
-               ", capital=" + capital +
-               ", risk=" + risk +
-               ", riskReward=" + riskReward +
-               ", charges=" + charges +
-               '}';
+    @JsonAnySetter
+    public void setValue(String key, String value) {
+        values.put(key, value);
     }
 }
+

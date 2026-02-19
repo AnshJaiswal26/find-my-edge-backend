@@ -74,16 +74,16 @@ public class TradeInitializer {
                 /* -------- FIELDS -------- */
 
                 trade.setId("T" + String.format("%04d", tradeCounter++));
-                trade.setDate(tradeDate.toString());
-                trade.setEntryTime(entryTime.toString());
-                trade.setExitTime(exitTime.toString());
+                trade.setValue("date", tradeDate.toString());
+                trade.setValue("entryTime", entryTime.toString());
+                trade.setValue("exitTime", exitTime.toString());
 
-                trade.setSymbol(randomSymbol());
-                trade.setQty(qty);
-                trade.setEntry(entry);
-                trade.setExit(exit);
+                trade.setValue("symbol", randomSymbol());
+                trade.setValue("qty", String.valueOf(qty));
+                trade.setValue("entry", String.valueOf(entry));
+                trade.setValue("exit", String.valueOf(exit));
 
-                trade.setRisk(RISK_PER_TRADE);
+                trade.setValue("risk", String.valueOf(RISK_PER_TRADE));
 
                 trades.add(trade);
             }

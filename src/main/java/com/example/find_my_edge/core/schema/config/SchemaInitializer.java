@@ -39,6 +39,7 @@ public class SchemaInitializer {
                 systemField("exitTime", "Exit Time", FieldType.TIME, SemanticType.TIME)
                         .display(display("hh:mm:ss A", 0))
                         .build(),
+                duration(),
 
                 systemField("symbol", "Symbol", FieldType.TEXT, SemanticType.STRING)
                         .build(),
@@ -55,6 +56,8 @@ public class SchemaInitializer {
                         .display(display("NUMBER", 0))
                         .build(),
 
+                pnl(),
+                riskReward(),
                 SchemaRequest.builder()
                              .id("emotion")
                              .label("Emotion")
@@ -64,12 +67,7 @@ public class SchemaInitializer {
                              .editable(true)
                              .options(List.of("Calm", "Fear", "Greed"))
                              .display(display("badge", null))
-                             .build(),
-
-                // 🔥 COMPUTED
-                duration(),
-                pnl(),
-                riskReward()
+                             .build()
         );
     }
 
@@ -101,7 +99,7 @@ public class SchemaInitializer {
                             .source(SchemaSource.COMPUTED)
                             .editable(false)
                             .dependencies(List.of("entryTime", "exitTime"))
-                            .formula("Exit Time - Entry Time")
+                            .formula("[Exit Time] - [Entry Time]")
                             .ast(binary("-", key("exitTime"), key("entryTime")))
                             .display(display("HH:mm:ss", 0))
                             .colorRules(List.of(
