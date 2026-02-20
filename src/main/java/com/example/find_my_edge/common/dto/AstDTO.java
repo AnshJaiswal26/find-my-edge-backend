@@ -1,4 +1,4 @@
-package com.example.find_my_edge.core.schema.dto;
+package com.example.find_my_edge.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,15 +11,15 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExpressionDto {
+public class AstDTO {
 
     private String type;   // "binary", "key", "constant", "function"
 
     // for binary
     private String op;     // +, -, *, /
 
-    private ExpressionDto left;
-    private ExpressionDto right;
+    private AstDTO left;
+    private AstDTO right;
 
     // for key
     private String key;
@@ -29,5 +29,5 @@ public class ExpressionDto {
 
     // for function
     private String fn;
-    private List<ExpressionDto> args;
+    private List<AstDTO> args;
 }

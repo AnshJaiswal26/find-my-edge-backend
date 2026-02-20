@@ -1,4 +1,4 @@
-package com.example.find_my_edge.core.schema.dto;
+package com.example.find_my_edge.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ColorRuleDto {
+public class ColorRuleDTO {
     private String operator;  // greaterThan, lessThan, equals
     private Double value;
     private Double value2;

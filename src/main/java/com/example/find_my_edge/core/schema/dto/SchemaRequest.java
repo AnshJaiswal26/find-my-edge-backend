@@ -1,5 +1,8 @@
 package com.example.find_my_edge.core.schema.dto;
 
+import com.example.find_my_edge.common.dto.AstDTO;
+import com.example.find_my_edge.common.dto.ColorRuleDTO;
+import com.example.find_my_edge.common.dto.DisplayDTO;
 import com.example.find_my_edge.core.schema.enums.FieldType;
 import com.example.find_my_edge.core.schema.enums.SchemaSource;
 import com.example.find_my_edge.core.schema.enums.SemanticType;
@@ -32,7 +35,7 @@ public class SchemaRequest {
     @Builder.Default
     private String mode = "row";
 
-    private ExpressionDto ast;
+    private AstDTO ast;
 
     @Builder.Default
     private String formula = "";
@@ -53,11 +56,11 @@ public class SchemaRequest {
 
     /* DISPLAY */
     @Builder.Default
-    private DisplayDto display = new DisplayDto("", 2);
+    private DisplayDTO display = new DisplayDTO("", 2);
 
     /* UI */
     @Builder.Default
-    private List<ColorRuleDto> colorRules = new ArrayList<>();
+    private List<ColorRuleDTO> colorRules = new ArrayList<>();
 
     @Builder.Default
     private List<String> options = new ArrayList<>();

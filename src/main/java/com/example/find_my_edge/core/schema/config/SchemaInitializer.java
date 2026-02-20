@@ -1,8 +1,8 @@
 package com.example.find_my_edge.core.schema.config;
 
-import com.example.find_my_edge.core.schema.dto.ColorRuleDto;
-import com.example.find_my_edge.core.schema.dto.DisplayDto;
-import com.example.find_my_edge.core.schema.dto.ExpressionDto;
+import com.example.find_my_edge.common.dto.ColorRuleDTO;
+import com.example.find_my_edge.common.dto.DisplayDTO;
+import com.example.find_my_edge.common.dto.AstDTO;
 import com.example.find_my_edge.core.schema.dto.SchemaRequest;
 import com.example.find_my_edge.core.schema.enums.FieldType;
 import com.example.find_my_edge.core.schema.enums.SemanticType;
@@ -155,40 +155,40 @@ public class SchemaInitializer {
 
     /* ---------------- AST HELPERS ---------------- */
 
-    private ExpressionDto key(String key) {
-        return ExpressionDto.builder()
-                            .type("key")
-                            .key(key)
-                            .build();
+    private AstDTO key(String key) {
+        return AstDTO.builder()
+                     .type("key")
+                     .key(key)
+                     .build();
     }
 
-    private ExpressionDto constant(Double value) {
-        return ExpressionDto.builder()
-                            .type("constant")
-                            .value(value)
-                            .build();
+    private AstDTO constant(Double value) {
+        return AstDTO.builder()
+                     .type("constant")
+                     .value(value)
+                     .build();
     }
 
-    private ExpressionDto binary(String op, ExpressionDto left, ExpressionDto right) {
-        return ExpressionDto.builder()
-                            .type("binary")
-                            .op(op)
-                            .left(left)
-                            .right(right)
-                            .build();
+    private AstDTO binary(String op, AstDTO left, AstDTO right) {
+        return AstDTO.builder()
+                     .type("binary")
+                     .op(op)
+                     .left(left)
+                     .right(right)
+                     .build();
     }
 
     /* ---------------- UI HELPERS ---------------- */
 
-    private DisplayDto display(String format, Integer decimals) {
-        return DisplayDto.builder()
+    private DisplayDTO display(String format, Integer decimals) {
+        return DisplayDTO.builder()
                          .format(format)
                          .decimals(decimals != null ? decimals : 2)
                          .build();
     }
 
-    private ColorRuleDto colorRule(String operator, Double value, String color) {
-        return ColorRuleDto.builder()
+    private ColorRuleDTO colorRule(String operator, Double value, String color) {
+        return ColorRuleDTO.builder()
                            .operator(operator)
                            .value(value)
                            .color(color)
