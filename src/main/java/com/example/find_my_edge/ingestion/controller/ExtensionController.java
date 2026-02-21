@@ -1,13 +1,12 @@
 package com.example.find_my_edge.ingestion.controller;
 
-import com.example.find_my_edge.common.enums.ResponseState;
+import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.core.backtest.dto.FieldDataRequest;
 import com.example.find_my_edge.core.backtest.service.TradeFieldService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/extension")
 @RequiredArgsConstructor
-public class ExtensionController {
+public class ExtensionController extends BaseController {
 
     private final TradeFieldService tradeFieldService;
 
@@ -60,32 +59,7 @@ public class ExtensionController {
 
         tradeFieldService.deleteTradeRecord(tradeId);
 
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                           .state(ResponseState.SUCCESS)
-                           .httpStatus(HttpStatus.OK.value())
-                           .message("Trade Record deleted successfully")
-                           .data(null)
-                           .meta(Map.of("empty", true, "count", 0))
-                           .build()
-        );
-    }
+        return buildResponse(null, "Trade Record deleted successfully");
 
-    /* ---------------- COMMON BUILDER ---------------- */
-    private ResponseEntity<ApiResponse<Object>> buildResponse(Object data, String message) {
-
-        boolean isList = data instanceof List;
-        int count = isList ? ((List<?>) data).size() : 1;
-        boolean empty = data == null || (isList && ((List<?>) data).isEmpty());
-
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                           .state(ResponseState.SUCCESS)
-                           .httpStatus(HttpStatus.OK.value())
-                           .message(message)
-                           .data(data)
-                           .meta(Map.of("empty", empty, "count", count))
-                           .build()
-        );
     }
 }

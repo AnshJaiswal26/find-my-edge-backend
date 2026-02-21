@@ -2,7 +2,9 @@ package com.example.find_my_edge.core.schema.config;
 
 import com.example.find_my_edge.common.dto.ColorRuleDTO;
 import com.example.find_my_edge.common.dto.DisplayDTO;
-import com.example.find_my_edge.common.dto.AstDTO;
+
+import static com.example.find_my_edge.common.ast.AstBuilder.*;
+
 import com.example.find_my_edge.core.schema.dto.SchemaRequest;
 import com.example.find_my_edge.core.schema.enums.FieldType;
 import com.example.find_my_edge.core.schema.enums.SemanticType;
@@ -151,31 +153,6 @@ public class SchemaInitializer {
                                     colorRule("lessThan", 0.0, "var(--error)")
                             ))
                             .build();
-    }
-
-    /* ---------------- AST HELPERS ---------------- */
-
-    private AstDTO key(String key) {
-        return AstDTO.builder()
-                     .type("key")
-                     .key(key)
-                     .build();
-    }
-
-    private AstDTO constant(Double value) {
-        return AstDTO.builder()
-                     .type("constant")
-                     .value(value)
-                     .build();
-    }
-
-    private AstDTO binary(String op, AstDTO left, AstDTO right) {
-        return AstDTO.builder()
-                     .type("binary")
-                     .op(op)
-                     .left(left)
-                     .right(right)
-                     .build();
     }
 
     /* ---------------- UI HELPERS ---------------- */

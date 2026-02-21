@@ -1,13 +1,12 @@
 package com.example.find_my_edge.core.schema.controller;
 
-import com.example.find_my_edge.common.enums.ResponseState;
+import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.core.schema.dto.SchemaRequest;
 import com.example.find_my_edge.core.schema.service.SchemaService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/schema")
 @RequiredArgsConstructor
-public class SchemaController {
+public class SchemaController extends BaseController {
 
     private final SchemaService schemaService;
 
@@ -65,23 +64,5 @@ public class SchemaController {
 
         List<String> newOrder = schemaService.updateOrder(order);
         return buildResponse(newOrder, "Schema order updated successfully");
-    }
-
-    /* ---------------- COMMON BUILDER ---------------- */
-    private ResponseEntity<ApiResponse<Object>> buildResponse(Object data, String message) {
-
-        boolean isList = data instanceof List;
-        int count = isList ? ((List<?>) data).size() : 1;
-        boolean empty = data == null || (isList && ((List<?>) data).isEmpty());
-
-        return ResponseEntity.ok(
-                ApiResponse.builder()
-                           .state(ResponseState.SUCCESS)
-                           .httpStatus(HttpStatus.OK.value())
-                           .message(message)
-                           .data(data)
-                           .meta(Map.of("empty", empty, "count", count))
-                           .build()
-        );
     }
 }
