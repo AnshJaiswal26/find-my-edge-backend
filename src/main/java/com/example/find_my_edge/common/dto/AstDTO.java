@@ -13,10 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 public class AstDTO {
 
-    private String type;   // "binary", "key", "constant", "function"
+    private String type;   // "binary"| "key" | "constant" | "function"
 
     // for binary
-    private String op;     // +, -, *, /
+    private String op;     // "+", "-", "*", "/"
 
     private AstDTO left;
     private AstDTO right;
@@ -26,8 +26,10 @@ public class AstDTO {
 
     // for constant
     private Double value;
+    private String valueType; // "string" | "number"
 
     // for function
     private String fn;
     private List<AstDTO> args;
+    private AstDTO arg;
 }

@@ -1,4 +1,4 @@
-package com.example.find_my_edge.common.utils;
+package com.example.find_my_edge.common.util;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;

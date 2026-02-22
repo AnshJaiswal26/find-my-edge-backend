@@ -3,8 +3,6 @@ package com.example.find_my_edge.core.schema.config;
 import com.example.find_my_edge.common.dto.ColorRuleDTO;
 import com.example.find_my_edge.common.dto.DisplayDTO;
 
-import static com.example.find_my_edge.common.ast.AstBuilder.*;
-
 import com.example.find_my_edge.core.schema.dto.SchemaRequest;
 import com.example.find_my_edge.core.schema.enums.FieldType;
 import com.example.find_my_edge.core.schema.enums.SemanticType;

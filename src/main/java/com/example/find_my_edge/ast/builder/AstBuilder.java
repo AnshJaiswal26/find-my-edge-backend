@@ -1,4 +1,4 @@
-package com.example.find_my_edge.common.ast;
+package com.example.find_my_edge.ast.builder;
 
 import com.example.find_my_edge.common.dto.AstDTO;
 
