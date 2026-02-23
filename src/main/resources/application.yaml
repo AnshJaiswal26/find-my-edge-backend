@@ -18,5 +18,3 @@ spring:
   jackson:
     time-zone: Asia/Kolkata
 
-    mapper:
-      accept-case-insensitive-enums: true

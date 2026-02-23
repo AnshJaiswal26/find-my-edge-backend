@@ -7,20 +7,20 @@ import java.util.List;
 import java.util.Map;
 
 public interface ChartService {
-    ChartDTO addChart(String page, ChartDTO dto);
+    ChartDTO create(Long workspaceId, String page, ChartDTO dto);
 
-    ChartDTO getChartById(String page, String chartId);
+    ChartDTO getById(Long workspaceId, String page, String chartId);
 
-    Map<String, ChartDTO> getAll(String page);
+    Map<String, ChartDTO> getAll(Long workspaceId, String page);
 
-    ChartDTO updateChart(String page, String chartId, ChartDTO dto);
+    ChartDTO update(Long workspaceId, String page, String chartId, ChartDTO dto);
 
-    void deleteChart(String page, String chartId);
+    void delete(Long workspaceId, String page, String chartId);
 
-    Map<String, Object> updateLayout(String page, String chartId, Object layout);
+    Map<String, Object> updateLayout(Long workspaceId, String page, String chartId, Object layout);
 
-    List<SeriesConfigDTO> updateSeriesConfig(String page, String chartId, List<SeriesConfigDTO> seriesConfig);
+    List<SeriesConfigDTO> updateSeriesConfig(Long workspaceId, String page, String chartId, List<SeriesConfigDTO> seriesConfig);
 
-    List<String> updateChartOrder(String page, List<String> order);
+    List<String> updateOrder(Long workspaceId, String page, List<String> order);
 
 }

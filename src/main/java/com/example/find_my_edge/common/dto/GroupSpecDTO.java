@@ -15,8 +15,8 @@ public class GroupSpecDTO {
     private List<RangeDTO> ranges;
 
     private String operator;
-    private int value;
-    private int valueTo;
+    private double value;
+    private double valueTo;
     private Map<String, String> labels;
 
     private AstDTO ast;

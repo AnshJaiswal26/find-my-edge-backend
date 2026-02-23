@@ -2,7 +2,8 @@ package com.example.find_my_edge.core.schema.controller;
 
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.response.ApiResponse;
-import com.example.find_my_edge.core.schema.dto.SchemaRequest;
+import com.example.find_my_edge.core.schema.dto.SchemaResponseDTO;
+import com.example.find_my_edge.core.schema.dto.SchemaRequestDTO;
 import com.example.find_my_edge.core.schema.service.SchemaService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,20 +22,19 @@ public class SchemaController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<Object>> createSchema(@RequestBody SchemaRequest request) {
-        Map<String, Object> created = schemaService.create(request);
-        return buildResponse(created, "Schema created successfully");
+    public ResponseEntity<ApiResponse<Object>> createSchema(@RequestBody SchemaRequestDTO request) {
+        SchemaResponseDTO schemaResponseDTO = schemaService.create(request);
+        return buildResponse(schemaResponseDTO, "Schema created successfully");
     }
 
     /* ---------------- UPDATE ---------------- */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> updateSchema(
             @PathVariable String id,
-            @RequestBody SchemaRequest request
+            @RequestBody SchemaRequestDTO request
     ) {
-        request.setId(id);
-        Map<String, Object> updated = schemaService.update(request);
-        return buildResponse(updated, "Schema updated successfully");
+        SchemaResponseDTO update = schemaService.update(id, request);
+        return buildResponse(update, "Schema updated successfully");
     }
 
     /* ---------------- GET ALL ---------------- */
@@ -47,15 +47,15 @@ public class SchemaController extends BaseController {
     /* ---------------- GET BY ID ---------------- */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> getSchemaById(@PathVariable String id) {
-        SchemaRequest schema = schemaService.getById(id);
+        SchemaResponseDTO schema = schemaService.getById(id);
         return buildResponse(schema, "Schema fetched successfully");
     }
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> deleteSchema(@PathVariable String id) {
-        Map<String, Object> deleted = schemaService.delete(id);
-        return buildResponse(deleted, "Schema deleted successfully");
+        schemaService.delete(id);
+        return buildResponse(null, "Schema deleted successfully");
     }
 
 

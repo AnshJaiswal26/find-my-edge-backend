@@ -1,160 +1,296 @@
 package com.example.find_my_edge.core.schema.service.impl;
 
-import com.example.find_my_edge.common.exceptions.SchemaDependencyException;
-import com.example.find_my_edge.common.exceptions.SchemaNotFoundException;
-import com.example.find_my_edge.common.exceptions.SchemaOperationNotAllowedException;
-import com.example.find_my_edge.common.exceptions.SchemaValidationException;
-import com.example.find_my_edge.core.schema.dto.SchemaRequest;
+import com.example.find_my_edge.common.auth.AuthService;
+import com.example.find_my_edge.common.dto.ColorRuleDTO;
+import com.example.find_my_edge.common.dto.DisplayDTO;
+import com.example.find_my_edge.core.schema.exception.SchemaDependencyException;
+import com.example.find_my_edge.core.schema.exception.SchemaNotFoundException;
+import com.example.find_my_edge.core.schema.exception.SchemaOperationNotAllowedException;
+import com.example.find_my_edge.common.util.JsonUtil;
+import com.example.find_my_edge.core.schema.exception.SchemaOverrideException;
+import com.example.find_my_edge.core.schema.registry.SystemSchemaRegistry;
+import com.example.find_my_edge.core.schema.dto.SchemaResponseDTO;
+import com.example.find_my_edge.core.schema.dto.SchemaRequestDTO;
+import com.example.find_my_edge.core.schema.entity.SchemaEntity;
+import com.example.find_my_edge.core.schema.entity.SchemaOrderEntity;
 import com.example.find_my_edge.core.schema.enums.SchemaSource;
+import com.example.find_my_edge.core.schema.mapper.SchemaMapper;
+import com.example.find_my_edge.core.schema.repository.SchemaOrderRepository;
+import com.example.find_my_edge.core.schema.repository.SchemaOverrideRepository;
+import com.example.find_my_edge.core.schema.repository.SchemaRepository;
 import com.example.find_my_edge.core.schema.service.SchemaService;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class SchemaServiceImpl implements SchemaService {
 
-    // Temporary in-memory store (replace with DB later)
-    private final Map<String, SchemaRequest> schemaStore = new HashMap<>();
-    private final List<String> schemaOrder = new ArrayList<>();
+    private final AuthService authService;
+
+    private final SchemaRepository schemaRepository;
+    private final SchemaOverrideRepository overrideRepository;
+    private final SchemaOrderRepository schemaOrderRepository;
+
+    private final SystemSchemaRegistry systemRegistry;
+
+    private final SchemaMapper mapper;
+    private final JsonUtil jsonUtil;
 
     /* ---------------- CREATE ---------------- */
     @Override
-    public Map<String, Object> create(SchemaRequest request) {
+    public SchemaResponseDTO create(SchemaRequestDTO request) {
 
-        String id = UUID.randomUUID().toString();
-        request.setId(id);
+        String userId = authService.getCurrentUserId();
 
-        schemaStore.put(id, request);
-        schemaOrder.add(id); // IMPORTANT
+        SchemaEntity entity = mapper.toEntity(request);
+        entity.setUserId(userId);
+        entity.setSource(SchemaSource.USER);
 
-        return Map.of(
-                "schema", request,
-                "order", new ArrayList<>(schemaOrder)
-        );
+        SchemaEntity saved = schemaRepository.save(entity);
+
+        updateOrderOnCreate(userId, saved.getId());
+
+        return mapper.toDTO(saved);
     }
-
 
     /* ---------------- UPDATE ---------------- */
     @Override
-    public Map<String, Object> update(SchemaRequest request) {
+    public SchemaResponseDTO update(String schemaId, SchemaRequestDTO request) {
 
-        String id = request.getId();
+        String userId = authService.getCurrentUserId();
 
-        if (id == null || !schemaStore.containsKey(id)) {
-            throw new SchemaNotFoundException("Schema not found");
+        SchemaEntity existing = schemaRepository
+                .findByIdAndUserId(schemaId, userId)
+                .orElseThrow(() -> new SchemaNotFoundException("Schema not found"));
+
+        if (existing.getSource() == SchemaSource.SYSTEM) {
+            throw new SchemaOperationNotAllowedException("System schema cannot be updated");
         }
 
-        schemaStore.put(id, request);
+        SchemaEntity updated = mapper.toEntity(request);
 
-        return Map.of(
-                "schema", request,
-                "order", new ArrayList<>(schemaOrder)
-        );
+        updated.setId(existing.getId());
+        updated.setUserId(userId);
+        updated.setSource(SchemaSource.USER);
+
+        return mapper.toDTO(schemaRepository.save(updated));
     }
 
     /* ---------------- GET BY ID ---------------- */
     @Override
-    public SchemaRequest getById(String id) {
-        SchemaRequest schema = schemaStore.get(id);
+    @Transactional(Transactional.TxType.SUPPORTS)
+    public SchemaResponseDTO getById(String id) {
 
-        if (schema == null) {
-            throw new SchemaNotFoundException("Schema not found");
+        String userId = authService.getCurrentUserId();
+
+        // system
+        SchemaResponseDTO system = systemRegistry.get(id);
+        if (system != null) {
+            return applyOverride(system, userId);
         }
 
-        return schema;
+        // user
+        SchemaEntity entity = schemaRepository
+                .findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new SchemaNotFoundException("Schema not found"));
+
+        return mapper.toDTO(entity);
     }
 
     /* ---------------- GET ALL ---------------- */
     @Override
+    @Transactional(Transactional.TxType.SUPPORTS)
     public Map<String, Object> getAll() {
 
-        List<SchemaRequest> schemas = new ArrayList<>();
-        Map<String, SchemaRequest> schemasById = new HashMap<>();
+        String userId = authService.getCurrentUserId();
 
-        for (String id : schemaOrder) {
-            SchemaRequest schema = schemaStore.get(id);
+        List<SchemaResponseDTO> result = new ArrayList<>();
+        Map<String, SchemaResponseDTO> byId = new HashMap<>();
 
-            if (schema != null) {
-                schemas.add(schema);              // for array use-case
-                schemasById.put(id, schema);      // map (important)
-            }
+        // 1. system
+        for (SchemaResponseDTO system : systemRegistry.getAll()) {
+            SchemaResponseDTO merged = applyOverride(system, userId);
+            result.add(merged);
+            byId.put(merged.getId(), merged);
+        }
+
+        // 2. user
+        List<SchemaEntity> userSchemas = schemaRepository.findAllByUserId(userId);
+
+        for (SchemaEntity entity : userSchemas) {
+            SchemaResponseDTO dto = mapper.toDTO(entity);
+            result.add(dto);
+            byId.put(dto.getId(), dto);
+        }
+
+        // 3. ORDER (IMPORTANT FIX)
+        List<String> order = getUserOrder(userId);
+
+        // fallback if empty
+        if (order.isEmpty()) {
+            order.addAll(systemRegistry.getOrder());
+            order.addAll(userSchemas.stream().map(SchemaEntity::getId).toList());
         }
 
         return Map.of(
-                "schemas", schemas,
-                "schemasById", schemasById,
-                "order", new ArrayList<>(schemaOrder)
+                "schemas", result,
+                "schemasById", byId,
+                "order", order
         );
     }
-
 
     /* ---------------- DELETE ---------------- */
     @Override
-    public Map<String, Object> delete(String id) {
+    public void delete(String id) {
 
-        if (!schemaStore.containsKey(id)) {
-            throw new SchemaNotFoundException("Schema not found");
-        }
+        String userId = authService.getCurrentUserId();
 
-        SchemaRequest schema = schemaStore.get(id);
+        SchemaEntity schema = schemaRepository
+                .findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new SchemaNotFoundException("Schema not found"));
 
         if (schema.getSource() == SchemaSource.SYSTEM) {
-            throw new SchemaOperationNotAllowedException("System schema cannot be deleted: " + id);
+            throw new SchemaOperationNotAllowedException("System schema cannot be deleted");
         }
 
-
-        List<String> dependents = new ArrayList<>();
-
-        for (SchemaRequest s : schemaStore.values()) {
-            if (s.getDependencies() != null && s.getDependencies().contains(id)) {
-                dependents.add(s.getLabel());
-            }
-        }
+        // dependency check
+        List<String> dependents = schemaRepository.findAllByUserId(userId)
+                                                  .stream()
+                                                  .filter(s -> s.getDependencies() != null && s.getDependencies().contains(id))
+                                                  .map(SchemaEntity::getLabel)
+                                                  .toList();
 
         if (!dependents.isEmpty()) {
             throw new SchemaDependencyException(
-                    "Cannot delete schema '" + schemaStore.get(id).getLabel() + "' because it is referenced by: " + String.join(", ", dependents)
+                    "Cannot delete '" + schema.getLabel() + "' used by: " + String.join(", ", dependents)
             );
         }
 
-        schemaStore.remove(id);
-        schemaOrder.remove(id);
+        schemaRepository.delete(schema);
 
-        return Map.of(
-                "order", new ArrayList<>(schemaOrder)
-        );
+        updateOrderOnDelete(userId, id);
     }
-
 
     @Override
     public List<String> updateOrder(List<String> order) {
 
-        if (order.size() != schemaStore.size()) {
-            throw new SchemaValidationException("Invalid order size");
+        String userId = authService.getCurrentUserId();
+
+        if (order == null || order.isEmpty()) {
+            throw new IllegalArgumentException("Order cannot be empty");
         }
 
+        // 1. Fetch user schemas
+        List<SchemaEntity> userSchemas = schemaRepository.findAllByUserId(userId);
+
+        Set<String> validIds = userSchemas.stream()
+                                          .map(SchemaEntity::getId)
+                                          .collect(Collectors.toSet());
+
+        // 2. Validate order (only user's schemas allowed)
         for (String id : order) {
-            if (!schemaStore.containsKey(id)) {
+            if (!validIds.contains(id) && !systemRegistry.exists(id)) {
                 throw new SchemaNotFoundException("Invalid schema id in order: " + id);
             }
         }
 
-        schemaOrder.clear();
-        schemaOrder.addAll(order);
+        // 3. Remove duplicates (important)
+        List<String> cleanedOrder = new ArrayList<>(new LinkedHashSet<>(order));
 
-        return new ArrayList<>(schemaOrder);
+        // 4. Save order
+        SchemaOrderEntity entity = schemaOrderRepository
+                .findByUserId(userId)
+                .orElseGet(() -> {
+                    SchemaOrderEntity e = new SchemaOrderEntity();
+                    e.setUserId(userId);
+                    return e;
+                });
+
+        entity.setOrder(jsonUtil.toJson(cleanedOrder));
+
+        schemaOrderRepository.save(entity);
+
+        return cleanedOrder;
     }
 
-    @Override
-    public void seed(SchemaRequest schema) {
-        String id = schema.getId();
+    /* ---------------- ORDER HELPERS ---------------- */
+    private void updateOrderOnCreate(String userId, String schemaId) {
 
-        if (!schemaStore.containsKey(id)) {
-            schemaOrder.add(id);
-        }
-        schemaStore.put(id, schema);
+        SchemaOrderEntity entity = schemaOrderRepository
+                .findByUserId(userId)
+                .orElseGet(() -> {
+                    SchemaOrderEntity e = new SchemaOrderEntity();
+                    e.setUserId(userId);
+                    e.setOrder(jsonUtil.toJson(new ArrayList<>()));
+                    return e;
+                });
+
+        List<String> order = parseOrder(entity);
+
+        order.add(schemaId);
+
+        entity.setOrder(jsonUtil.toJson(order));
+        schemaOrderRepository.save(entity);
     }
 
+    private void updateOrderOnDelete(String userId, String schemaId) {
+
+        schemaOrderRepository.findByUserId(userId).ifPresent(entity -> {
+            List<String> order = parseOrder(entity);
+            order.remove(schemaId);
+
+            entity.setOrder(jsonUtil.toJson(order));
+            schemaOrderRepository.save(entity);
+        });
+    }
+
+    private List<String> getUserOrder(String userId) {
+        return schemaOrderRepository.findByUserId(userId)
+                                    .map(this::parseOrder)
+                                    .orElse(new ArrayList<>());
+    }
+
+    private List<String> parseOrder(SchemaOrderEntity entity) {
+        return entity.getOrder() == null
+               ? new ArrayList<>()
+               : jsonUtil.fromJsonList(entity.getOrder(), String.class);
+    }
+
+    /* ---------------- OVERRIDE ---------------- */
+    private SchemaResponseDTO applyOverride(SchemaResponseDTO system, String userId) {
+
+        return overrideRepository
+                .findByUserIdAndSchemaId(userId, system.getId())
+                .map(override -> {
+
+                    SchemaResponseDTO copy = mapper.copy(system);
+
+                    try {
+                        if (override.getDisplayJson() != null) {
+                            copy.setDisplay(
+                                    jsonUtil.fromJson(override.getDisplayJson(), DisplayDTO.class)
+                            );
+                        }
+
+                        if (override.getColorRulesJson() != null) {
+                            copy.setColorRules(
+                                    jsonUtil.fromJsonList(override.getColorRulesJson(), ColorRuleDTO.class)
+                            );
+                        }
+
+                    } catch (Exception e) {
+                        throw new SchemaOverrideException("Override parsing failed");
+                    }
+
+                    return copy;
+                })
+                .orElse(system); //  fallback if no override
+    }
 }

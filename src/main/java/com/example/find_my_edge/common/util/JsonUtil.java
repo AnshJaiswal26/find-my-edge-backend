@@ -1,34 +1,50 @@
 package com.example.find_my_edge.common.util;
 
-import tools.jackson.core.type.TypeReference;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-public final class JsonUtil {
+@Component
+@RequiredArgsConstructor
+public class JsonUtil {
 
-    private JsonUtil() {
-        throw new AssertionError("Utility Class");
-    }
+    private final ObjectMapper objectMapper;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    /* ---------- WRITE ---------- */
+    public String toJson(Object obj) {
+        if (obj == null) return null;
 
-    public static String toJSON(List<String> list) {
-        if (list == null) return null;
         try {
-            return mapper.writeValueAsString(list);
+            return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to convert to JSON", e);
+            throw new RuntimeException("JSON write failed", e);
         }
     }
 
-    public static <T> T fromJson(String json, TypeReference<T> type) {
-        if (json == null) return null;
+    /* ---------- READ OBJECT ---------- */
+    public <T> T fromJson(String json, Class<T> clazz) {
+        if (json == null || json.isBlank()) return null;
+
         try {
-            return mapper.readValue(json, type);
+            return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to convert JSON to List", e);
+            throw new RuntimeException("JSON read failed", e);
         }
     }
 
+    /* ---------- READ LIST ---------- */
+    public <T> List<T> fromJsonList(String json, Class<T> clazz) {
+        if (json == null || json.isBlank()) return List.of();
+
+        try {
+            return objectMapper.readValue(
+                    json,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, clazz)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("JSON list read failed", e);
+        }
+    }
 }

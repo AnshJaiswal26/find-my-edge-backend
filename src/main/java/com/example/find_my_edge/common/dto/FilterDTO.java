@@ -6,8 +6,7 @@ import lombok.Data;
 public class FilterDTO {
     private String key;
     private String operator;
-    private int value;
-    private int from;
-    private int to;
-
+    private Double value;
+    private Double from;
+    private Double to;
 }

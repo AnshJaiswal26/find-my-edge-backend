@@ -1,13 +1,18 @@
 package com.example.find_my_edge.core.workspace.service;
 
+import com.example.find_my_edge.common.enums.Page;
 import com.example.find_my_edge.core.workspace.dto.core.PageDTO;
+import com.example.find_my_edge.core.workspace.dto.stat.StatDTO;
+import com.example.find_my_edge.core.workspace.entity.Workspace;
 
 public interface WorkspaceService {
-    PageDTO getPage(String page);
+    Workspace get(Long id);
 
-    PageDTO savePage(String page, PageDTO dto);
+    Workspace save(Workspace workspace);
 
-    PageDTO updatePage(String page, PageDTO dto);
+    Workspace update(Workspace workspace);
 
-    void deletePage(String page);
+    PageDTO getPage(Long workspaceId, String page);
+
+    void seedStats(Page page, StatDTO statDTO);
 }

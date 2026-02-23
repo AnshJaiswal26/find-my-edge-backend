@@ -2,6 +2,10 @@ package com.example.find_my_edge.common.exceptions;
 
 import com.example.find_my_edge.common.enums.ResponseState;
 import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.core.schema.exception.SchemaDependencyException;
+import com.example.find_my_edge.core.schema.exception.SchemaNotFoundException;
+import com.example.find_my_edge.core.trade_import.exception.ImportedTradeNotFoundException;
+import com.example.find_my_edge.sheets.exception.SheetFetchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,8 +19,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(TradeNotFoundException.class)
-    public ResponseEntity<ApiResponse<?>> handleTradeNotFound(TradeNotFoundException ex, HttpServletRequest request) {
+    @ExceptionHandler(ImportedTradeNotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleTradeNotFound(ImportedTradeNotFoundException ex, HttpServletRequest request) {
 
         ApiResponse<?> response = ApiResponse.builder()
                                              .state(ResponseState.ERROR)

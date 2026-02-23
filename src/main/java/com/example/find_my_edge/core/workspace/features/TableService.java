@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface TableService {
 
-    List<String> updateColumnOrder(String page, List<String> order);
+    List<String> updateColumnOrder(Long workspaceId, String page, List<String> order);
 
-    Integer updateColumnWidth(String page, String id, Integer width);
+    Integer updateColumnWidth(Long workspaceId, String page, String id, Integer width);
 }

@@ -1,14 +1,13 @@
 package com.example.find_my_edge.core.workspace.features.impl;
 
 import com.example.find_my_edge.core.workspace.dto.core.PageDTO;
-import com.example.find_my_edge.core.workspace.dto.core.WorkspaceDTO;
+import com.example.find_my_edge.core.workspace.entity.Workspace;
 import com.example.find_my_edge.core.workspace.dto.stat.StatDTO;
 import com.example.find_my_edge.core.workspace.features.StatService;
+import com.example.find_my_edge.core.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,21 +15,30 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StatServiceImpl implements StatService {
 
-    private final WorkspaceDTO workspace;
+    private final WorkspaceService workspaceService;
 
-    /* ---------------- HELPER ---------------- */
-    private PageDTO getOrCreatePage(String page) {
-        if (workspace.getPages() == null) {
-            workspace.setPages(new HashMap<>());
-        }
+    /* ---------------- GET ALL ---------------- */
+    @Override
+    public Map<String, Object> getAll(Long workspaceId, String page) {
+        PageDTO pageDTO = workspaceService.getPage(workspaceId, page);
+        System.out.println(pageDTO);
+        return Map.of(
+                "statsById", pageDTO.getStatsById(),
+                "statsOrder", pageDTO.getStatsOrder()
+        );
+    }
 
-        return workspace.getPages().computeIfAbsent(page, key -> new PageDTO());
+    /* ---------------- GET BY id ---------------- */
+    @Override
+    public StatDTO getById(Long workspaceId, String page, String id) {
+        PageDTO pageDTO = workspaceService.getPage(workspaceId, page);
+        return pageDTO.getStatsById().get(id);
     }
 
     /* ---------------- ADD ---------------- */
     @Override
-    public StatDTO addStat(String page, StatDTO stat) {
-        PageDTO pageDTO = getOrCreatePage(page);
+    public StatDTO create(Long workspaceId, String page, StatDTO stat) {
+        PageDTO pageDTO = workspaceService.getPage(workspaceId, page);
 
         pageDTO.getStatsById().put(stat.getId(), stat);
         pageDTO.getStatsOrder().add(stat.getId());
@@ -41,25 +49,17 @@ public class StatServiceImpl implements StatService {
 
     /* ---------------- UPDATE ---------------- */
     @Override
-    public StatDTO updateStat(String page, String id, StatDTO stat) {
-        PageDTO pageDTO = getOrCreatePage(page);
+    public StatDTO update(Long workspaceId, String page, String id, StatDTO stat) {
+        PageDTO pageDTO = workspaceService.getPage(workspaceId, page);
 
         pageDTO.getStatsById().put(id, stat);
         return stat;
     }
 
-    /* ---------------- GET ALL ---------------- */
-    @Override
-    public Map<String, Object> getAll(String page) {
-        PageDTO pageDTO = getOrCreatePage(page);
-        System.out.println(pageDTO);
-        return Map.of("statsById", pageDTO.getStatsById(), "statsOrder", pageDTO.getStatsOrder());
-    }
-
     /* ---------------- DELETE ---------------- */
     @Override
-    public void delete(String page, String id) {
-        PageDTO pageDTO = getOrCreatePage(page);
+    public void delete(Long workspaceId, String page, String id) {
+        PageDTO pageDTO = workspaceService.getPage(workspaceId, page);
 
         pageDTO.getStatsById().remove(id);
         pageDTO.getStatsOrder().remove(id);
@@ -67,8 +67,8 @@ public class StatServiceImpl implements StatService {
 
     /* ---------------- UPDATE ORDER ---------------- */
     @Override
-    public List<String> updateStatsOrder(String page, List<String> statsOrder) {
-        PageDTO pageDTO = getOrCreatePage(page);
+    public List<String> updateOrder(Long workspaceId, String page, List<String> statsOrder) {
+        PageDTO pageDTO = workspaceService.getPage(workspaceId, page);
 
         pageDTO.setStatsOrder(statsOrder);
         return statsOrder;

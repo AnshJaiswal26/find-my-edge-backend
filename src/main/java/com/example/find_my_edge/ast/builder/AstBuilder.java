@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AstBuilder {
+    private AstBuilder() {
+    }
 
     public static AstDTO key(String key) {
         return AstDTO.builder()
@@ -21,7 +23,7 @@ public class AstBuilder {
                      .build();
     }
 
-    public static AstDTO binary(String op, AstDTO left, AstDTO right) {
+    public static AstDTO binary(AstDTO left, String op, AstDTO right) {
         return AstDTO.builder()
                      .type("binary")
                      .op(op)

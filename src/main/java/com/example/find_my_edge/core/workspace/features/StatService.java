@@ -7,13 +7,16 @@ import java.util.Map;
 
 public interface StatService {
 
-    StatDTO addStat(String page, StatDTO stat);
+    Map<String, Object> getAll(Long workspaceId, String page);
 
-    StatDTO updateStat(String page, String id, StatDTO stat);
+    StatDTO getById(Long workspaceId, String page, String id);
 
-    Map<String, Object> getAll(String page);
+    StatDTO create(Long workspaceId, String page, StatDTO stat);
 
-    void delete(String page, String id);
+    StatDTO update(Long workspaceId, String page, String id, StatDTO stat);
 
-    List<String> updateStatsOrder(String page, List<String> statsOrder);
+    void delete(Long workspaceId, String page, String id);
+
+    List<String> updateOrder(Long workspaceId, String page, List<String> order);
+
 }

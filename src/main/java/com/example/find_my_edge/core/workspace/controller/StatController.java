@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/workspace/{page}/stats")
+@RequestMapping("/workspace/{workspaceId}/{page}/stats")
 @RequiredArgsConstructor
 public class StatController extends BaseController {
 
@@ -20,52 +20,56 @@ public class StatController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<Object>> addStat(
+    public ResponseEntity<ApiResponse<Object>> createStat(
+            @PathVariable Long workspaceId,
             @PathVariable String page,
             @RequestBody StatDTO stat
     ) {
-        StatDTO saved = statService.addStat(page, stat);
+        StatDTO saved = statService.create(workspaceId, page, stat);
         return buildResponse(saved, "Stat created successfully");
     }
 
     /* ---------------- GET ALL ---------------- */
     @GetMapping
-    public ResponseEntity<ApiResponse<Object>> getAll(
+    public ResponseEntity<ApiResponse<Object>> getAllStats(
+            @PathVariable Long workspaceId,
             @PathVariable String page
     ) {
-        Object stats = statService.getAll(page);
+        Object stats = statService.getAll(workspaceId, page);
         return buildResponse(stats, "Stats fetched successfully");
     }
 
     /* ---------------- UPDATE ---------------- */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> updateStat(
+            @PathVariable Long workspaceId,
             @PathVariable String page,
             @PathVariable String id,
             @RequestBody StatDTO stat
     ) {
-        StatDTO updated = statService.updateStat(page, id, stat);
+        StatDTO updated = statService.update(workspaceId, page, id, stat);
         return buildResponse(updated, "Stat updated successfully");
     }
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> deleteStat(
+            @PathVariable Long workspaceId,
             @PathVariable String page,
             @PathVariable String id
     ) {
-        statService.delete(page, id);
+        statService.delete(workspaceId, page, id);
         return buildResponse(null, "Stat deleted successfully");
     }
 
     /* ---------------- UPDATE ORDER ---------------- */
     @PutMapping("/order")
-    public ResponseEntity<ApiResponse<Object>> updateOrder(
+    public ResponseEntity<ApiResponse<Object>> updateStatsOrder(
+            @PathVariable Long workspaceId,
             @PathVariable String page,
             @RequestBody List<String> statsOrder
     ) {
-        List<String> updatedOrder = statService.updateStatsOrder(page, statsOrder);
+        List<String> updatedOrder = statService.updateOrder(workspaceId, page, statsOrder);
         return buildResponse(updatedOrder, "Stats order updated successfully");
     }
-
 }
