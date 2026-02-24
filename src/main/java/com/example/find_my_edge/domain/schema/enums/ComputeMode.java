@@ -1,0 +1,19 @@
+package com.example.find_my_edge.domain.schema.enums;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum ComputeMode {
+    ROW,
+    CUMULATIVE;
+
+    @JsonValue
+    public String toJson() {
+        return this.name().toLowerCase();
+    }
+
+    @JsonCreator
+    public static ComputeMode fromJson(String value) {
+        return ComputeMode.valueOf(value.toUpperCase());
+    }
+}

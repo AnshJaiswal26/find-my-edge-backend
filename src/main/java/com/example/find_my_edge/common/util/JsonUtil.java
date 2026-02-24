@@ -47,4 +47,15 @@ public class JsonUtil {
             throw new RuntimeException("JSON list read failed", e);
         }
     }
+
+    public <T> T copy(Object object, Class<T> clazz) {
+        try {
+            return objectMapper.readValue(
+                    objectMapper.writeValueAsString(object),
+                    clazz
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to copy SchemaDTO", e);
+        }
+    }
 }

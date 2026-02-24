@@ -1,6 +1,6 @@
 package com.example.find_my_edge.config;
 
-import com.example.find_my_edge.sheets.exception.SheetFetchException;
+import com.example.find_my_edge.integrations.sheets.exception.SheetFetchException;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.sheets.v4.Sheets;

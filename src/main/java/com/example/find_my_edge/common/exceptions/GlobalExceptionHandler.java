@@ -2,10 +2,10 @@ package com.example.find_my_edge.common.exceptions;
 
 import com.example.find_my_edge.common.enums.ResponseState;
 import com.example.find_my_edge.common.response.ApiResponse;
-import com.example.find_my_edge.core.schema.exception.SchemaDependencyException;
-import com.example.find_my_edge.core.schema.exception.SchemaNotFoundException;
-import com.example.find_my_edge.core.trade_import.exception.ImportedTradeNotFoundException;
-import com.example.find_my_edge.sheets.exception.SheetFetchException;
+import com.example.find_my_edge.domain.schema.exception.SchemaDependencyException;
+import com.example.find_my_edge.domain.schema.exception.SchemaNotFoundException;
+import com.example.find_my_edge.trade_import.exception.ImportedTradeNotFoundException;
+import com.example.find_my_edge.integrations.sheets.exception.SheetFetchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
