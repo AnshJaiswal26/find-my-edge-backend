@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "schemas",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "schemaId", "label"}))
+@Table(name = "trade_schemas",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "label"}))
 @Data
 @Builder
 @NoArgsConstructor

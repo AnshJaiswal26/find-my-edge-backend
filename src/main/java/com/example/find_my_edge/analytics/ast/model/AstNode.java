@@ -12,13 +12,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AstNode {
-    private String type;   // "binary"| "key" | "constant" | "function"
+
+    private NodeType type;   // 👈 enum instead of String
 
     // for binary
-    private String op;     // "+", "-", "*", "/"
-
+    private String op;       // "+", "-", "*", "/", etc.
     private AstNode left;
     private AstNode right;
+
+    // for unary
+    private AstNode arg;
 
     // for key
     private String key;
@@ -30,5 +33,35 @@ public class AstNode {
     // for function
     private String fn;
     private List<AstNode> args;
-    private AstNode arg;
+
+    /* ---------- ENUM ---------- */
+    public enum NodeType {
+        BINARY,
+        UNARY,
+        KEY,
+        CONSTANT,
+        FUNCTION
+    }
+
+    /* ---------- Helper Methods (Optional but Recommended) ---------- */
+
+    public boolean isBinary() {
+        return type == NodeType.BINARY;
+    }
+
+    public boolean isUnary() {
+        return type == NodeType.UNARY;
+    }
+
+    public boolean isFunction() {
+        return type == NodeType.FUNCTION;
+    }
+
+    public boolean isKey() {
+        return type == NodeType.KEY;
+    }
+
+    public boolean isConstant() {
+        return type == NodeType.CONSTANT;
+    }
 }

@@ -23,7 +23,6 @@ public class TradeEntity {
             indexes = {
                     @Index(name = "idx_trade_values_trade_id", columnList = "trade_id"),
                     @Index(name = "idx_trade_values_field_key", columnList = "field_key"),
-                    @Index(name = "idx_trade_values_key_value", columnList = "field_key, field_value")
             }
     )
     @MapKeyColumn(name = "field_key") // = SchemaEntity.id

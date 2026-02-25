@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ImportedTradeFieldRepository extends JpaRepository<ImportedTradeFieldEntity, Long> {
-
-    void deleteAllByImportId(Long id);
 }

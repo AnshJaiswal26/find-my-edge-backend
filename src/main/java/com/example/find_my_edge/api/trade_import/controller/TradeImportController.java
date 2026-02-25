@@ -7,7 +7,7 @@ import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.api.trade_import.dto.FieldDataRequestDTO;
 import com.example.find_my_edge.api.trade_import.dto.ImportedTradeResponseDTO;
 import com.example.find_my_edge.trade_import.entity.ImportedTradeEntity;
-import com.example.find_my_edge.trade_import.service.impl.TradeImportServiceImpl;
+import com.example.find_my_edge.trade_import.service.TradeImportService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +21,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TradeImportController extends BaseController {
 
-    private final TradeImportServiceImpl tradeImportServiceImpl;
+    private final TradeImportService tradeImportService;
     private final ImportedTradeMapper importedTradeMapper;
     private final ImportedTradeFieldMapper fieldMapper;
 
@@ -29,7 +29,7 @@ public class TradeImportController extends BaseController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<ImportedTradeResponseDTO>>> getImportedTrades() {
 
-        List<ImportedTradeEntity> all = tradeImportServiceImpl.getAll();
+        List<ImportedTradeEntity> all = tradeImportService.getAll();
 
         return buildResponse(
                 all.stream()
@@ -46,7 +46,7 @@ public class TradeImportController extends BaseController {
     ) {
 
         ImportedTradeEntity importedTradeEntity =
-                tradeImportServiceImpl.create(request.stream()
+                tradeImportService.create(request.stream()
                                                      .map(fieldMapper::toEntity).toList());
 
         return buildResponse(
@@ -62,7 +62,7 @@ public class TradeImportController extends BaseController {
             @RequestBody List<FieldDataRequestDTO> request
     ) {
 
-        ImportedTradeEntity update = tradeImportServiceImpl.update(
+        ImportedTradeEntity update = tradeImportService.update(
                 importId, request.stream()
                                  .map(fieldMapper::toEntity).toList()
         );
@@ -79,7 +79,7 @@ public class TradeImportController extends BaseController {
             @PathVariable Long importId
     ) {
 
-        tradeImportServiceImpl.delete(importId);
+        tradeImportService.delete(importId);
 
         return buildResponse(null, "Imported Trade deleted successfully");
     }

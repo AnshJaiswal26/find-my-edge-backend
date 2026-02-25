@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "workspace")
 public class WorkspaceEntity {
 
     @Id

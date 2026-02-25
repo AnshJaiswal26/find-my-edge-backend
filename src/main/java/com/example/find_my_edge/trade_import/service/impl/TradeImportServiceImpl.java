@@ -26,7 +26,7 @@ public class TradeImportServiceImpl implements TradeImportService {
         ImportedTradeEntity importedTradeEntity = new ImportedTradeEntity();
 
         for (ImportedTradeFieldEntity field : fields) {
-            field.setImportedTradeEntity(importedTradeEntity);
+            field.setTrade(importedTradeEntity);
             importedTradeEntity.getFields().add(field);
         }
 

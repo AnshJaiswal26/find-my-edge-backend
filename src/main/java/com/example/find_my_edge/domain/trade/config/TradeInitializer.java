@@ -28,6 +28,9 @@ public class TradeInitializer {
     @PostConstruct
     public void init() {
         List<Trade> trades = generateTrades();
+
+        tradeService.deleteAll();
+
         tradeService.createAll(trades); //  seed into DB
     }
 

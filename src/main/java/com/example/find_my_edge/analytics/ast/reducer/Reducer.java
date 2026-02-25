@@ -3,6 +3,7 @@ package com.example.find_my_edge.analytics.ast.reducer;
 
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.common.config.AstConfig;
 
 import java.util.function.BiFunction;
@@ -21,7 +22,7 @@ public interface Reducer {
     int getArity();
 
     // ---------- OPTIONAL EXECUTOR ----------
-    default BiFunction<AstConfig, EvaluationContext, Object> getExecutor() {
+    default BiFunction<AstNode, EvaluationContext, Object> getExecutor() {
         return null;
     }
 

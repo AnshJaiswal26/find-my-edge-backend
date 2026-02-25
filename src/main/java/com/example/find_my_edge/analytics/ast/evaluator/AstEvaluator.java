@@ -2,7 +2,7 @@ package com.example.find_my_edge.analytics.ast.evaluator;
 
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.function.FunctionHandler;
-import com.example.find_my_edge.common.config.AstConfig;
+import com.example.find_my_edge.analytics.ast.model.AstNode;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,15 +20,15 @@ public class AstEvaluator {
         this.functionHandler = functionHandler;
     }
 
-    public Object evaluate(AstConfig ast, EvaluationContext ctx) {
+    public Object evaluate(AstNode ast, EvaluationContext ctx) {
         if (ast == null) return null;
 
         return switch (ast.getType()) {
-            case "constant" -> ast.getValue();
-            case "key" -> ctx.getKeyValue(ast.getKey());
-            case "unary" -> unaryHandler.handle(ast, ctx, this);
-            case "binary" -> binaryHandler.handle(ast, ctx, this);
-            case "function" -> functionHandler.handle(ast, ctx);
+            case AstNode.NodeType.CONSTANT -> ast.getValue();
+            case AstNode.NodeType.KEY-> ctx.getKeyValue(ast.getKey());
+            case AstNode.NodeType.UNARY -> unaryHandler.handle(ast, ctx, this);
+            case AstNode.NodeType.BINARY -> binaryHandler.handle(ast, ctx, this);
+            case AstNode.NodeType.FUNCTION -> functionHandler.handle(ast, ctx, this);
             default -> null;
         };
     }

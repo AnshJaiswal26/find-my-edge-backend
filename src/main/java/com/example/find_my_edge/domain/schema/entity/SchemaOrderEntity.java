@@ -14,6 +14,6 @@ public class SchemaOrderEntity {
     @Column(nullable = false, unique = true)
     String userId;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "schemas_order", columnDefinition = "TEXT")
     String order;
 }

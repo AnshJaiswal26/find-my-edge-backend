@@ -2,11 +2,14 @@ package com.example.find_my_edge.workspace.features.impl;
 
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
+import com.example.find_my_edge.workspace.entity.WorkspaceEntity;
 import com.example.find_my_edge.workspace.features.StatService;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,13 +40,32 @@ public class StatServiceImpl implements StatService {
     /* ---------------- ADD ---------------- */
     @Override
     public StatConfig create(String page, StatConfig stat) {
-        PageConfig pageConfig = workspaceService.getPage(page);
+        WorkspaceEntity workspaceEntity = workspaceService.get();
+
+        PageConfig pageConfig = workspaceEntity.getData().getPages().get(page);
 
         pageConfig.getStatsById().put(stat.getId(), stat);
         pageConfig.getStatsOrder().add(stat.getId());
 
-        System.out.println(pageConfig);
+        workspaceService.save(workspaceEntity);
         return stat;
+    }
+
+    @Override
+    public void createAll(Map<String, StatConfig> stats, List<String> statsOrder) {
+        WorkspaceEntity workspaceEntity = workspaceService.get();
+
+        PageConfig pageConfig = workspaceEntity
+                .getData()
+                .getPages()
+                .computeIfAbsent("dashboard", p -> new PageConfig());
+
+
+        pageConfig.getStatsById().putAll(stats);
+        pageConfig.getStatsOrder().addAll(statsOrder);
+
+        System.out.println(pageConfig);
+        workspaceService.save(workspaceEntity);
     }
 
     /* ---------------- UPDATE ---------------- */
@@ -71,5 +93,17 @@ public class StatServiceImpl implements StatService {
 
         pageConfig.setStatsOrder(statsOrder);
         return statsOrder;
+    }
+
+    @Override
+    public void deleteByUserId() {
+        WorkspaceEntity workspaceEntity = workspaceService.get();
+        PageConfig dashboard = workspaceEntity.getData()
+                                              .getPages()
+                                              .get("dashboard");
+        dashboard.setStatsById(new HashMap<>());
+        dashboard.setStatsOrder(new ArrayList<>());
+
+        workspaceService.save(workspaceEntity);
     }
 }

@@ -59,6 +59,7 @@ public class SystemSchemaRegistry {
     }
 
     private List<Schema> buildSystemSchemas() {
+
         return List.of(
                 systemField(
                         "date",

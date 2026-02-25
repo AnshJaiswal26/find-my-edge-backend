@@ -19,8 +19,8 @@ public class ImportedTradeFieldEntity {
 
 
     @ManyToOne
-    @JoinColumn(name = "trade_id")
-    private ImportedTradeEntity importedTradeEntity;
+    @JoinColumn(name = "imported_trade_id")
+    private ImportedTradeEntity trade;
 
     private String label;
     private String type;

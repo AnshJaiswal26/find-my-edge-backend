@@ -54,7 +54,7 @@ public class TradeServiceImpl implements TradeService {
 
         List<TradeEntity> entityList = new ArrayList<>();
 
-        for (Trade trade : trades){
+        for (Trade trade : trades) {
             TradeEntity entity = mapper.toEntity(trade);
             entity.setId(UUID.randomUUID().toString());
             entity.setUserId(userId);
@@ -131,5 +131,14 @@ public class TradeServiceImpl implements TradeService {
                 .orElseThrow(() -> new TradeNotFoundException("Trade not found"));
 
         tradeRepository.delete(entity);
+    }
+
+
+    @Override
+    public void deleteAll() {
+
+        String userId = authService.getCurrentUserId();
+
+        tradeRepository.deleteByUserId(userId);
     }
 }

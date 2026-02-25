@@ -3,6 +3,7 @@ package com.example.find_my_edge.workspace.registry;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
+import com.example.find_my_edge.workspace.features.StatService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,8 @@ import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
 @Component
 @RequiredArgsConstructor
 public class StatRegistry {
+
+    private final StatService statService;
 
     private Map<String, StatConfig> stats;
     private Set<String> statsOrder;
@@ -30,6 +33,9 @@ public class StatRegistry {
 
         this.stats = Map.copyOf(tempMap);
         this.statsOrder = Set.copyOf(tempOrder);
+
+        statService.deleteByUserId();
+        statService.createAll(this.stats, new ArrayList<>(this.statsOrder));
     }
 
     public List<StatConfig> getDefaultStats() {   // call on user signup for default stats
@@ -53,7 +59,7 @@ public class StatRegistry {
         return StatConfig.builder()
                          .id("stat-1")
                          .title("PnL")
-                         .type("NUMBER")
+                         .type("number")
                          .ast(function("SUM", key("pnl")))
                          .format("COMPACT_CURRENCY_SIGNED")
                          .colorRules(List.of(
@@ -67,9 +73,10 @@ public class StatRegistry {
         return StatConfig.builder()
                          .id("stat-2")
                          .title("Avg Risk/Reward")
-                         .type("NUMBER")
+                         .type("number")
                          .ast(function("AVG", key("riskReward")))
                          .format("RATIO")
+                         .colorRules(new ArrayList<>())
                          .build();
     }
 
@@ -77,9 +84,10 @@ public class StatRegistry {
         return StatConfig.builder()
                          .id("stat-3")
                          .title("Avg Holding Time")
-                         .type("DURATION")
+                         .type("duration")
                          .ast(function("AVG", key("duration")))
                          .format("HH:mm:ss")
+                         .colorRules(new ArrayList<>())
                          .build();
     }
 
@@ -87,9 +95,10 @@ public class StatRegistry {
         return StatConfig.builder()
                          .id("stat-4")
                          .title("Max Profit")
-                         .type("NUMBER")
+                         .type("number")
                          .ast(function("MAX", key("pnl")))
                          .format("CURRENCY_SIGNED")
+                         .colorRules(new ArrayList<>())
                          .build();
     }
 
@@ -97,9 +106,10 @@ public class StatRegistry {
         return StatConfig.builder()
                          .id("stat-5")
                          .title("Max Loss")
-                         .type("NUMBER")
+                         .type("number")
                          .ast(function("MIN", key("pnl")))
                          .format("CURRENCY_SIGNED")
+                         .colorRules(new ArrayList<>())
                          .build();
     }
 
@@ -107,9 +117,10 @@ public class StatRegistry {
         return StatConfig.builder()
                          .id("stat-6")
                          .title("Win Rate")
-                         .type("NUMBER")
+                         .type("number")
                          .ast(function("WIN_RATE"))
                          .format("PERCENT")
+                         .colorRules(new ArrayList<>())
                          .build();
     }
 

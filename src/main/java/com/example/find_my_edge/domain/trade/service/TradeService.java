@@ -20,4 +20,6 @@ public interface TradeService {
     void delete(String id);
 
     void createAll(List<Trade> trades);
+
+    void deleteAll();
 }

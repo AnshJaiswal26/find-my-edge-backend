@@ -17,11 +17,29 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final AuthService authService;
     private final WorkspaceRepository workspaceRepository;
 
-    @Override
+//    @Override
+//    public WorkspaceEntity get() {
+//        String currentUserId = authService.getCurrentUserId();
+//        return workspaceRepository.findByUserId(currentUserId)
+//                                  .orElseThrow(() -> new WorkspaceNotFoundException("Workspace not found for user: " + currentUserId));
+//    }
+
+    @Override  // for dev
     public WorkspaceEntity get() {
-        String currentUserId = authService.getCurrentUserId();
-        return workspaceRepository.findByUserId(currentUserId)
-                                  .orElseThrow(() -> new WorkspaceNotFoundException("Workspace not found for user: " + currentUserId));
+        String userId = authService.getCurrentUserId();
+
+        return workspaceRepository.findByUserId(userId)
+                                  .orElseGet(() -> createDefaultWorkspace(userId));
+    }
+
+    private WorkspaceEntity createDefaultWorkspace(String userId) {
+        WorkspaceEntity workspace = new WorkspaceEntity();
+        workspace.setUserId(userId);
+
+        // optional: set default data
+        workspace.setData(new WorkspaceData());
+
+        return workspaceRepository.save(workspace);
     }
 
     @Override

@@ -2,9 +2,9 @@ package com.example.find_my_edge.workspace.converter;
 
 import com.example.find_my_edge.workspace.model.WorkspaceData;
 import com.example.find_my_edge.workspace.exception.WorkspaceSerializationException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import tools.jackson.databind.ObjectMapper;
 
 @Converter(autoApply = false)
 public class WorkspaceDataConverter implements AttributeConverter<WorkspaceData, String> {
