@@ -21,6 +21,7 @@ public class AggregateReducerRunner implements ReducerRunnerStrategy {
 
         if (state == null){
             throw new AstExecutionException(
+                    "[Aggregation Execution Error]",
                     "Reducer returned null state for: " + fn.getFn()
             );
         }
@@ -28,6 +29,7 @@ public class AggregateReducerRunner implements ReducerRunnerStrategy {
         Integer total = ctx.getTradeCount();
         if (total == null) {
             throw new AstExecutionException(
+                    "[Aggregation Execution Error]",
                     "Trade count is missing in evaluation context"
             );
         }

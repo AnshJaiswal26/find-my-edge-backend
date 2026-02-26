@@ -16,6 +16,5 @@ public class Trade {
 
     private String id;
 
-    // dynamic fields (based on schema)
-    private Map<String, String> values = new HashMap<>();
+    private Map<String, Object> values = new HashMap<>();
 }

@@ -9,7 +9,7 @@ import jakarta.persistence.Converter;
 @Converter(autoApply = false)
 public class WorkspaceDataConverter implements AttributeConverter<WorkspaceData, String> {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(WorkspaceData attribute) {

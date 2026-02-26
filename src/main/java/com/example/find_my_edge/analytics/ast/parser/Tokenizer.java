@@ -1,5 +1,6 @@
 package com.example.find_my_edge.analytics.ast.parser;
 
+import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -254,7 +255,7 @@ public class Tokenizer {
     }
 
     private RuntimeException error(String msg) {
-        return new RuntimeException("[Tokenizer Error] " + msg);
+        return new AstParseException("[Tokenizer Error]", msg);
     }
 
     @Getter

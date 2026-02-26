@@ -4,7 +4,6 @@ import com.example.find_my_edge.analytics.ast.context.DefaultEvaluationContext;
 import com.example.find_my_edge.analytics.ast.context.SchemaType;
 import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.common.config.AstConfig;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 

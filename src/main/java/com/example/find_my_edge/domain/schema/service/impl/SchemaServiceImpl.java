@@ -1,5 +1,7 @@
 package com.example.find_my_edge.domain.schema.service.impl;
 
+import com.example.find_my_edge.analytics.ast.model.AstResult;
+import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
 import com.example.find_my_edge.common.auth.AuthService;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 import com.example.find_my_edge.common.config.DisplayConfig;
@@ -34,6 +36,8 @@ public class SchemaServiceImpl implements SchemaService {
 
     private final AuthService authService;
 
+    private final AstPipeline astPipeline;
+
     private final SchemaRepository schemaRepository;
     private final SchemaOverrideRepository overrideRepository;
     private final SchemaOrderRepository schemaOrderRepository;
@@ -41,6 +45,7 @@ public class SchemaServiceImpl implements SchemaService {
     private final SystemSchemaRegistry systemRegistry;
 
     private final SchemaMapper mapper;
+
     private final JsonUtil jsonUtil;
 
     /* ---------------- CREATE ---------------- */
@@ -50,8 +55,19 @@ public class SchemaServiceImpl implements SchemaService {
         String userId = authService.getCurrentUserId();
 
         SchemaEntity entity = mapper.toEntity(schema);
+
+        if (schema.getSource() == SchemaSource.COMPUTED &&
+            schema.getFormula() != null && !schema.getFormula().isBlank()) {
+
+            AstResult astResult = astPipeline.buildAst(schema.getFormula(), "");
+
+            entity.setAstJson(jsonUtil.toJson(astResult.getAstNode()));
+
+            entity.setDependencies(new ArrayList<>(astResult.getDependencies()));
+        }
+
         entity.setUserId(userId);
-        entity.setSource(SchemaSource.USER);
+        entity.setSource(schema.getSource());
 
         SchemaEntity saved = schemaRepository.save(entity);
 

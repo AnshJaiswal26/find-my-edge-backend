@@ -1,5 +1,6 @@
 package com.example.find_my_edge.analytics.ast.parser;
 
+import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.parser.Tokenizer.Token;
 import org.springframework.stereotype.Component;
 
@@ -183,7 +184,7 @@ public class PostfixConverter {
     }
 
     private RuntimeException error(String msg) {
-        return new RuntimeException("[Parser Error] " + msg);
+        return new AstParseException("[Parser Error]",  msg);
     }
 
     /* ---------- Function Context ---------- */

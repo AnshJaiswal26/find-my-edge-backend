@@ -3,7 +3,6 @@ package com.example.find_my_edge.analytics.ast.util;
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.context.SchemaType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.common.config.AstConfig;
 
 public class SchemaUtil {
 
@@ -14,7 +13,7 @@ public class SchemaUtil {
     }
 
     private static SchemaType get(AstNode node, EvaluationContext ctx) {
-        if (!"key".equals(node.getType())) return null;
+        if (AstNode.NodeType.KEY != node.getType()) return null;
         return ctx.getSchemaType(node.getKey());
     }
 }

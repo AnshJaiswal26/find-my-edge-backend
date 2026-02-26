@@ -46,22 +46,22 @@ public class AstNode {
     /* ---------- Helper Methods (Optional but Recommended) ---------- */
 
     public boolean isBinary() {
-        return type == NodeType.BINARY;
+        return this.type == NodeType.BINARY;
     }
 
     public boolean isUnary() {
-        return type == NodeType.UNARY;
+        return this.type == NodeType.UNARY;
     }
 
     public boolean isFunction() {
-        return type == NodeType.FUNCTION;
+        return this.type == NodeType.FUNCTION;
     }
 
     public boolean isKey() {
-        return type == NodeType.KEY;
+        return this.type == NodeType.KEY;
     }
 
     public boolean isConstant() {
-        return type == NodeType.CONSTANT;
+        return this.type == NodeType.CONSTANT;
     }
 }

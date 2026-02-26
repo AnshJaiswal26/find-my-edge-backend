@@ -6,7 +6,6 @@ import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.util.NormalizeUtil;
 import com.example.find_my_edge.analytics.ast.util.SchemaUtil;
 import com.example.find_my_edge.analytics.ast.util.TypeUtil;
-import com.example.find_my_edge.common.config.AstConfig;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,12 +27,12 @@ public class ComparisonHandler {
         }
 
         return switch (ast.getOp()) {
-            case "==" -> l.equals(r) ? 1 : 0;
-            case "!=" -> !l.equals(r) ? 1 : 0;
-            case ">" -> TypeUtil.toDouble(l) > TypeUtil.toDouble(r) ? 1 : 0;
-            case "<" -> TypeUtil.toDouble(l) < TypeUtil.toDouble(r) ? 1 : 0;
-            case ">=" -> TypeUtil.toDouble(l) >= TypeUtil.toDouble(r) ? 1 : 0;
-            case "<=" -> TypeUtil.toDouble(l) <= TypeUtil.toDouble(r) ? 1 : 0;
+            case "==" -> l.equals(r);
+            case "!=" -> !l.equals(r);
+            case ">" -> TypeUtil.toDouble(l) > TypeUtil.toDouble(r);
+            case "<" -> TypeUtil.toDouble(l) < TypeUtil.toDouble(r);
+            case ">=" -> TypeUtil.toDouble(l) >= TypeUtil.toDouble(r);
+            case "<=" -> TypeUtil.toDouble(l) <= TypeUtil.toDouble(r);
             default -> null;
         };
     }

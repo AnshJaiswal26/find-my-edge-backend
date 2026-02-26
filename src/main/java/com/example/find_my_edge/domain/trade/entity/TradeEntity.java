@@ -1,5 +1,6 @@
 package com.example.find_my_edge.domain.trade.entity;
 
+import com.example.find_my_edge.domain.trade.converter.MapToJsonConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,18 +17,9 @@ public class TradeEntity {
 
     private String userId;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "trade_values",
-            joinColumns = @JoinColumn(name = "trade_id"),
-            indexes = {
-                    @Index(name = "idx_trade_values_trade_id", columnList = "trade_id"),
-                    @Index(name = "idx_trade_values_field_key", columnList = "field_key"),
-            }
-    )
-    @MapKeyColumn(name = "field_key") // = SchemaEntity.id
-    @Column(name = "field_value", columnDefinition = "TEXT")
-    private Map<String, String> values = new HashMap<>();
+    @Column(name = "field_value", columnDefinition = "JSON")
+    @Convert(converter = MapToJsonConverter.class)
+    private Map<String, Object> values = new HashMap<>();
 
     private Long createdAt;
     private Long updatedAt;

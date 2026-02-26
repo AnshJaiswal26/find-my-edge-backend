@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -74,19 +75,27 @@ public class TradeInitializer {
 
                 double exit = round(entry + move);
 
+
                 /* -------- FIELDS -------- */
 
                 trade.setId("T" + String.format("%04d", tradeCounter++));
-                trade.getValues().put("date", tradeDate.toString());
-                trade.getValues().put("entryTime", entryTime.toString());
-                trade.getValues().put("exitTime", exitTime.toString());
+
+                trade.getValues().put(
+                        "date",
+                        tradeDate
+                                .atStartOfDay(ZoneOffset.UTC)
+                                .toEpochSecond()
+                );
+
+                trade.getValues().put("entryTime", entryTime.toSecondOfDay());
+                trade.getValues().put("exitTime", exitTime.toSecondOfDay());
 
                 trade.getValues().put("symbol", randomSymbol());
-                trade.getValues().put("qty", String.valueOf(qty));
-                trade.getValues().put("entry", String.valueOf(entry));
-                trade.getValues().put("exit", String.valueOf(exit));
+                trade.getValues().put("qty", qty);
+                trade.getValues().put("entry", entry);
+                trade.getValues().put("exit", exit);
 
-                trade.getValues().put("risk", String.valueOf(RISK_PER_TRADE));
+                trade.getValues().put("risk", RISK_PER_TRADE);
 
                 trades.add(trade);
             }

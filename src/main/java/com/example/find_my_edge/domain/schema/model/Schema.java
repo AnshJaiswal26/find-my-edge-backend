@@ -1,7 +1,7 @@
 package com.example.find_my_edge.domain.schema.model;
 
 
-import com.example.find_my_edge.analytics.ast.model.AstNode;
+import com.example.find_my_edge.analytics.ast.util.HasDependencies;
 import com.example.find_my_edge.common.config.AstConfig;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 import com.example.find_my_edge.common.config.DisplayConfig;
@@ -21,7 +21,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Schema {
+public class Schema implements HasDependencies {
 
     private String id;
     private String label;

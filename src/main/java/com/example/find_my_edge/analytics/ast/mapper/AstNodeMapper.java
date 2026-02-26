@@ -1,5 +1,6 @@
 package com.example.find_my_edge.analytics.ast.mapper;
 
+import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.common.config.AstConfig;
 
@@ -11,8 +12,18 @@ public class AstNodeMapper {
     public static AstNode toNode(AstConfig config) {
         if (config == null) return null;
 
+        AstNode.NodeType type;
+        try {
+            type = AstNode.NodeType.valueOf(config.getType().toUpperCase());
+        } catch (Exception e) {
+            throw new AstParseException(
+                    "[AstNode Type Error]",
+                    "Invalid node type: " + config.getType()
+            );
+        }
+
         return AstNode.builder()
-                      .type(AstNode.NodeType.valueOf(config.getType().toUpperCase()))
+                      .type(type)
                       .op(config.getOp())
 
                       // recursive mapping

@@ -31,8 +31,8 @@ public class BinaryHandler {
             case "/" -> TypeUtil.toDouble(right) == 0 ? null :
                         TypeUtil.toDouble(left) / TypeUtil.toDouble(right);
 
-            case "AND" -> (TypeUtil.toBoolean(left) && TypeUtil.toBoolean(right)) ? 1 : 0;
-            case "OR" -> (TypeUtil.toBoolean(left) || TypeUtil.toBoolean(right)) ? 1 : 0;
+            case "AND" -> TypeUtil.toBoolean(left) && TypeUtil.toBoolean(right);
+            case "OR" -> TypeUtil.toBoolean(left) || TypeUtil.toBoolean(right);
 
             case "==", "!=", ">", "<", ">=", "<=" -> comparisonHandler.handle(ast, ctx, evaluator);
 

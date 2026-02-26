@@ -11,10 +11,10 @@ public class TradeResponseDTO {
 
     private String id;
 
-    private Map<String, String> values = new HashMap<>();
+    private Map<String, Object> values = new HashMap<>();
 
     @JsonAnyGetter
-    public Map<String, String> getValues() {
+    public Map<String, Object> getValues() {
         return values;
     }
 }

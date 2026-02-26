@@ -5,7 +5,6 @@ import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
 import com.example.find_my_edge.analytics.ast.exception.AstExecutionException;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
-import com.example.find_my_edge.common.config.AstConfig;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,7 +22,8 @@ public class NativeWindowReducerRunner implements ReducerRunnerStrategy {
         String key = reducer.getKey();
         if (key == null) {
             throw new AstExecutionException(
-                    "runNativeWindowReducer: key not found in reducer '" + reducer.getName() + "'"
+                    "[Native Window Execution Error]",
+                    "key not found in reducer '" + reducer.getName() + "'"
             );
         }
 

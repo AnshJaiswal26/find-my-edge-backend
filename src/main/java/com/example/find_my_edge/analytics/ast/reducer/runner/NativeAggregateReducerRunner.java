@@ -2,9 +2,9 @@ package com.example.find_my_edge.analytics.ast.reducer.runner;
 
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
+import com.example.find_my_edge.analytics.ast.exception.AstExecutionException;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
-import com.example.find_my_edge.common.config.AstConfig;
 import org.springframework.stereotype.Component;
 
 @Component("NATIVE_AGG")
@@ -16,8 +16,9 @@ public class NativeAggregateReducerRunner implements ReducerRunnerStrategy {
         // ✅ reducer must define key
         String key = reducer.getKey();
         if (key == null) {
-            throw new IllegalStateException(
-                    "runNativeAggregateReducer: key not found in reducer '" + reducer.getName() + "'"
+            throw new AstExecutionException(
+                    "[Native Aggregation Execution Error]",
+                    "key not found in reducer '" + reducer.getName() + "'"
             );
         }
 

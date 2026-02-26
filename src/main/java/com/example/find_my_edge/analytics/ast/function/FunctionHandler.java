@@ -7,7 +7,6 @@ import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import com.example.find_my_edge.analytics.ast.reducer.runner.ReducerRunnerRegistry;
 import com.example.find_my_edge.analytics.ast.reducer.runner.ReducerRunnerStrategy;
-import com.example.find_my_edge.common.config.AstConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

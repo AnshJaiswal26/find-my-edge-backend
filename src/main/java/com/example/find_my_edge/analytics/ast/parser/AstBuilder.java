@@ -1,6 +1,7 @@
 package com.example.find_my_edge.analytics.ast.parser;
 
 import com.example.find_my_edge.analytics.ast.exception.AstException;
+import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
@@ -199,6 +200,6 @@ public class AstBuilder {
     }
 
     private RuntimeException error(String msg) {
-        return new AstException("[AST Builder] " + msg);
+        return new AstParseException("[AST Builder]", msg);
     }
 }
