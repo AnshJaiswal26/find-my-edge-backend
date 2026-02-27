@@ -19,16 +19,24 @@ import java.util.Map;
 @NoArgsConstructor
 public class PageConfig {
     // Charts
+
+    @Builder.Default
     private Map<String, ChartLayoutConfig> chartGridLayout = new HashMap<>();
+    @Builder.Default
     private Map<String, ChartConfig> charts = new HashMap<>();
+    @Builder.Default
     private List<String> chartOrder = new ArrayList<>();
 
     // Stats
+    @Builder.Default
     private List<String> statsOrder = new ArrayList<>();
+    @Builder.Default
     private Map<String, StatConfig> statsById = new HashMap<>();
 
     // Table
+    @Builder.Default
     private List<String> columnsOrder = new ArrayList<>();
+    @Builder.Default
     private Map<String, Integer> columnWidths = new HashMap<>();
 
 }

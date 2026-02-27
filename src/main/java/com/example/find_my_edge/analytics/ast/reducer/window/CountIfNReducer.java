@@ -1,15 +1,30 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+
+@FunctionMeta(
+        argTypes = {"boolean", "number"},
+        semanticArgs = {
+                @ArgType({"boolean"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "COUNT_IF_N(condition, n)",
+        description = "Count of rows in last N where condition is true"
+)
 @Component
 public class CountIfNReducer implements Reducer {
 
     private final SumNReducer sumN = new SumNReducer();
 
-    // ---------- METADATA ----------
+
 
     @Override
     public FunctionType getType() {
@@ -22,8 +37,8 @@ public class CountIfNReducer implements Reducer {
     }
 
     @Override
-    public int getArity() {
-        return 1; // condition only (n handled by engine)
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
     }
 
     // ---------- EXECUTION (DELEGATION) ----------
@@ -34,7 +49,7 @@ public class CountIfNReducer implements Reducer {
     }
 
     @Override
-    public boolean step(Object state, Object[] args) {
+    public Boolean step(Object state, Object[] args) {
         if (args == null || args.length == 0) return true;
 
         Object conditionObj = args[0];

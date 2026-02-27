@@ -13,13 +13,10 @@ public interface StatService {
 
     StatConfig create(String page, StatConfig stat);
 
-    void createAll(Map<String, StatConfig> stats, List<String> statsOrder);
-
     StatConfig update(String page, String id, StatConfig stat);
 
     void delete(String page, String id);
 
     List<String> updateOrder(String page, List<String> order);
 
-    void deleteByUserId();
 }

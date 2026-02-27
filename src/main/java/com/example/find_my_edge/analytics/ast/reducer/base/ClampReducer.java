@@ -1,9 +1,24 @@
 package com.example.find_my_edge.analytics.ast.reducer.base;
 
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"number", "number", "number"},
+        semanticArgs = {
+                @ArgType({"number"}),
+                @ArgType({"number"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "CLAMP(expr, min, max)",
+        description = "Clamp value to range"
+)
 @Component
 public class ClampReducer implements Reducer {
 
@@ -13,30 +28,29 @@ public class ClampReducer implements Reducer {
 
     @Override
     public FunctionType getType() {
-        return FunctionType.BASE;
+        return FunctionType.PURE;
     }
 
-
+    @Override
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
+    }
 
     @Override
     public String getName() {
         return "CLAMP";
     }
 
-    @Override
-    public int getArity() {
-        return 3;
-    }
 
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State();
     }
 
     @Override
-    public boolean step(Object stateObj, Object[] args) {
+    public Boolean step(Object stateObj, Object[] args) {
         State state = (State) stateObj;
 
         Object value = args[0];

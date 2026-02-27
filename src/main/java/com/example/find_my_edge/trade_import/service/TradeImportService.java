@@ -1,7 +1,5 @@
 package com.example.find_my_edge.trade_import.service;
 
-import com.example.find_my_edge.api.trade_import.dto.FieldDataRequestDTO;
-import com.example.find_my_edge.api.trade_import.dto.ImportedTradeResponseDTO;
 import com.example.find_my_edge.trade_import.entity.ImportedTradeEntity;
 import com.example.find_my_edge.trade_import.entity.ImportedTradeFieldEntity;
 

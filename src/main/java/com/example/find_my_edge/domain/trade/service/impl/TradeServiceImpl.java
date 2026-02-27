@@ -3,7 +3,7 @@ package com.example.find_my_edge.domain.trade.service.impl;
 import com.example.find_my_edge.common.auth.AuthService;
 import com.example.find_my_edge.domain.trade.entity.TradeEntity;
 import com.example.find_my_edge.domain.trade.exception.TradeNotFoundException;
-import com.example.find_my_edge.domain.trade.mapper.TradeMapper;
+import com.example.find_my_edge.domain.trade.mapper.TradeEntityMapper;
 import com.example.find_my_edge.domain.trade.model.Trade;
 import com.example.find_my_edge.domain.trade.repository.TradeRepository;
 import com.example.find_my_edge.domain.trade.service.TradeService;
@@ -24,7 +24,7 @@ public class TradeServiceImpl implements TradeService {
 
     private final AuthService authService;
     private final TradeRepository tradeRepository;
-    private final TradeMapper mapper;
+    private final TradeEntityMapper mapper;
 
     /* ---------------- CREATE ---------------- */
 
@@ -43,7 +43,7 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity saved = tradeRepository.save(entity);
 
-        return mapper.toModel(saved);
+        return mapper.toDomain(saved);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity existing = tradeRepository
                 .findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new TradeNotFoundException("Trade not found"));
+                .orElseThrow(() -> new TradeNotFoundException(id));
 
         TradeEntity updated = mapper.toEntity(trade);
 
@@ -87,7 +87,7 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity saved = tradeRepository.save(updated);
 
-        return mapper.toModel(saved);
+        return mapper.toDomain(saved);
     }
 
     /* ---------------- GET BY ID ---------------- */
@@ -100,9 +100,9 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity entity = tradeRepository
                 .findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new TradeNotFoundException("Trade not found"));
+                .orElseThrow(() -> new TradeNotFoundException(id));
 
-        return mapper.toModel(entity);
+        return mapper.toDomain(entity);
     }
 
     /* ---------------- GET ALL ---------------- */
@@ -115,7 +115,7 @@ public class TradeServiceImpl implements TradeService {
 
         return tradeRepository.findAllByUserId(userId)
                               .stream()
-                              .map(mapper::toModel)
+                              .map(mapper::toDomain)
                               .toList();
     }
 
@@ -128,7 +128,7 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity entity = tradeRepository
                 .findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new TradeNotFoundException("Trade not found"));
+                .orElseThrow(() -> new TradeNotFoundException(id));
 
         tradeRepository.delete(entity);
     }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component("GLOBAL") // also reuse for RATIO if needed
+@Component("AGGREGATE")
 public class AggregateReducerRunner implements ReducerRunnerStrategy {
 
     @Override

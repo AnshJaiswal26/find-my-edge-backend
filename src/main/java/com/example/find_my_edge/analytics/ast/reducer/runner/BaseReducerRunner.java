@@ -8,7 +8,7 @@ import com.example.find_my_edge.common.config.AstConfig;
 import org.springframework.stereotype.Component;
 
 
-@Component("BASE")
+@Component("PURE")
 public class BaseReducerRunner implements ReducerRunnerStrategy {
 
     @Override

@@ -49,6 +49,33 @@ public class JsonUtil {
         }
     }
 
+    /* ---------- WRITE LIST ---------- */
+    public String toJsonList(List<?> list) {
+
+        if (list == null || list.isEmpty()) return "[]";
+
+        try {
+            return objectMapper.writeValueAsString(list);
+        } catch (Exception e) {
+            throw new RuntimeException("JSON list write failed", e);
+        }
+    }
+
+    /* ---------- COPY LIST ---------- */
+    public <T> List<T> fromList(List<?> source, Class<T> clazz) {
+
+        if (source == null || source.isEmpty()) return List.of();
+
+        try {
+            return source.stream()
+                         .map(item -> objectMapper.convertValue(item, clazz))
+                         .toList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("JSON list copy failed", e);
+        }
+    }
+
     public <T> T copy(Object object, Class<T> clazz) {
         try {
             return objectMapper.readValue(

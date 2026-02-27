@@ -7,9 +7,7 @@ import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.domain.schema.entity.SchemaEntity;
 import com.example.find_my_edge.domain.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.tool.schema.extract.spi.SchemaExtractionException;
 import org.springframework.stereotype.Component;
-
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +15,7 @@ public class SchemaMapper {
 
     private final JsonUtil jsonUtil;
 
-    /* ---------------- schema → ENTITY ---------------- */
+    /* ---------------- MODEL → ENTITY ---------------- */
     public SchemaEntity toEntity(Schema schema) {
 
         if (schema == null) return null;
@@ -26,27 +24,29 @@ public class SchemaMapper {
             return SchemaEntity.builder()
                                .label(schema.getLabel())
                                .type(schema.getType())
+                               .hidden(schema.getHidden())
+
                                .semanticType(schema.getSemanticType())
                                .mode(schema.getMode())
 
                                .astJson(jsonUtil.toJson(schema.getAst()))
                                .formula(schema.getFormula())
-                               .dependencies(schema.getDependencies())
+                               .dependencies(safeList(schema.getDependencies()))
 
                                .initialValue(schema.getInitialValue())
 
                                .displayJson(jsonUtil.toJson(schema.getDisplay()))
-                               .colorRulesJson(jsonUtil.toJson(schema.getColorRules()))
-                               .optionsJson(jsonUtil.toJson(schema.getOptions()))
+                               .colorRulesJson(jsonUtil.toJson(safeList(schema.getColorRules())))
+                               .optionsJson(jsonUtil.toJson(safeList(schema.getOptions())))
 
                                .build();
 
         } catch (Exception e) {
-            throw new SchemaExtractionException("Failed to map schema → Entity", e);
+            throw new RuntimeException("Failed to map Schema → Entity", e);
         }
     }
 
-    /* ---------------- ENTITY → schema ---------------- */
+    /* ---------------- ENTITY → MODEL ---------------- */
     public Schema toModel(SchemaEntity entity) {
 
         if (entity == null) return null;
@@ -55,16 +55,20 @@ public class SchemaMapper {
             return Schema.builder()
                          .id(entity.getId())
                          .label(entity.getLabel())
+                         .hidden(entity.getHidden())
+
                          .type(entity.getType())
                          .semanticType(entity.getSemanticType())
                          .mode(entity.getMode())
 
                          .ast(jsonUtil.fromJson(entity.getAstJson(), AstConfig.class))
                          .formula(entity.getFormula())
-                         .dependencies(entity.getDependencies())
+                         .dependencies(safeList(entity.getDependencies()))
 
+                         // safe to expose
                          .source(entity.getSource())
-                         .editable(entity.getEditable())
+                         .role(entity.getRole())
+
                          .initialValue(entity.getInitialValue())
 
                          .display(jsonUtil.fromJson(entity.getDisplayJson(), DisplayConfig.class))
@@ -77,8 +81,14 @@ public class SchemaMapper {
                          .build();
 
         } catch (Exception e) {
-            throw new SchemaExtractionException("Failed to map Entity → schema", e);
+            throw new RuntimeException("Failed to map Entity → Schema", e);
         }
     }
 
+    /* ---------------- HELPERS ---------------- */
+
+    private <T> java.util.List<T> safeList(java.util.List<T> list) {
+        return list == null ? new java.util.ArrayList<>() : list;
+    }
 }
+

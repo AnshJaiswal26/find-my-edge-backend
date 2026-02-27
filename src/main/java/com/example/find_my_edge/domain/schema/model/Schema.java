@@ -5,10 +5,7 @@ import com.example.find_my_edge.analytics.ast.util.HasDependencies;
 import com.example.find_my_edge.common.config.AstConfig;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 import com.example.find_my_edge.common.config.DisplayConfig;
-import com.example.find_my_edge.domain.schema.enums.ComputeMode;
-import com.example.find_my_edge.domain.schema.enums.FieldType;
-import com.example.find_my_edge.domain.schema.enums.SchemaSource;
-import com.example.find_my_edge.domain.schema.enums.SemanticType;
+import com.example.find_my_edge.domain.schema.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +22,9 @@ public class Schema implements HasDependencies {
 
     private String id;
     private String label;
+
+    @Builder.Default
+    private Boolean hidden = false;
 
     /* TYPE */
     @Builder.Default
@@ -49,9 +49,8 @@ public class Schema implements HasDependencies {
     @Builder.Default
     private SchemaSource source = SchemaSource.USER;
 
-    /* BEHAVIOR */
     @Builder.Default
-    private Boolean editable = false;
+    private SchemaRole role = SchemaRole.USER_DEFINED;
 
     @Builder.Default
     private Double initialValue = 0.0;
@@ -66,4 +65,103 @@ public class Schema implements HasDependencies {
 
     @Builder.Default
     private List<String> options = new ArrayList<>();
+
+    /* ---------------- SOURCE HELPERS ---------------- */
+
+    public boolean isSystem() {
+        return source == SchemaSource.SYSTEM;
+    }
+
+    public boolean isUser() {
+        return source == SchemaSource.USER;
+    }
+
+    public boolean isComputed() {
+        return source == SchemaSource.COMPUTED;
+    }
+
+    /* ---------------- ROLE HELPERS ---------------- */
+
+    public boolean isSystemRequired() {
+        return role == SchemaRole.SYSTEM_REQUIRED;
+    }
+
+    public boolean isSystemOptional() {
+        return role == SchemaRole.SYSTEM_OPTIONAL;
+    }
+
+    public boolean isUserDefined() {
+        return role == SchemaRole.USER_DEFINED;
+    }
+
+    /* ---------------- BEHAVIOR HELPERS ---------------- */
+
+    /**
+     * Can user edit cell values?
+     */
+    public boolean isCellEditable() {
+        // computed values are never editable
+        return !isComputed();
+    }
+
+    /**
+     * Can user modify schema (formula, dependencies, etc.)?
+     */
+    public boolean isSchemaEditable() {
+        return isUserDefined();
+    }
+
+    /**
+     * Can user delete this schema?
+     */
+    public boolean isDeletable() {
+        return isUserDefined();
+    }
+
+
+    /**
+     * Is this schema critical for system?
+     */
+    public boolean isSystemCritical() {
+        return isSystemRequired();
+    }
+
+    /* ---------------- COMPUTATION HELPERS ---------------- */
+
+    /**
+     * Does this schema have a formula?
+     */
+    public boolean hasFormula() {
+        return formula != null && !formula.isBlank();
+    }
+
+    /**
+     * Is this actively computed (has AST or formula)?
+     */
+    public boolean isComputedField() {
+        return isComputed() || hasFormula() || ast != null;
+    }
+
+    /**
+     * Has dependencies?
+     */
+    public boolean hasDependencies() {
+        return dependencies != null && !dependencies.isEmpty();
+    }
+
+    /* ---------------- UI HELPERS ---------------- */
+
+    /**
+     * Should this be visible in UI?
+     */
+    public boolean isVisible() {
+        return hidden == null || !hidden;
+    }
+
+    /**
+     * Is selectable field (dropdown type)?
+     */
+    public boolean hasOptions() {
+        return options != null && !options.isEmpty();
+    }
 }

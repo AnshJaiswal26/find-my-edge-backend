@@ -2,16 +2,18 @@ package com.example.find_my_edge.analytics.ast.reducer;
 
 
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.common.config.AstConfig;
 
 import java.util.function.BiFunction;
 
 public interface Reducer {
 
-    // ---------- METADATA ----------
+
     FunctionType getType();
+
+    ExecutionMode getExecutionMode();
 
     default String getKey() {
         return null;
@@ -19,17 +21,25 @@ public interface Reducer {
 
     String getName();
 
-    int getArity();
-
-    // ---------- OPTIONAL EXECUTOR ----------
-    default BiFunction<AstNode, EvaluationContext, Object> getExecutor() {
+    // ---------- REDUCER ----------
+    default Object init(int n) {
         return null;
     }
 
-    // ---------- REDUCER ----------
-    Object init(int n);
+    default Object init() {
+        return null;
+    }
 
-    boolean step(Object state, Object[] args);
+    default Boolean step(Object state, Object[] args) {
+        return false;
+    }
 
-    Object result(Object state);
+    default Object result(Object state) {
+        return null;
+    }
+
+    // ---------- PURE FUNCTION ----------
+    default BiFunction<AstNode, EvaluationContext, Object> getExecutor() {
+        return null;
+    }
 }

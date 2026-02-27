@@ -42,8 +42,10 @@ public class TradeImportServiceImpl implements TradeImportService {
     @Transactional
     @Override
     public ImportedTradeEntity update(Long importId, List<ImportedTradeFieldEntity> fields) {
-        ImportedTradeEntity importedTradeEntity = importedTradeRepository.findById(importId)
-                                                                         .orElseThrow(() -> new ImportedTradeNotFoundException("Imported Trade not found with id " + importId));
+        ImportedTradeEntity importedTradeEntity =
+                importedTradeRepository
+                        .findById(importId)
+                        .orElseThrow(() -> new ImportedTradeNotFoundException(importId));
 
         importedTradeEntity.getFields().clear();
         importedTradeEntity.getFields().addAll(fields);
@@ -56,7 +58,7 @@ public class TradeImportServiceImpl implements TradeImportService {
     public void delete(Long importId) {
 
         if (!importedTradeRepository.existsById(importId)) {
-            throw new ImportedTradeNotFoundException("Imported Trade not found with id " + importId);
+            throw new ImportedTradeNotFoundException(importId);
         }
 
         importedTradeRepository.deleteById(importId);

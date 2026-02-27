@@ -1,9 +1,24 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+
+@FunctionMeta(
+        argTypes = {"number", "number"},
+        semanticArgs = {
+                @ArgType({"number"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "VOLATILITY_N(expr, n)",
+        description = "Standard deviation of returns over last N rows"
+)
 @Component
 public class VolatilityNReducer implements Reducer {
 
@@ -30,7 +45,10 @@ public class VolatilityNReducer implements Reducer {
         }
     }
 
-    // ---------- METADATA ----------
+    @Override
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
+    }
 
     @Override
     public FunctionType getType() {
@@ -42,10 +60,6 @@ public class VolatilityNReducer implements Reducer {
         return "VOLATILITY_N";
     }
 
-    @Override
-    public int getArity() {
-        return 1; // expr (n from engine)
-    }
 
     // ---------- EXECUTION ----------
 
@@ -56,7 +70,7 @@ public class VolatilityNReducer implements Reducer {
     }
 
     @Override
-    public boolean step(Object stateObj, Object[] args) {
+    public Boolean step(Object stateObj, Object[] args) {
         if (stateObj == null || args == null || args.length == 0) return true;
 
         State state = (State) stateObj;

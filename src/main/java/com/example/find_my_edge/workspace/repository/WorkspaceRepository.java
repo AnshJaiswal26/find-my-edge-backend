@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface WorkspaceRepository extends JpaRepository<WorkspaceEntity, Long> {
     Optional<WorkspaceEntity> findByUserId(String userId);
+
+    void deleteByUserId(String userId);
 }

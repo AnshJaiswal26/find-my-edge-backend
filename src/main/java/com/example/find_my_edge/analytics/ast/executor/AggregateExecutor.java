@@ -34,6 +34,8 @@ public class AggregateExecutor {
         ctx.setGetTradeCount(getTradeCount);
         ctx.setGetSchemaType(getSchemaType);
 
+        ctx.setEvaluator(evaluator);
+
         ctx.setTradeIndex(0);
 
 

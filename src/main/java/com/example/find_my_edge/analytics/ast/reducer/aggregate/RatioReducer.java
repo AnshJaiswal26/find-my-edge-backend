@@ -1,0 +1,89 @@
+package com.example.find_my_edge.analytics.ast.reducer.aggregate;
+
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.reducer.Reducer;
+import org.springframework.stereotype.Component;
+
+@FunctionMeta(
+        argTypes = {"number", "number"},
+        semanticArgs = {
+                @ArgType({"number"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "RATIO(a, b)",
+        description = "Division of two aggregated values (a / b)"
+)
+@Component
+public class RatioReducer implements Reducer {
+
+    // ---------- STATE ----------
+    private static class State {
+        double a;
+        double b;
+
+        State() {
+            this.a = 0.0;
+            this.b = 0.0;
+        }
+    }
+
+    @Override
+    public FunctionType getType() {
+        return FunctionType.AGGREGATE;
+    }
+
+    @Override
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
+    }
+
+    @Override
+    public String getName() {
+        return "RATIO";
+    }
+
+
+
+    // ---------- EXECUTION ----------
+
+    @Override
+    public Object init(int n) {
+        return new State(); // n not used
+    }
+
+    @Override
+    public Boolean step(Object stateObj, Object[] args) {
+        if (stateObj == null || args == null || args.length < 2) return true;
+
+        State state = (State) stateObj;
+
+        Object aObj = args[0];
+        Object bObj = args[1];
+
+        if (aObj != null) {
+            state.a += ((Number) aObj).doubleValue();
+        }
+
+        if (bObj != null) {
+            state.b += ((Number) bObj).doubleValue();
+        }
+
+        return true; // process all rows
+    }
+
+    @Override
+    public Object result(Object stateObj) {
+        if (stateObj == null) return null;
+
+        State state = (State) stateObj;
+
+        return state.b == 0.0
+               ? 0.0
+               : state.a / state.b;
+    }
+}

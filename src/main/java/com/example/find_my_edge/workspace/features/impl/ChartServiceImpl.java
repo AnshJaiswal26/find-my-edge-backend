@@ -3,13 +3,18 @@ package com.example.find_my_edge.workspace.features.impl;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
+import com.example.find_my_edge.workspace.enums.ChartCategory;
+import com.example.find_my_edge.workspace.exception.chart.ChartNotFoundException;
+import com.example.find_my_edge.workspace.exception.chart.InvalidChartConfigException;
 import com.example.find_my_edge.workspace.features.ChartService;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -18,67 +23,128 @@ public class ChartServiceImpl implements ChartService {
     private final WorkspaceService workspaceService;
 
     @Override
-    public ChartConfig create(String page, ChartConfig dto) {
-        PageConfig pageConfig = workspaceService.getPage(page);
+    public ChartConfig create(String pageName, ChartConfig dto) {
+        validateChart(dto);
 
-        return pageConfig.getCharts().put(dto.getMeta().getId(), dto);
+        workspaceService.getPageAndModify(page -> {
+            String chartId = dto.getMeta().getId();
+
+            if (page.getCharts().containsKey(chartId)) {
+                throw new InvalidChartConfigException("Chart already exists with id: " + chartId);
+            }
+
+            page.getCharts().put(chartId, dto);
+        }, pageName);
+
+        return dto;
     }
 
     @Override
-    public ChartConfig getById(String page, String chartId) {
-        PageConfig pageConfig = workspaceService.getPage(page);
-
-        return pageConfig.getCharts().get(chartId);
+    public ChartConfig getById(String pageName, String chartId) {
+        PageConfig page = workspaceService.getPage(pageName);
+        return getChartOrThrow(page, chartId);
     }
 
     @Override
-    public Map<String, ChartConfig> getAll(String page) {
-        PageConfig pageConfig = workspaceService.getPage(page);
-
-        return pageConfig.getCharts();
+    public Map<String, ChartConfig> getAll(String pageName) {
+        PageConfig page = workspaceService.getPage(pageName);
+        return Collections.unmodifiableMap(page.getCharts());
     }
 
     @Override
-    public ChartConfig update(String page, String chartId, ChartConfig dto) {
-        PageConfig pageConfig = workspaceService.getPage(page);
+    public ChartConfig update(String pageName, String chartId, ChartConfig dto) {
+        validateChart(dto);
 
-        return pageConfig.getCharts().put(chartId, dto);
+        workspaceService.getPageAndModify(page -> {
+            if (!page.getCharts().containsKey(chartId)) {
+                throw new ChartNotFoundException(chartId);
+            }
+
+            page.getCharts().put(chartId, dto);
+        }, pageName);
+
+        return dto;
     }
 
     @Override
-    public void delete(String page, String chartId) {
-        PageConfig pageConfig = workspaceService.getPage(page);
+    public void delete(String pageName, String chartId) {
+        workspaceService.getPageAndModify(page -> {
+            if (!page.getCharts().containsKey(chartId)) {
+                throw new ChartNotFoundException(chartId);
+            }
 
-        pageConfig.getCharts().remove(chartId);
+            page.getCharts().remove(chartId);
+        }, pageName);
     }
 
     @Override
-    public Map<String, Object> updateLayout(String page, String chartId, Object layout) {
-        PageConfig pageConfig = workspaceService.getPage(page);
-
-        return pageConfig.getCharts().get(chartId).getLayout();
-    }
-
-    @Override
-    public List<SeriesConfig> updateSeriesConfig(String page, String chartId, List<SeriesConfig> seriesConfig) {
-        PageConfig pageConfig = workspaceService.getPage(page);
-
-        ChartConfig chartConfig = pageConfig.getCharts().get(chartId);
-
-        if (chartConfig.getMeta().getCategory().equals("series")) {
-            chartConfig.setYSeriesConfig(seriesConfig);
-        } else {
-            chartConfig.setSeriesConfig(seriesConfig);
+    public Map<String, Object> updateLayout(
+            String pageName,
+            String chartId,
+            Map<String, Object> layout
+    ) {
+        if (layout == null) {
+            throw new IllegalArgumentException("Layout cannot be null");
         }
+
+        workspaceService.getPageAndModify(page -> {
+            ChartConfig chart = getChartOrThrow(page, chartId);
+            chart.setLayout(layout);
+        }, pageName);
+
+        return layout;
+    }
+
+    @Override
+    public List<SeriesConfig> updateSeriesConfig(
+            String pageName,
+            String chartId,
+            List<SeriesConfig> seriesConfig
+    ) {
+        if (seriesConfig == null) {
+            throw new IllegalArgumentException("Series config cannot be null");
+        }
+
+        workspaceService.getPageAndModify(page -> {
+            ChartConfig chart = getChartOrThrow(page, chartId);
+
+            if (chart.getMeta().getCategory().equals(ChartCategory.SERIES.key())) {
+                chart.setYSeriesConfig(seriesConfig);
+            } else {
+                chart.setSeriesConfig(seriesConfig);
+            }
+        }, pageName);
 
         return seriesConfig;
     }
 
-    @Override
-    public List<String> updateOrder(String page, List<String> order) {
-        PageConfig pageConfig = workspaceService.getPage(page);
+    // =========================
+    // 🔒 PRIVATE HELPERS
+    // =========================
 
-        pageConfig.setChartOrder(order);
-        return order;
+    private ChartConfig getChartOrThrow(PageConfig page, String chartId) {
+        ChartConfig chart = page.getCharts().get(chartId);
+        if (chart == null) {
+            throw new ChartNotFoundException(chartId);
+        }
+        return chart;
+    }
+
+    private void validateChart(ChartConfig dto) {
+        if (dto == null) {
+            throw new InvalidChartConfigException("ChartConfig cannot be null");
+        }
+
+        if (dto.getMeta() == null) {
+            throw new InvalidChartConfigException("Chart meta cannot be null");
+        }
+
+        if (dto.getMeta().getId() == null || dto.getMeta().getId().isBlank()) {
+            throw new InvalidChartConfigException("Chart id cannot be null or blank");
+        }
+
+        if (dto.getMeta().getCategory() == null) {
+            throw new InvalidChartConfigException("Chart category cannot be null");
+        }
     }
 }

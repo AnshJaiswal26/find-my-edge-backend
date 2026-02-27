@@ -1,8 +1,8 @@
 package com.example.find_my_edge.api.trade_import.mapper;
 
 import com.example.find_my_edge.common.util.JsonUtil;
-import com.example.find_my_edge.api.trade_import.dto.FieldDataRequestDTO;
-import com.example.find_my_edge.api.trade_import.dto.FieldDataResponseDTO;
+import com.example.find_my_edge.api.trade_import.dto.FieldDataRequestDto;
+import com.example.find_my_edge.api.trade_import.dto.FieldDataResponseDto;
 import com.example.find_my_edge.trade_import.entity.ImportedTradeFieldEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ public class ImportedTradeFieldMapper {
 
     private final JsonUtil jsonUtil;
 
-    public ImportedTradeFieldEntity toEntity(FieldDataRequestDTO dto) {
+    public ImportedTradeFieldEntity toEntity(FieldDataRequestDto dto) {
         return ImportedTradeFieldEntity.builder()
                                        .label(dto.getLabel())
                                        .type(dto.getType())
@@ -27,13 +27,13 @@ public class ImportedTradeFieldMapper {
                                        .build();
     }
 
-    public FieldDataResponseDTO toResponseDTO(ImportedTradeFieldEntity field) {
+    public FieldDataResponseDto toResponseDto(ImportedTradeFieldEntity field) {
         List<String> options = Collections.singletonList(jsonUtil.fromJson(
                 field.getOptions(),
                 String.class
         ));
 
-        return FieldDataResponseDTO.builder()
+        return FieldDataResponseDto.builder()
                                    .id(field.getId())
                                    .label(field.getLabel())
                                    .type(field.getType())

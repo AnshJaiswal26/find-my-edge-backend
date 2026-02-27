@@ -1,9 +1,23 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"any", "number"},
+        semanticArgs = {
+                @ArgType({"any"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "COUNT_N(expr, n)",
+        description = "Rolling count over N rows"
+)
 @Component
 public class CountNReducer implements Reducer {
 
@@ -20,7 +34,10 @@ public class CountNReducer implements Reducer {
         }
     }
 
-    // ---------- METADATA ----------
+    @Override
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
+    }
 
     @Override
     public FunctionType getType() {
@@ -32,10 +49,6 @@ public class CountNReducer implements Reducer {
         return "COUNT_N";
     }
 
-    @Override
-    public int getArity() {
-        return 1; // expr only (n handled by engine)
-    }
 
     // ---------- EXECUTION ----------
 
@@ -46,7 +59,7 @@ public class CountNReducer implements Reducer {
     }
 
     @Override
-    public boolean step(Object stateObj, Object[] args) {
+    public Boolean step(Object stateObj, Object[] args) {
         if (stateObj == null || args == null || args.length == 0) return true;
 
         State state = (State) stateObj;

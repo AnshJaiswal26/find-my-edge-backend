@@ -1,29 +1,26 @@
 package com.example.find_my_edge.api.workspace.controller;
 
+import com.example.find_my_edge.common.controller.BaseController;
+import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.workspace.features.TableService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/workspace/{page}")
+@RequestMapping("api/pages/{pageName}")
 @RequiredArgsConstructor
-public class TableController {
+public class TableController extends BaseController {
 
     private final TableService tableService;
 
-    @PostMapping("/columnOrder")
-    public List<String> updateColumnOrder(
-            @PathVariable String page, List<String> columnsOrder
+    @PostMapping("table/columnWidth/{columnId}")
+    public ResponseEntity<ApiResponse<Integer>> updateColumnWidth(
+            @PathVariable String columnId, @PathVariable String pageName, int width
     ) {
-        return tableService.updateColumnOrder(page, columnsOrder);
-    }
-
-    @PostMapping("/columnWidth/{columnId}")
-    public int updateColumnWidth(
-            @PathVariable String columnId, @PathVariable String page, int width
-    ) {
-        return tableService.updateColumnWidth(page, columnId, width);
+        return buildResponse(
+                tableService.updateColumnWidth(pageName, columnId, width),
+                "Column width updated successfully"
+        );
     }
 }

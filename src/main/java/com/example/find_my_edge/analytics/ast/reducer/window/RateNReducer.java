@@ -1,9 +1,23 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"boolean", "number"},
+        semanticArgs = {
+                @ArgType({"boolean"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "RATE_N(condition, n)",
+        description = "Rate (percentage) of rows in last N where condition is true"
+)
 @Component
 public class RateNReducer implements Reducer {
 
@@ -22,7 +36,10 @@ public class RateNReducer implements Reducer {
         }
     }
 
-    // ---------- METADATA ----------
+    @Override
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
+    }
 
     @Override
     public FunctionType getType() {
@@ -34,10 +51,6 @@ public class RateNReducer implements Reducer {
         return "RATE_N";
     }
 
-    @Override
-    public int getArity() {
-        return 1; // boolean condition (n comes from engine/config)
-    }
 
     // ---------- EXECUTION ----------
 
@@ -48,7 +61,7 @@ public class RateNReducer implements Reducer {
     }
 
     @Override
-    public boolean step(Object stateObj, Object[] args) {
+    public Boolean step(Object stateObj, Object[] args) {
         if (stateObj == null || args == null || args.length == 0) return true;
 
         State state = (State) stateObj;

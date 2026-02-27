@@ -4,8 +4,8 @@ import com.example.find_my_edge.api.trade_import.mapper.ImportedTradeFieldMapper
 import com.example.find_my_edge.api.trade_import.mapper.ImportedTradeMapper;
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.response.ApiResponse;
-import com.example.find_my_edge.api.trade_import.dto.FieldDataRequestDTO;
-import com.example.find_my_edge.api.trade_import.dto.ImportedTradeResponseDTO;
+import com.example.find_my_edge.api.trade_import.dto.FieldDataRequestDto;
+import com.example.find_my_edge.api.trade_import.dto.ImportedTradeResponseDto;
 import com.example.find_my_edge.trade_import.entity.ImportedTradeEntity;
 import com.example.find_my_edge.trade_import.service.TradeImportService;
 
@@ -27,13 +27,13 @@ public class TradeImportController extends BaseController {
 
     /* ---------------- GET ALL ---------------- */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ImportedTradeResponseDTO>>> getImportedTrades() {
+    public ResponseEntity<ApiResponse<List<ImportedTradeResponseDto>>> getImportedTrades() {
 
         List<ImportedTradeEntity> all = tradeImportService.getAll();
 
         return buildResponse(
                 all.stream()
-                   .map(importedTradeMapper::toResponseDTO)
+                   .map(importedTradeMapper::toResponse)
                    .toList(),
                 "Imported Trades fetched successfully"
         );
@@ -41,8 +41,8 @@ public class TradeImportController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<ImportedTradeResponseDTO>> createImportedTrades(
-            @RequestBody List<FieldDataRequestDTO> request
+    public ResponseEntity<ApiResponse<ImportedTradeResponseDto>> createImportedTrades(
+            @RequestBody List<FieldDataRequestDto> request
     ) {
 
         ImportedTradeEntity importedTradeEntity =
@@ -50,16 +50,16 @@ public class TradeImportController extends BaseController {
                                                      .map(fieldMapper::toEntity).toList());
 
         return buildResponse(
-                importedTradeMapper.toResponseDTO(importedTradeEntity),
+                importedTradeMapper.toResponse(importedTradeEntity),
                 "Imported Trade added successfully"
         );
     }
 
     /* ---------------- UPDATE ---------------- */
     @PutMapping("/{importId}")
-    public ResponseEntity<ApiResponse<ImportedTradeResponseDTO>> updateImportedTrade(
+    public ResponseEntity<ApiResponse<ImportedTradeResponseDto>> updateImportedTrade(
             @PathVariable Long importId,
-            @RequestBody List<FieldDataRequestDTO> request
+            @RequestBody List<FieldDataRequestDto> request
     ) {
 
         ImportedTradeEntity update = tradeImportService.update(
@@ -68,7 +68,7 @@ public class TradeImportController extends BaseController {
         );
 
         return buildResponse(
-                importedTradeMapper.toResponseDTO(update),
+                importedTradeMapper.toResponse(update),
                 "Imported Trade updated successfully"
         );
     }

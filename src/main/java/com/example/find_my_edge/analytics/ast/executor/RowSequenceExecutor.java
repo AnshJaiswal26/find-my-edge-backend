@@ -5,7 +5,6 @@ import com.example.find_my_edge.analytics.ast.context.SchemaType;
 import com.example.find_my_edge.analytics.ast.enums.ComputationMode;
 import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.common.config.AstConfig;
 import lombok.NonNull;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.springframework.stereotype.Service;
@@ -46,6 +45,7 @@ public class RowSequenceExecutor {
         ctx.setGetTradeCount(getTradeCount);
         ctx.setGetSchemaType(getSchemaType);
 
+        ctx.setEvaluator(evaluator);
 
         boolean isWindow = mode == ComputationMode.WINDOW;
 

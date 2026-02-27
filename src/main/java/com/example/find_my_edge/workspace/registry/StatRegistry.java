@@ -33,15 +33,20 @@ public class StatRegistry {
 
         this.stats = Map.copyOf(tempMap);
         this.statsOrder = Set.copyOf(tempOrder);
-
-        statService.deleteByUserId();
-        statService.createAll(this.stats, new ArrayList<>(this.statsOrder));
     }
 
-    public List<StatConfig> getDefaultStats() {   // call on user signup for default stats
+    public List<StatConfig> getAll() {   // call on user signup for default stats
         return statsOrder.stream()
                          .map(stats::get)
                          .toList();
+    }
+
+    public Map<String, StatConfig> getStatsById() {   // call on user signup for default stats
+        return stats;
+    }
+
+    public List<String> getOrder(){
+        return statsOrder.stream().toList();
     }
 
     private List<StatConfig> buildSystemStats() {

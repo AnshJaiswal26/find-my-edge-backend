@@ -1,9 +1,6 @@
 package com.example.find_my_edge.domain.schema.entity;
 
-import com.example.find_my_edge.domain.schema.enums.ComputeMode;
-import com.example.find_my_edge.domain.schema.enums.FieldType;
-import com.example.find_my_edge.domain.schema.enums.SchemaSource;
-import com.example.find_my_edge.domain.schema.enums.SemanticType;
+import com.example.find_my_edge.domain.schema.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +21,8 @@ public class SchemaEntity {
     private String id;
 
     private String label;
+
+    private Boolean hidden = false;
 
     @Column(nullable = false)
     private String userId;
@@ -59,8 +58,8 @@ public class SchemaEntity {
     @Enumerated(EnumType.STRING)
     private SchemaSource source = SchemaSource.USER;
 
-    /* BEHAVIOR */
-    private Boolean editable = false;
+    @Enumerated(EnumType.STRING)
+    private SchemaRole role = SchemaRole.USER_DEFINED;
 
     private Double initialValue = 0.0;
 
@@ -69,7 +68,7 @@ public class SchemaEntity {
     private String displayJson; // store DisplayDTO as JSON
 
     /* UI */
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "JSON")
     private String colorRulesJson; // store List<ColorRuleDTO> as JSON
 
     @Column(columnDefinition = "TEXT")

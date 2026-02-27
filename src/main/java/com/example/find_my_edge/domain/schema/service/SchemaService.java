@@ -1,5 +1,6 @@
 package com.example.find_my_edge.domain.schema.service;
 
+import com.example.find_my_edge.domain.schema.enums.ViewType;
 import com.example.find_my_edge.domain.schema.model.Schema;
 import com.example.find_my_edge.domain.schema.model.SchemaBundle;
 
@@ -17,6 +18,5 @@ public interface SchemaService {
 
     void delete(String id);
 
-    List<String> updateOrder(List<String> order);
-
+    List<String> updateOrder(List<String> order, ViewType viewType);
 }

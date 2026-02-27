@@ -12,6 +12,7 @@ import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
 import com.example.find_my_edge.analytics.ast.util.DependencyResolver;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.domain.schema.enums.ComputeMode;
+import com.example.find_my_edge.domain.schema.enums.SchemaSource;
 import com.example.find_my_edge.domain.schema.enums.SemanticType;
 import com.example.find_my_edge.domain.schema.model.Schema;
 import com.example.find_my_edge.domain.schema.model.SchemaBundle;
@@ -59,14 +60,16 @@ public class ComputeServiceImpl implements ComputeService {
         for (Trade trade : trades) {
             Map<String, Double> ctx = new HashMap<>();
 
+
             trade.getValues()
                  .forEach((k, v) -> {
                      Schema schema = schemasById.get(k);
-                     if (schema == null ||
-                         schema.getSemanticType() != SemanticType.NUMBER) return;
+                     System.out.println(schema);
 
+                     if (schema == null) return;
+
+                     System.out.println("k: " + k + "v: " + v);
                      if (v != null) {
-
                          if (v instanceof Number n)
                              ctx.put(k, n.doubleValue());
 

@@ -16,7 +16,7 @@ public class LayoutRegistry {
         layouts.put("bar", barLayout());
         layouts.put("line", lineLayout());
         layouts.put("pie", pieLayout());
-        layouts.put("group", radialBarLayout());
+        layouts.put("radialBar", radialBarLayout());
 
     }
 
@@ -57,7 +57,7 @@ public class LayoutRegistry {
     }
 
     private Map<String, Object> pieLayout() {
-        Map<String, Object> layout = new HashMap<>(cartesianLayout());
+        Map<String, Object> layout = new HashMap<>(groupLayout());
 
         layout.put("title", "Pie Chart");
         layout.put("donutSize", 70);
@@ -69,7 +69,7 @@ public class LayoutRegistry {
     }
 
     private Map<String, Object> radialBarLayout() {
-        Map<String, Object> layout = new HashMap<>(cartesianLayout());
+        Map<String, Object> layout = new HashMap<>(groupLayout());
 
         layout.put("title", "RadialBar Chart");
         layout.put("hollowSize", 50);

@@ -5,7 +5,7 @@ import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.integrations.sheets.exception.SheetFetchException;
 import com.example.find_my_edge.integrations.sheets.builder.SheetRequestBuilder;
 import com.example.find_my_edge.integrations.sheets.dto.SheetPayload;
-import com.example.find_my_edge.integrations.sheets.dto.SheetRequest;
+import com.example.find_my_edge.integrations.sheets.dto.SheetRequestDto;
 import com.example.find_my_edge.integrations.sheets.utils.SheetUtil;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.sheets.v4.Sheets;
@@ -63,7 +63,7 @@ public class GoogleSheetService {
                                                             .size();
     }
 
-    private int appendToSheet(String spreadsheetId, SheetRequest request) throws IOException {
+    private int appendToSheet(String spreadsheetId, SheetRequestDto request) throws IOException {
 
         String sheetName = request.getSheetName();
         Integer sheetId = request.getSheetId();
@@ -89,7 +89,7 @@ public class GoogleSheetService {
     }
 
 
-    private void handleAutosave(String spreadsheetId, SheetRequest request) {
+    private void handleAutosave(String spreadsheetId, SheetRequestDto request) {
         String syncId = request.getSyncId();
 
         try {
@@ -135,7 +135,7 @@ public class GoogleSheetService {
     }
 
 
-    private ApiResponse<Object> handleManualSave(String spreadsheetId, SheetRequest request) {
+    private ApiResponse<Object> handleManualSave(String spreadsheetId, SheetRequestDto request) {
         try {
             int rowIndex = appendToSheet(spreadsheetId, request);
 
@@ -158,7 +158,7 @@ public class GoogleSheetService {
     }
 
 
-    public ResponseEntity<ApiResponse<Object>> appendDataToSheet(String spreadsheetId, SheetRequest request) {
+    public ResponseEntity<ApiResponse<Object>> appendDataToSheet(String spreadsheetId, SheetRequestDto request) {
 
         if (Boolean.TRUE.equals(request.getAutosave())) {
 
@@ -189,16 +189,17 @@ public class GoogleSheetService {
                                             .get(spreadSheetId)
                                             .execute();
 
-            List<SheetDetailsResponse> sheetDetails = spreadsheet.getSheets()
-                                                                 .stream()
-                                                                 .map(s -> {
-                                                                     SheetProperties properties = s.getProperties();
-                                                                     return new SheetDetailsResponse(
-                                                                             properties.getTitle(),
-                                                                             properties.getSheetId()
-                                                                     );
-                                                                 })
-                                                                 .toList();
+            List<SheetDetailsResponse> sheetDetails =
+                    spreadsheet.getSheets()
+                               .stream()
+                               .map(s -> {
+                                   SheetProperties properties = s.getProperties();
+                                   return new SheetDetailsResponse(
+                                           properties.getTitle(),
+                                           properties.getSheetId()
+                                   );
+                               })
+                               .toList();
 
             return ResponseEntity.ok(ApiResponse.builder()
                                                 .state(ResponseState.SUCCESS)

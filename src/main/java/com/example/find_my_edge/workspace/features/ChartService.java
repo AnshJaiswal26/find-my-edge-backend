@@ -17,10 +17,7 @@ public interface ChartService {
 
     void delete(String page, String chartId);
 
-    Map<String, Object> updateLayout(String page, String chartId, Object layout);
+    Map<String, Object> updateLayout(String page, String chartId, Map<String, Object> layout);
 
     List<SeriesConfig> updateSeriesConfig(String page, String chartId, List<SeriesConfig> seriesConfig);
-
-    List<String> updateOrder(String page, List<String> order);
-
 }

@@ -15,7 +15,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SchemaResponseDTOBundle {
-    private List<SchemaResponseDTO> schemas = new ArrayList<>();
-    private Map<String, SchemaResponseDTO> schemasById = new HashMap<>();
+    private List<SchemaResponseDto> schemas = new ArrayList<>();
+    private Map<String, SchemaResponseDto> schemasById = new HashMap<>();
     private List<String> schemasOrder = new ArrayList<>();
 }

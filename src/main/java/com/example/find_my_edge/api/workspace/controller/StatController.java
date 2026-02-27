@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/workspace/{page}/stats")
+@RequestMapping("api/pages/{pageName}/stats")
 @RequiredArgsConstructor
 public class StatController extends BaseController {
 
@@ -21,50 +21,50 @@ public class StatController extends BaseController {
     /* ---------------- CREATE ---------------- */
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> createStat(
-            @PathVariable String page,
+            @PathVariable String pageName,
             @RequestBody StatConfig stat
     ) {
-        StatConfig saved = statService.create(page, stat);
+        StatConfig saved = statService.create(pageName, stat);
         return buildResponse(saved, "Stat created successfully");
     }
 
     /* ---------------- GET ALL ---------------- */
     @GetMapping
     public ResponseEntity<ApiResponse<Object>> getAllStats(
-            @PathVariable String page
+            @PathVariable String pageName
     ) {
-        Object stats = statService.getAll(page);
+        Object stats = statService.getAll(pageName);
         return buildResponse(stats, "Stats fetched successfully");
     }
 
     /* ---------------- UPDATE ---------------- */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> updateStat(
-            @PathVariable String page,
+            @PathVariable String pageName,
             @PathVariable String id,
             @RequestBody StatConfig stat
     ) {
-        StatConfig updated = statService.update(page, id, stat);
+        StatConfig updated = statService.update(pageName, id, stat);
         return buildResponse(updated, "Stat updated successfully");
     }
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> deleteStat(
-            @PathVariable String page,
+            @PathVariable String pageName,
             @PathVariable String id
     ) {
-        statService.delete(page, id);
+        statService.delete(pageName, id);
         return buildResponse(null, "Stat deleted successfully");
     }
 
     /* ---------------- UPDATE ORDER ---------------- */
     @PutMapping("/order")
     public ResponseEntity<ApiResponse<Object>> updateStatsOrder(
-            @PathVariable String page,
+            @PathVariable String pageName,
             @RequestBody List<String> statsOrder
     ) {
-        List<String> updatedOrder = statService.updateOrder(page, statsOrder);
+        List<String> updatedOrder = statService.updateOrder(pageName, statsOrder);
         return buildResponse(updatedOrder, "Stats order updated successfully");
     }
 }

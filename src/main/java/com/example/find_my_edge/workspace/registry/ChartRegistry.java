@@ -2,6 +2,7 @@ package com.example.find_my_edge.workspace.registry;
 
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartMetaConfig;
+import com.example.find_my_edge.workspace.enums.ChartCategory;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -37,6 +38,14 @@ public class ChartRegistry {
                          .toList();
     }
 
+    public Map<String, ChartConfig> getChartsById() {
+        return charts;
+    }
+
+    public List<String> getOrder() {
+        return chartOrder.stream().toList();
+    }
+
     private List<ChartConfig> buildDefaultCharts() {
         return List.of(
                 barChart(),
@@ -52,7 +61,7 @@ public class ChartRegistry {
         config.setMeta(ChartMetaConfig.builder()
                                       .id("chart-1")
                                       .type("bar")
-                                      .category("series")
+                                      .category(ChartCategory.SERIES.key())
                                       .title("Bar Chart")
                                       .build());
 
@@ -69,7 +78,7 @@ public class ChartRegistry {
         config.setMeta(ChartMetaConfig.builder()
                                       .id("chart-2")
                                       .type("line")
-                                      .category("series")
+                                      .category(ChartCategory.SERIES.key())
                                       .title("Line Chart")
                                       .build());
 
@@ -87,7 +96,7 @@ public class ChartRegistry {
         config.setMeta(ChartMetaConfig.builder()
                                       .id("chart-1")
                                       .type("donut")
-                                      .category("group")
+                                      .category(ChartCategory.GROUP.key())
                                       .title("Pie Chart")
                                       .build());
 
@@ -103,12 +112,12 @@ public class ChartRegistry {
 
         config.setMeta(ChartMetaConfig.builder()
                                       .id("chart-1")
-                                      .type("donut")
-                                      .category("group")
-                                      .title("Pie Chart")
+                                      .type("radialBar")
+                                      .category(ChartCategory.GROUP.key())
+                                      .title("RadialBar Chart")
                                       .build());
 
-        Map<String, Object> layout = layoutRegistry.get("pie");
+        Map<String, Object> layout = layoutRegistry.get("radialBar");
 
         config.setLayout(layout);
 

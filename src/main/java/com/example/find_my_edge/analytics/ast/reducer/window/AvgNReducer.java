@@ -1,9 +1,23 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
+import com.example.find_my_edge.analytics.ast.function.ArgType;
+import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"number", "number"},
+        semanticArgs = {
+                @ArgType({"number", "duration"}),
+                @ArgType({"number"})
+        },
+        returnType = "number",
+        semanticReturn = "same",
+        signature = "AVG_N(expr, n)",
+        description = "Rolling average over N rows"
+)
 @Component
 public class AvgNReducer implements Reducer {
 
@@ -22,7 +36,6 @@ public class AvgNReducer implements Reducer {
         }
     }
 
-    // ---------- METADATA ----------
 
     @Override
     public FunctionType getType() {
@@ -30,13 +43,13 @@ public class AvgNReducer implements Reducer {
     }
 
     @Override
-    public String getName() {
-        return "AVG_N";
+    public ExecutionMode getExecutionMode() {
+        return ExecutionMode.AST;
     }
 
     @Override
-    public int getArity() {
-        return 1; // value (n comes from engine/config)
+    public String getName() {
+        return "AVG_N";
     }
 
     // ---------- EXECUTION ----------
@@ -48,7 +61,7 @@ public class AvgNReducer implements Reducer {
     }
 
     @Override
-    public boolean step(Object stateObj, Object[] args) {
+    public Boolean step(Object stateObj, Object[] args) {
         if (stateObj == null || args == null || args.length == 0) return true;
 
         State state = (State) stateObj;

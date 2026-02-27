@@ -8,21 +8,19 @@ import com.example.find_my_edge.workspace.exception.WorkspaceNotFoundException;
 import com.example.find_my_edge.workspace.model.WorkspaceData;
 import com.example.find_my_edge.workspace.repository.WorkspaceRepository;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
 public class WorkspaceServiceImpl implements WorkspaceService {
     private final AuthService authService;
     private final WorkspaceRepository workspaceRepository;
-
-//    @Override
-//    public WorkspaceEntity get() {
-//        String currentUserId = authService.getCurrentUserId();
-//        return workspaceRepository.findByUserId(currentUserId)
-//                                  .orElseThrow(() -> new WorkspaceNotFoundException("Workspace not found for user: " + currentUserId));
-//    }
 
     @Override  // for dev
     public WorkspaceEntity get() {
@@ -43,6 +41,41 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     @Override
+    public WorkspaceEntity getAndModify(Consumer<Map<String, PageConfig>> updater) {
+
+        WorkspaceEntity workspace = get();
+
+        WorkspaceData data = ensureData(workspace);
+
+        Map<String, PageConfig> pages = ensurePages(data);
+
+        updater.accept(pages);
+
+        return workspaceRepository.save(workspace);
+    }
+
+    @Override
+    public void getPageAndModify(Consumer<PageConfig> updater, String page) {
+
+        WorkspaceEntity workspace = get();
+
+        WorkspaceData data = ensureData(workspace);
+
+        Map<String, PageConfig> pages = ensurePages(data);
+
+        PageConfig pageConfig = pages.get(page);
+
+        if (pageConfig == null) {
+            throw new PageNotFoundException(page);
+        }
+
+        updater.accept(pageConfig);
+
+        workspaceRepository.save(workspace);
+
+    }
+
+    @Override
     public WorkspaceEntity save(WorkspaceEntity workspaceEntity) {
         return workspaceRepository.save(workspaceEntity);
     }
@@ -58,15 +91,39 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
         WorkspaceData data = workspaceEntity.getData();
         if (data == null || data.getPages() == null) {
-            throw new WorkspaceNotFoundException("Workspace has no pages");
+            throw new WorkspaceNotFoundException();
         }
 
         PageConfig pageConfig = data.getPages().get(page);
         if (pageConfig == null) {
-            throw new PageNotFoundException("Page not found: " + page);
+            throw new PageNotFoundException(page);
         }
 
         return pageConfig;
     }
 
+    @Override
+    @Transactional
+    public void delete() {
+        String currentUserId = authService.getCurrentUserId();
+        workspaceRepository.deleteByUserId(currentUserId);
+    }
+
+    private WorkspaceData ensureData(WorkspaceEntity workspace) {
+
+        if (workspace.getData() == null) {
+            workspace.setData(new WorkspaceData());
+        }
+
+        return workspace.getData();
+    }
+
+    private Map<String, PageConfig> ensurePages(WorkspaceData data) {
+
+        if (data.getPages() == null) {
+            data.setPages(new HashMap<>());
+        }
+
+        return data.getPages();
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.find_my_edge.analytics.ast.context;
 
+import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
 import lombok.*;
 
 import java.util.function.BiFunction;
@@ -22,6 +23,8 @@ public class DefaultEvaluationContext implements EvaluationContext {
     private int windowStartIndex = 0;
 
     private Object prevValue = null;
+
+    private AstEvaluator evaluator;
 
     // ---------- interface methods ----------
 
