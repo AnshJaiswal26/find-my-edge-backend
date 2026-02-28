@@ -1,8 +1,9 @@
-package com.example.find_my_edge.analytics.ast.reducer.context;
+package com.example.find_my_edge.analytics.ast.reducer.context.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -11,23 +12,23 @@ import org.springframework.stereotype.Component;
         semanticArgs = {},
         returnType = "number",
         semanticReturn = "number",
-        signature = "LOSS_FACTOR()",
-        description = "Gross loss divided by gross profit"
+        signature = "LOSS_RATE()",
+        description = "Losing trades divided by total trades",
+        modes = {FunctionMode.AGGREGATE}
 )
 @Component
-public class LossFactorReducer implements Reducer {
+public class LossRateReducer implements Reducer {
 
     // ---------- STATE ----------
     private static class State {
-        double grossProfit;
-        double grossLoss; // negative values
+        int total;
+        int losses;
 
         State() {
-            this.grossProfit = 0.0;
-            this.grossLoss = 0.0;
+            this.total = 0;
+            this.losses = 0;
         }
     }
-
 
 
     @Override
@@ -42,20 +43,18 @@ public class LossFactorReducer implements Reducer {
 
     @Override
     public String getName() {
-        return "LOSS_FACTOR";
+        return "LOSS_RATE";
     }
 
-
-
     @Override
-    public String getKey() {
+    public String getField() {
         return "pnl"; // 👈 engine injects pnl
     }
 
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State(); // n not used
     }
 
@@ -71,10 +70,10 @@ public class LossFactorReducer implements Reducer {
 
         double pnl = ((Number) pnlObj).doubleValue();
 
-        if (pnl > 0) {
-            state.grossProfit += pnl;
-        } else if (pnl < 0) {
-            state.grossLoss += pnl; // keep negative
+        state.total++;
+
+        if (pnl < 0) {
+            state.losses++;
         }
 
         return true; // process all rows
@@ -86,12 +85,8 @@ public class LossFactorReducer implements Reducer {
 
         State state = (State) stateObj;
 
-        double lossAbs = Math.abs(state.grossLoss);
-
-        if (state.grossProfit == 0.0) {
-            return null; // avoid divide by zero
-        }
-
-        return lossAbs / state.grossProfit;
+        return state.total > 0
+               ? ((double) state.losses / state.total) * 100.0
+               : null;
     }
 }

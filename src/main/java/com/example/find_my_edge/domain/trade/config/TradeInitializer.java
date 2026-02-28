@@ -95,8 +95,6 @@ public class TradeInitializer {
                 trade.getValues().put("entry", entry);
                 trade.getValues().put("exit", exit);
 
-                trade.getValues().put("risk", RISK_PER_TRADE);
-
                 trades.add(trade);
             }
         }

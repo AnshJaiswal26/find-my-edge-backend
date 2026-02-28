@@ -12,7 +12,7 @@ public enum SemanticType {
     }
 
     @JsonCreator
-    public static ComputeMode fromJson(String value) {
-        return ComputeMode.valueOf(value.toUpperCase());
+    public static SemanticType fromJson(String value) {
+        return SemanticType.valueOf(value.toUpperCase());
     }
 }

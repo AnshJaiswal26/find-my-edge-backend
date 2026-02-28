@@ -1,4 +1,4 @@
-package com.example.find_my_edge.analytics.ast.function;
+package com.example.find_my_edge.analytics.ast.function.enums;
 
 public enum FunctionType {
     PURE,        // ABS, IF, ROUND (no loop)

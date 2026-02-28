@@ -11,7 +11,6 @@ import java.util.List;
 @Component("WINDOW")
 public class WindowReducerRunner implements ReducerRunnerStrategy {
 
-
     @Override
     public Object run(Reducer reducer, AstNode fn, EvaluationContext ctx, AstEvaluator evaluator) {
 

@@ -1,5 +1,6 @@
 package com.example.find_my_edge.common.config;
 
+import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AstConfig {
 
-    private String type;   // "binary"| "key" | "constant" | "function"
+    private NodeType type;   // "binary"| "key" | "constant" | "function"
 
     // for binary
     private String op;     // "+", "-", "*", "/"
@@ -22,10 +23,10 @@ public class AstConfig {
     private AstConfig right;
 
     // for key
-    private String key;
+    private String field;
 
     // for constant
-    private Double value;
+    private Object value;
     private String valueType; // "string" | "number"
 
     // for function

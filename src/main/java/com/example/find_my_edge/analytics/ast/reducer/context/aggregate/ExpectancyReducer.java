@@ -1,8 +1,9 @@
-package com.example.find_my_edge.analytics.ast.reducer.context;
+package com.example.find_my_edge.analytics.ast.reducer.context.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Component;
         returnType = "number",
         semanticReturn = "number",
         signature = "EXPECTANCY()",
-        description = "Expected profit per trade (win rate × avg win − loss rate × avg loss)"
+        description = "Expected profit per trade (win rate × avg win − loss rate × avg loss)",
+        modes={FunctionMode.AGGREGATE}
 )
 @Component
 public class ExpectancyReducer implements Reducer {
@@ -49,15 +51,15 @@ public class ExpectancyReducer implements Reducer {
     }
 
     @Override
-    public String getKey() {
+    public String getField() {
         return "pnl"; // 👈 engine injects pnl
     }
 
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
-        return new State(); // n not used
+    public Object init() {
+        return new State();
     }
 
     @Override

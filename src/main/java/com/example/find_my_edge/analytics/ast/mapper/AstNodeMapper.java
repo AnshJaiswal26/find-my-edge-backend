@@ -1,5 +1,6 @@
 package com.example.find_my_edge.analytics.ast.mapper;
 
+import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.common.config.AstConfig;
@@ -12,9 +13,9 @@ public class AstNodeMapper {
     public static AstNode toNode(AstConfig config) {
         if (config == null) return null;
 
-        AstNode.NodeType type;
+        NodeType type;
         try {
-            type = AstNode.NodeType.valueOf(config.getType().toUpperCase());
+            type = config.getType();
         } catch (Exception e) {
             throw new AstParseException(
                     "[AstNode Type Error]",
@@ -30,7 +31,7 @@ public class AstNodeMapper {
                       .left(toNode(config.getLeft()))
                       .right(toNode(config.getRight()))
 
-                      .key(config.getKey())
+                      .field(config.getField())
 
                       .value(config.getValue())
                       .valueType(config.getValueType())

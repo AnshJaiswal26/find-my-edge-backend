@@ -16,4 +16,6 @@ public interface EvaluationContext {
 
     Object getTradeValue(int index, String key);
 
+    Object getPrevValue();
+
 }

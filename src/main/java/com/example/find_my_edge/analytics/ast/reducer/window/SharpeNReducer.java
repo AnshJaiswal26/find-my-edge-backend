@@ -1,9 +1,10 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
-import com.example.find_my_edge.analytics.ast.function.ArgType;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component;
         returnType = "number",
         semanticReturn = "number",
         signature = "SHARPE_N(expr, n)",
-        description = "Sharpe ratio over last N rows (risk-free = 0)"
+        description = "Sharpe ratio over last N rows (risk-free = 0)",
+        modes = {FunctionMode.WINDOW}
 )
 @Component
 public class SharpeNReducer implements Reducer {

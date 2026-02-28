@@ -1,9 +1,10 @@
 package com.example.find_my_edge.analytics.ast.reducer.window;
 
-import com.example.find_my_edge.analytics.ast.function.ArgType;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Component;
         returnType = "number",
         semanticReturn = "number",
         signature = "MAX_DRAWDOWN_N(expr, n)",
-        description = "Maximum drawdown over last N rows"
+        description = "Maximum drawdown over last N rows",
+        modes = {FunctionMode.WINDOW}
 )
 @Component
 public class MaxDrawdownNReducer implements Reducer {

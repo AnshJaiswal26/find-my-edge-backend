@@ -1,9 +1,10 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ArgType;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
         returnType = "number",
         semanticReturn = "same",
         signature = "AVG(expr)",
-        description = "Average (mean) of values"
+        description = "Average (mean) of values",
+        modes={FunctionMode.AGGREGATE}
 )
 @Component
 public class AvgReducer implements Reducer {
@@ -51,7 +53,7 @@ public class AvgReducer implements Reducer {
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         // n not used for global aggregate
         return new State();
     }

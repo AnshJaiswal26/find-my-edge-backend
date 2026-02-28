@@ -3,6 +3,8 @@ package com.example.find_my_edge.analytics.ast.function;
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
 import com.example.find_my_edge.analytics.ast.exception.AstFunctionException;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import com.example.find_my_edge.analytics.ast.reducer.runner.ReducerRunnerRegistry;
@@ -18,17 +20,16 @@ public class FunctionHandler {
 
     public Object handle(AstNode ast, EvaluationContext ctx, AstEvaluator evaluator) {
 
-        Reducer fn = registry.get(ast.getFn());
+        FunctionDefinition fnDef = registry.get(ast.getFn());
+
+        Reducer fn = fnDef.getReducer();
 
         if (fn == null) {
             throw new AstFunctionException("No function registered for: " + ast.getFn());
         }
 
         if (fn.getType() == FunctionType.PURE) {
-            if (fn.getExecutor() == null) {
-                throw new AstFunctionException("No Executor found for: " + ast.getFn());
-            }
-            return fn.getExecutor().apply(ast, ctx);
+            return fn.execute(ast, ctx, evaluator);
         }
 
         String runnerKey;

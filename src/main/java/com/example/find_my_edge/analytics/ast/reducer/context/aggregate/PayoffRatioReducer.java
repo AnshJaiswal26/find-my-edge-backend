@@ -1,8 +1,9 @@
-package com.example.find_my_edge.analytics.ast.reducer.context;
+package com.example.find_my_edge.analytics.ast.reducer.context.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -11,22 +12,29 @@ import org.springframework.stereotype.Component;
         semanticArgs = {},
         returnType = "number",
         semanticReturn = "number",
-        signature = "PROFIT_FACTOR()",
-        description = "Gross profit divided by gross loss"
+        signature = "PAYOFF_RATIO()",
+        description = "Average win divided by average loss",
+        modes={FunctionMode.AGGREGATE}
 )
 @Component
-public class ProfitFactorReducer implements Reducer {
+public class PayoffRatioReducer implements Reducer {
 
     // ---------- STATE ----------
     private static class State {
-        double grossProfit;
-        double grossLoss; // negative values
+        double winSum;
+        int winCount;
+
+        double lossSum; // negative
+        int lossCount;
 
         State() {
-            this.grossProfit = 0.0;
-            this.grossLoss = 0.0;
+            this.winSum = 0.0;
+            this.winCount = 0;
+            this.lossSum = 0.0;
+            this.lossCount = 0;
         }
     }
+
 
     @Override
     public FunctionType getType() {
@@ -40,18 +48,19 @@ public class ProfitFactorReducer implements Reducer {
 
     @Override
     public String getName() {
-        return "PROFIT_FACTOR";
+        return "PAYOFF_RATIO";
     }
 
+
     @Override
-    public String getKey() {
+    public String getField() {
         return "pnl"; // 👈 engine injects pnl
     }
 
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State(); // n not used
     }
 
@@ -62,15 +71,16 @@ public class ProfitFactorReducer implements Reducer {
         State state = (State) stateObj;
 
         Object pnlObj = args[0];
-
         if (pnlObj == null) return true;
 
         double pnl = ((Number) pnlObj).doubleValue();
 
         if (pnl > 0) {
-            state.grossProfit += pnl;
+            state.winSum += pnl;
+            state.winCount++;
         } else if (pnl < 0) {
-            state.grossLoss += pnl; // keep negative
+            state.lossSum += pnl; // keep negative
+            state.lossCount++;
         }
 
         return true; // process all rows
@@ -82,8 +92,15 @@ public class ProfitFactorReducer implements Reducer {
 
         State state = (State) stateObj;
 
-        return state.grossLoss == 0.0
+        if (state.winCount == 0 || state.lossCount == 0) {
+            return null;
+        }
+
+        double avgWin = state.winSum / state.winCount;
+        double avgLoss = Math.abs(state.lossSum / state.lossCount);
+
+        return avgLoss == 0.0
                ? null
-               : state.grossProfit / Math.abs(state.grossLoss);
+               : avgWin / avgLoss;
     }
 }

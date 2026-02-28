@@ -1,8 +1,10 @@
 package com.example.find_my_edge.analytics.ast.parser;
 
+import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.exception.AstParseException;
+import com.example.find_my_edge.analytics.ast.function.FunctionDefinition;
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
@@ -30,30 +32,34 @@ public class AstBuilder {
             if (t.getType() == Tokenizer.Token.Type.FUNCTION) {
 
                 String name = t.getValue().toUpperCase();
-                Reducer fnDef = functionRegistry.get(name);
+                FunctionDefinition fnDef = functionRegistry.get(name);
 
                 if (fnDef == null) {
                     throw error("Unknown function: " + name);
                 }
 
-                int arity = t.getArgCount();
+                int actualArgs = t.getArgCount();
+                int expectedArgs = fnDef.getMeta().argTypes().length;
 
-                if (arity < 0) {
-                    throw error("Invalid function arity: " + name);
+                if (actualArgs != expectedArgs) {
+                    throw error(
+                            "Function " + name + " expects " + expectedArgs +
+                            " argument(s) but got " + actualArgs
+                    );
                 }
 
-                if (stack.size() < arity) {
-                    throw error("Function " + name + " expects " + arity + " arguments");
+                if (stack.size() < actualArgs) {
+                    throw error("Function " + name + " expects " + actualArgs + " arguments");
                 }
 
                 List<AstNode> args = new ArrayList<>();
 
-                for (int i = 0; i < arity; i++) {
+                for (int i = 0; i < actualArgs; i++) {
                     args.addFirst(stack.pop()); // reverse order
                 }
 
                 // 🚫 Prevent nested window
-                if (isWindowFunction(fnDef)) {
+                if (isWindowFunction(fnDef.getReducer())) {
                     for (AstNode arg : args) {
                         if (containsWindowFunction(arg)) {
                             throw error("Nested window functions not allowed in " + name);
@@ -62,7 +68,7 @@ public class AstBuilder {
                 }
 
                 AstNode node = AstNode.builder()
-                                      .type(AstNode.NodeType.FUNCTION)
+                                      .type(NodeType.FUNCTION)
                                       .fn(name)
                                       .args(args)
                                       .build();
@@ -82,8 +88,8 @@ public class AstBuilder {
                 dependencies.add(key);
 
                 AstNode node = AstNode.builder()
-                                      .type(AstNode.NodeType.KEY)
-                                      .key(key)
+                                      .type(NodeType.IDENTIFIER)
+                                      .field(key)
                                       .build();
 
                 stack.push(node);
@@ -94,10 +100,9 @@ public class AstBuilder {
             if (t.getType() == Tokenizer.Token.Type.STRING) {
 
                 AstNode node = AstNode.builder()
-                                      .type(AstNode.NodeType.CONSTANT)
+                                      .type(NodeType.CONSTANT)
                                       .valueType("string")
-                                      .value(null) // string stored separately if needed
-                                      .key(t.getValue()) // optional: or add separate string field later
+                                      .value(t.getValue()) // string stored separately if needed
                                       .build();
 
                 stack.push(node);
@@ -108,7 +113,7 @@ public class AstBuilder {
             if (t.getType() == Tokenizer.Token.Type.NUMBER) {
 
                 AstNode node = AstNode.builder()
-                                      .type(AstNode.NodeType.CONSTANT)
+                                      .type(NodeType.CONSTANT)
                                       .valueType("number")
                                       .value(Double.valueOf(t.getValue()))
                                       .build();
@@ -131,7 +136,7 @@ public class AstBuilder {
                     AstNode arg = stack.pop();
 
                     AstNode node = AstNode.builder()
-                                          .type(AstNode.NodeType.UNARY)
+                                          .type(NodeType.UNARY)
                                           .op("-")
                                           .arg(arg)
                                           .build();
@@ -149,7 +154,7 @@ public class AstBuilder {
                 AstNode left = stack.pop();
 
                 AstNode node = AstNode.builder()
-                                      .type(AstNode.NodeType.BINARY)
+                                      .type(NodeType.BINARY)
                                       .op(op)
                                       .left(left)
                                       .right(right)
@@ -176,22 +181,22 @@ public class AstBuilder {
 
         if (node == null) return false;
 
-        if (node.getType() == AstNode.NodeType.FUNCTION) {
-            Reducer def = functionRegistry.get(node.getFn());
+        if (node.getType() == NodeType.FUNCTION) {
+            FunctionDefinition def = functionRegistry.get(node.getFn());
 
-            if (def != null && isWindowFunction(def)) return true;
+            if (def != null && isWindowFunction(def.getReducer())) return true;
 
             for (AstNode arg : node.getArgs()) {
                 if (containsWindowFunction(arg)) return true;
             }
         }
 
-        if (node.getType() == AstNode.NodeType.BINARY) {
+        if (node.getType() == NodeType.BINARY) {
             return containsWindowFunction(node.getLeft()) ||
                    containsWindowFunction(node.getRight());
         }
 
-        if (node.getType() == AstNode.NodeType.UNARY) {
+        if (node.getType() == NodeType.UNARY) {
             return containsWindowFunction(node.getArg());
         }
 

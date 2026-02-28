@@ -18,12 +18,12 @@ public class NativeWindowReducerRunner implements ReducerRunnerStrategy {
         List<AstNode> args = fn.getArgs();
         if (args == null || args.isEmpty()) return null;
 
-        // ✅ reducer must define key
-        String key = reducer.getKey();
-        if (key == null) {
+        // ✅ reducer must define field
+        String field = reducer.getField();
+        if (field == null) {
             throw new AstExecutionException(
                     "[Native Window Execution Error]",
-                    "key not found in reducer '" + reducer.getName() + "'"
+                    "field not found in reducer '" + reducer.getName() + "'"
             );
         }
 
@@ -45,7 +45,7 @@ public class NativeWindowReducerRunner implements ReducerRunnerStrategy {
         for (int i = ctx.getWindowStartIndex(); i >= 0 && count < windowSize; i--) {
 
             // 🚀 no AST eval — direct access
-            Object value = ctx.getTradeValue(i, key);
+            Object value = ctx.getTradeValue(i, field);
 
             boolean cont = reducer.step(state, new Object[]{value});
 

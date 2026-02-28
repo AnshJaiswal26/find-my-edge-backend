@@ -1,10 +1,21 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {},
+        semanticArgs = {},
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "COUNT_ALL()",
+        description = "Total number of records",
+        modes = {FunctionMode.AGGREGATE}
+)
 @Component
 public class CountAllReducer implements Reducer {
 
@@ -32,7 +43,7 @@ public class CountAllReducer implements Reducer {
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State();
     }
 

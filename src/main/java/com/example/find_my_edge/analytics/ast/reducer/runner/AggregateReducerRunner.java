@@ -3,26 +3,28 @@ package com.example.find_my_edge.analytics.ast.reducer.runner;
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
 import com.example.find_my_edge.analytics.ast.exception.AstExecutionException;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component("AGGREGATE")
 public class AggregateReducerRunner implements ReducerRunnerStrategy {
 
     @Override
-    public Object run(Reducer reducer, AstNode fn, EvaluationContext ctx, AstEvaluator evaluator) {
+    public Object run(Reducer reducer, AstNode node, EvaluationContext ctx, AstEvaluator evaluator) {
 
-        List<AstNode> args = fn.getArgs();
+        List<AstNode> args = node.getArgs();
 
-        Object state = reducer.init(args != null ? args.size() : 0);
+        Object state = reducer.init();
 
-        if (state == null){
+        if (state == null) {
             throw new AstExecutionException(
                     "[Aggregation Execution Error]",
-                    "Reducer returned null state for: " + fn.getFn()
+                    "Reducer returned null state for: " + node.getFn()
             );
         }
 
@@ -54,6 +56,7 @@ public class AggregateReducerRunner implements ReducerRunnerStrategy {
 
         ctx.setTradeIndex(originalIndex); // ✅ restore context
 
+//        System.out.println(reducer.result(state));
         return reducer.result(state);
     }
 }

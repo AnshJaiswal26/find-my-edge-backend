@@ -12,7 +12,7 @@ public enum SchemaSource {
     }
 
     @JsonCreator
-    public static ComputeMode fromJson(String value) {
-        return ComputeMode.valueOf(value.toUpperCase());
+    public static SchemaSource fromJson(String value) {
+        return SchemaSource.valueOf(value.toUpperCase());
     }
 }

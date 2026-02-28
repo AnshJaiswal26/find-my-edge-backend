@@ -28,6 +28,7 @@ public class WorkspaceRegistry {
         workspaceService.delete();
         WorkspaceEntity workspaceEntity = workspaceService.get();
         workspaceEntity.setData(createDefaultWorkspace());
+        workspaceService.save(workspaceEntity);
     }
 
     public WorkspaceData createDefaultWorkspace() {
@@ -48,7 +49,7 @@ public class WorkspaceRegistry {
         PageConfig page = new PageConfig();
 
         // default charts
-        page.setCharts(chartRegistry.getChartsById());
+        page.setCharts(chartRegistry.getCharts());
         page.setChartOrder(chartRegistry.getOrder());
 
         // default stats

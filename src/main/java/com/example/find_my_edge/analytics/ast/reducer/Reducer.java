@@ -1,21 +1,18 @@
 package com.example.find_my_edge.analytics.ast.reducer;
 
-
 import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.evaluator.AstEvaluator;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 
-import java.util.function.BiFunction;
-
 public interface Reducer {
-
 
     FunctionType getType();
 
     ExecutionMode getExecutionMode();
 
-    default String getKey() {
+    default String getField() {
         return null;
     }
 
@@ -38,8 +35,8 @@ public interface Reducer {
         return null;
     }
 
-    // ---------- PURE FUNCTION ----------
-    default BiFunction<AstNode, EvaluationContext, Object> getExecutor() {
-        return null;
+    // ---------- PURE ----------
+    default Object execute(AstNode fn, EvaluationContext ctx, AstEvaluator evaluator) {
+        throw new UnsupportedOperationException("Not a PURE function");
     }
 }

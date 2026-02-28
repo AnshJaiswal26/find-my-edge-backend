@@ -13,16 +13,16 @@ public class NativeAggregateReducerRunner implements ReducerRunnerStrategy {
     @Override
     public Object run(Reducer reducer, AstNode fn, EvaluationContext ctx, AstEvaluator evaluator) {
 
-        // ✅ reducer must define key
-        String key = reducer.getKey();
-        if (key == null) {
+        // ✅ reducer must define field
+        String field = reducer.getField();
+        if (field == null) {
             throw new AstExecutionException(
                     "[Native Aggregation Execution Error]",
-                    "key not found in reducer '" + reducer.getName() + "'"
+                    "field not found in reducer '" + reducer.getName() + "'"
             );
         }
 
-        Object state = reducer.init(1); // or 0 depending on your reducer design
+        Object state = reducer.init(); // or 0 depending on your reducer design
         if (state == null) return null;
 
         Integer total = ctx.getTradeCount();
@@ -31,7 +31,7 @@ public class NativeAggregateReducerRunner implements ReducerRunnerStrategy {
         for (int i = 0; i < total; i++) {
 
             // direct value access (no AST evaluation)
-            Object value = ctx.getTradeValue(i, key);
+            Object value = ctx.getTradeValue(i, field);
 
             if (value == null) continue;
 

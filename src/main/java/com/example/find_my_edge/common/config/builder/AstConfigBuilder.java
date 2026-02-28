@@ -1,6 +1,6 @@
 package com.example.find_my_edge.common.config.builder;
 
-
+import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.common.config.AstConfig;
 
 import java.util.Arrays;
@@ -10,35 +10,44 @@ public class AstConfigBuilder {
     private AstConfigBuilder() {
     }
 
-    public static AstConfig key(String key) {
+    public static AstConfig field(String field) {
         return AstConfig.builder()
-                     .type("key")
-                     .key(key)
-                     .build();
+                        .type(NodeType.IDENTIFIER)
+                        .field(field)
+                        .build();
     }
 
     public static AstConfig constant(Double value) {
         return AstConfig.builder()
-                     .type("constant")
-                     .value(value)
-                     .build();
+                        .type(NodeType.CONSTANT)
+                        .value(value)
+                        .valueType("number")
+                        .build();
+    }
+
+    public static AstConfig constant(String value) {
+        return AstConfig.builder()
+                        .type(NodeType.CONSTANT)
+                        .value(value)
+                        .valueType("string")
+                        .build();
     }
 
     public static AstConfig binary(AstConfig left, String op, AstConfig right) {
         return AstConfig.builder()
-                     .type("binary")
-                     .op(op)
-                     .left(left)
-                     .right(right)
-                     .build();
+                        .type(NodeType.BINARY)
+                        .op(op)
+                        .left(left)
+                        .right(right)
+                        .build();
     }
 
     public static AstConfig function(String fn, List<AstConfig> args) {
         return AstConfig.builder()
-                     .type("function")
-                     .fn(fn)
-                     .args(args)
-                     .build();
+                        .type(NodeType.FUNCTION)
+                        .fn(fn)
+                        .args(args)
+                        .build();
     }
 
     public static AstConfig function(String fn, AstConfig... args) {

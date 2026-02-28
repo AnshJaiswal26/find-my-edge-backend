@@ -227,7 +227,7 @@ public class Tokenizer {
             String expr,
             int i) {
 
-        if (buf.length() == 0) return prevToken;
+        if (buf.isEmpty()) return prevToken;
 
         String value = buf.toString();
         String upper = value.toUpperCase();
@@ -254,7 +254,7 @@ public class Tokenizer {
         return t;
     }
 
-    private RuntimeException error(String msg) {
+    private AstParseException error(String msg) {
         return new AstParseException("[Tokenizer Error]", msg);
     }
 

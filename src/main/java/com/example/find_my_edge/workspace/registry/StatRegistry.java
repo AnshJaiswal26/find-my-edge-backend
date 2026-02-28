@@ -45,8 +45,12 @@ public class StatRegistry {
         return stats;
     }
 
-    public List<String> getOrder(){
+    public List<String> getOrder() {
         return statsOrder.stream().toList();
+    }
+
+    public boolean has(String statId) {
+        return statsOrder.contains(statId);
     }
 
     private List<StatConfig> buildSystemStats() {
@@ -65,7 +69,8 @@ public class StatRegistry {
                          .id("stat-1")
                          .title("PnL")
                          .type("number")
-                         .ast(function("SUM", key("pnl")))
+                         .ast(function("SUM", field("pnl")))
+                         .formula("SUM(pnl)")
                          .format("COMPACT_CURRENCY_SIGNED")
                          .colorRules(List.of(
                                  colorRule("greaterThan", 0.0, "var(--success)"),
@@ -79,7 +84,8 @@ public class StatRegistry {
                          .id("stat-2")
                          .title("Avg Risk/Reward")
                          .type("number")
-                         .ast(function("AVG", key("riskReward")))
+                         .formula("AVG(riskReward)")
+                         .ast(function("AVG", field("riskReward")))
                          .format("RATIO")
                          .colorRules(new ArrayList<>())
                          .build();
@@ -90,7 +96,8 @@ public class StatRegistry {
                          .id("stat-3")
                          .title("Avg Holding Time")
                          .type("duration")
-                         .ast(function("AVG", key("duration")))
+                         .formula("AVG(duration)")
+                         .ast(function("AVG", field("duration")))
                          .format("HH:mm:ss")
                          .colorRules(new ArrayList<>())
                          .build();
@@ -101,7 +108,8 @@ public class StatRegistry {
                          .id("stat-4")
                          .title("Max Profit")
                          .type("number")
-                         .ast(function("MAX", key("pnl")))
+                         .formula("MAX(pnl)")
+                         .ast(function("MAX", field("pnl")))
                          .format("CURRENCY_SIGNED")
                          .colorRules(new ArrayList<>())
                          .build();
@@ -112,7 +120,8 @@ public class StatRegistry {
                          .id("stat-5")
                          .title("Max Loss")
                          .type("number")
-                         .ast(function("MIN", key("pnl")))
+                         .formula("MIN(pnl)")
+                         .ast(function("MIN", field("pnl")))
                          .format("CURRENCY_SIGNED")
                          .colorRules(new ArrayList<>())
                          .build();
@@ -123,6 +132,7 @@ public class StatRegistry {
                          .id("stat-6")
                          .title("Win Rate")
                          .type("number")
+                         .formula("WIN_RATE()")
                          .ast(function("WIN_RATE"))
                          .format("PERCENT")
                          .colorRules(new ArrayList<>())

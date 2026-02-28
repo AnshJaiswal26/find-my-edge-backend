@@ -1,23 +1,24 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ArgType;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
 
 @FunctionMeta(
-        argTypes = {"number", "number"},
+        argTypes = {"number"},
         semanticArgs = {
-                @ArgType({"number", "duration"}),
-                @ArgType({"number"})
+                @ArgType({"number", "duration"})
         },
         returnType = "number",
         semanticReturn = "same",
-        signature = "SUM_N(expr, n)",
-        description = "Rolling sum over N rows"
+        signature = "SUM_NEGATIVE(expr)",
+        description = "Sum of values less than 0",
+        modes = {FunctionMode.AGGREGATE}
 )
 @Component
 public class SumNegativeReducer implements Reducer {
@@ -47,7 +48,7 @@ public class SumNegativeReducer implements Reducer {
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State();
     }
 

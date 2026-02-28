@@ -17,8 +17,9 @@ public class StatConfig {
     private String id;
     private String title;
     private String type;
+    private String formula;
     private AstConfig ast;
     private String format;
-    long value;
+    Double value;
     List<ColorRuleConfig> colorRules;
 }

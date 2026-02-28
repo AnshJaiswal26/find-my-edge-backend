@@ -1,9 +1,10 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ArgType;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Component;
         returnType = "number",
         semanticReturn = "same",
         signature = "AVG_IF(expr, condition)",
-        description = "Average of expr where condition is true"
+        description = "Average of expr where condition is true",
+        modes={FunctionMode.AGGREGATE}
 )
 @Component
 public class AvgIfReducer implements Reducer {
@@ -51,7 +53,7 @@ public class AvgIfReducer implements Reducer {
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State(); // n not used
     }
 
@@ -64,7 +66,7 @@ public class AvgIfReducer implements Reducer {
         Object valueObj = args[0];
         Object condObj = args[1];
 
-        if (valueObj != null && condObj != null && (Boolean) condObj) {
+        if (valueObj != null && condObj != null && Boolean.TRUE.equals(condObj)) {
             double value = ((Number) valueObj).doubleValue();
             state.sum += value;
             state.count++;

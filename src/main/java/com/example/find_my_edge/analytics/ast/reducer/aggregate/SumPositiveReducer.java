@@ -1,10 +1,24 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"number"},
+        semanticArgs = {
+                @ArgType({"number", "duration"})
+        },
+        returnType = "number",
+        semanticReturn = "same",
+        signature = "SUM_POSITIVE(expr)",
+        description = "Sum of values greater than 0",
+        modes = {FunctionMode.AGGREGATE}
+)
 @Component
 public class SumPositiveReducer implements Reducer {
 
@@ -33,7 +47,7 @@ public class SumPositiveReducer implements Reducer {
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State();
     }
 

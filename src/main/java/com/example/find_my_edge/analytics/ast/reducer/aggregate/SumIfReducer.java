@@ -1,10 +1,25 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"number", "boolean"},
+        semanticArgs = {
+                @ArgType({"number", "duration"}),
+                @ArgType({"boolean"})
+        },
+        returnType = "number",
+        semanticReturn = "same",
+        signature = "SUM_IF(expr, condition)",
+        description = "Sum of expr where condition is true",
+        modes = {FunctionMode.AGGREGATE}
+)
 @Component
 public class SumIfReducer implements Reducer {
 
@@ -32,7 +47,7 @@ public class SumIfReducer implements Reducer {
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State();
     }
 
@@ -45,7 +60,7 @@ public class SumIfReducer implements Reducer {
         Object valueObj = args[0];
         Object condObj = args[1];
 
-        if (valueObj instanceof Number && condObj instanceof Boolean && (Boolean) condObj) {
+        if (valueObj instanceof Number && condObj instanceof Boolean && Boolean.TRUE.equals(valueObj)) {
             s.sum += ((Number) valueObj).doubleValue();
         }
 

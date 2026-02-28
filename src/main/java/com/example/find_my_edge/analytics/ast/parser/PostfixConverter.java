@@ -49,12 +49,11 @@ public class PostfixConverter {
             }
 
             /* ---------- VALUE START ---------- */
-            if (isValueStart(t)) {
-                if (ctx != null && ctx.expectingArg) {
-                    ctx.expectingArg = false;
-                    ctx.argCount++;
-                }
+            if (isValueStart(t) && ctx != null && ctx.expectingArg) {
+                ctx.expectingArg = false;
+                ctx.argCount++;
             }
+
 
             /* ---------- VALUES ---------- */
             if (isValue(t)) {
@@ -183,8 +182,8 @@ public class PostfixConverter {
                t.getType() == Token.Type.LPAREN;
     }
 
-    private RuntimeException error(String msg) {
-        return new AstParseException("[Parser Error]",  msg);
+    private AstParseException error(String msg) {
+        return new AstParseException("[Parser Error]", msg);
     }
 
     /* ---------- Function Context ---------- */

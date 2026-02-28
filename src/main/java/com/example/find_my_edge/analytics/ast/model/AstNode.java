@@ -1,5 +1,9 @@
 package com.example.find_my_edge.analytics.ast.model;
 
+import com.example.find_my_edge.analytics.ast.enums.NodeType;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AstNode {
 
-    private NodeType type;   // 👈 enum instead of String
+    private NodeType type;
 
     // for binary
     private String op;       // "+", "-", "*", "/", etc.
@@ -24,24 +28,15 @@ public class AstNode {
     private AstNode arg;
 
     // for key
-    private String key;
+    private String field;
 
     // for constant
-    private Double value;
+    private Object value;
     private String valueType; // "string" | "number"
 
     // for function
     private String fn;
     private List<AstNode> args;
-
-    /* ---------- ENUM ---------- */
-    public enum NodeType {
-        BINARY,
-        UNARY,
-        KEY,
-        CONSTANT,
-        FUNCTION
-    }
 
     /* ---------- Helper Methods (Optional but Recommended) ---------- */
 
@@ -57,11 +52,23 @@ public class AstNode {
         return this.type == NodeType.FUNCTION;
     }
 
-    public boolean isKey() {
-        return this.type == NodeType.KEY;
+    public boolean isField() {
+        return this.type == NodeType.IDENTIFIER;
     }
 
     public boolean isConstant() {
         return this.type == NodeType.CONSTANT;
+    }
+
+    @Override
+    public String toString() {
+        ObjectMapper mapper = new ObjectMapper()
+                .enable(SerializationFeature.INDENT_OUTPUT);
+
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "AstNode{error_serializing=" + e.getMessage() + "}";
+        }
     }
 }

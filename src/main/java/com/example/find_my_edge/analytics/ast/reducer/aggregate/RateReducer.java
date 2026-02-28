@@ -1,9 +1,10 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ArgType;
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
         returnType = "number",
         semanticReturn = "number",
         signature = "RATE(condition)",
-        description = "Percentage of rows where condition is true"
+        description = "Percentage of rows where condition is true",
+        modes = {FunctionMode.AGGREGATE}
 )
 @Component
 public class RateReducer implements Reducer {
@@ -49,7 +51,7 @@ public class RateReducer implements Reducer {
 // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State(); // n not used
     }
 

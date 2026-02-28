@@ -4,6 +4,7 @@ import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartMetaConfig;
 import com.example.find_my_edge.workspace.enums.ChartCategory;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ public class ChartRegistry {
 
     private final LayoutRegistry layoutRegistry;
 
+    @Getter
     private Map<String, ChartConfig> charts;
     private Set<String> chartOrder;
 
@@ -36,10 +38,6 @@ public class ChartRegistry {
         return chartOrder.stream()
                          .map(charts::get)
                          .toList();
-    }
-
-    public Map<String, ChartConfig> getChartsById() {
-        return charts;
     }
 
     public List<String> getOrder() {

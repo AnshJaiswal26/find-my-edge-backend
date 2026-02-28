@@ -14,4 +14,5 @@ public class ColorRuleConfig {
     private Double value;
     private Double value2;
     private String color;
+    private String label;
 }

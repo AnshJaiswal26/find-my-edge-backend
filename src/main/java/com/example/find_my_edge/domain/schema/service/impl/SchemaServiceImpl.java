@@ -65,7 +65,7 @@ public class SchemaServiceImpl implements SchemaService {
         // HANDLE COMPUTED
         if (schema.isComputed() && schema.hasFormula()) {
 
-            AstResult astResult = astPipeline.buildAst(schema.getFormula(), "");
+            AstResult astResult = astPipeline.buildAst(schema.getFormula());
 
             entity.setAstJson(jsonUtil.toJson(astResult.getAstNode()));
             entity.setDependencies(new ArrayList<>(astResult.getDependencies()));
@@ -104,7 +104,7 @@ public class SchemaServiceImpl implements SchemaService {
             existing.getFormula() != null &&
             !existing.getFormula().isBlank()) {
 
-            AstResult astResult = astPipeline.buildAst(existing.getFormula(), "");
+            AstResult astResult = astPipeline.buildAst(existing.getFormula());
 
             existing.setAstJson(jsonUtil.toJson(astResult.getAstNode()));
             existing.setDependencies(new ArrayList<>(astResult.getDependencies()));

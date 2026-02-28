@@ -1,10 +1,24 @@
 package com.example.find_my_edge.analytics.ast.reducer.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
+@FunctionMeta(
+        argTypes = {"boolean"},
+        semanticArgs = {
+                @ArgType({"boolean"})
+        },
+        returnType = "number",
+        semanticReturn = "number",
+        signature = "COUNT_IF(condition)",
+        description = "Count of rows where condition is true",
+        modes = {FunctionMode.AGGREGATE}
+)
 @Component
 public class CountIfReducer implements Reducer {
 
@@ -28,12 +42,10 @@ public class CountIfReducer implements Reducer {
         return "COUNT_IF";
     }
 
-
-
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State();
     }
 
@@ -45,7 +57,7 @@ public class CountIfReducer implements Reducer {
         Object valueObj = args[0];
 
         // JS logic: v === 1
-        if (valueObj instanceof Number && ((Number) valueObj).intValue() == 1) {
+        if (valueObj != null && Boolean.TRUE.equals(valueObj)) {
             s.count++;
         }
 

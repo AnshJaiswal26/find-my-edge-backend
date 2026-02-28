@@ -1,8 +1,9 @@
-package com.example.find_my_edge.analytics.ast.reducer.context;
+package com.example.find_my_edge.analytics.ast.reducer.context.aggregate;
 
-import com.example.find_my_edge.analytics.ast.function.ExecutionMode;
-import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
-import com.example.find_my_edge.analytics.ast.function.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.enums.ExecutionMode;
+import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
+import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
@@ -11,20 +12,21 @@ import org.springframework.stereotype.Component;
         semanticArgs = {},
         returnType = "number",
         semanticReturn = "number",
-        signature = "WIN_RATE()",
-        description = "Winning trades divided by total trades"
+        signature = "PROFIT_FACTOR()",
+        description = "Gross profit divided by gross loss",
+        modes={FunctionMode.AGGREGATE}
 )
 @Component
-public class WinRateReducer implements Reducer {
+public class ProfitFactorReducer implements Reducer {
 
     // ---------- STATE ----------
     private static class State {
-        int total;
-        int wins;
+        double grossProfit;
+        double grossLoss; // negative values
 
         State() {
-            this.total = 0;
-            this.wins = 0;
+            this.grossProfit = 0.0;
+            this.grossLoss = 0.0;
         }
     }
 
@@ -40,18 +42,18 @@ public class WinRateReducer implements Reducer {
 
     @Override
     public String getName() {
-        return "WIN_RATE";
+        return "PROFIT_FACTOR";
     }
 
     @Override
-    public String getKey() {
-        return "pnl"; // 👈 important
+    public String getField() {
+        return "pnl"; // 👈 engine injects pnl
     }
 
     // ---------- EXECUTION ----------
 
     @Override
-    public Object init(int n) {
+    public Object init() {
         return new State(); // n not used
     }
 
@@ -61,16 +63,16 @@ public class WinRateReducer implements Reducer {
 
         State state = (State) stateObj;
 
-        Object pnlObj = args[0]; // injected via key
+        Object pnlObj = args[0];
 
         if (pnlObj == null) return true;
 
         double pnl = ((Number) pnlObj).doubleValue();
 
-        state.total++;
-
         if (pnl > 0) {
-            state.wins++;
+            state.grossProfit += pnl;
+        } else if (pnl < 0) {
+            state.grossLoss += pnl; // keep negative
         }
 
         return true; // process all rows
@@ -82,8 +84,8 @@ public class WinRateReducer implements Reducer {
 
         State state = (State) stateObj;
 
-        return state.total > 0
-               ? ((double) state.wins / state.total) * 100.0
-               : null;
+        return state.grossLoss == 0.0
+               ? null
+               : state.grossProfit / Math.abs(state.grossLoss);
     }
 }

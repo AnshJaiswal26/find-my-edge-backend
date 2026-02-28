@@ -128,6 +128,7 @@ public class SchemaRegistry {
 
                 pnl(),
                 riskReward(),
+                isProfit(),
                 Schema.builder()
                       .id("emotion")
                       .label("Emotion")
@@ -168,7 +169,7 @@ public class SchemaRegistry {
                      .role(SchemaRole.SYSTEM_REQUIRED)
                      .dependencies(List.of("entryTime", "exitTime"))
                      .formula("[Exit Time] - [Entry Time]")
-                     .ast(binary(key("exitTime"), "-", key("entryTime")))
+                     .ast(binary(field("exitTime"), "-", field("entryTime")))
                      .display(display("HH:mm:ss", 0))
                      .colorRules(List.of(
                              colorRule("lessThan", 5.0, "var(--warning)"),
@@ -189,9 +190,9 @@ public class SchemaRegistry {
                      .formula("([Exit] - [Entry]) * [Qty]")
                      .ast(
                              binary(
-                                     binary(key("exit"), "-", key("entry")),
+                                     binary(field("exit"), "-", field("entry")),
                                      "*",
-                                     key("qty")
+                                     field("qty")
                              )
                      )
                      .display(display("CURRENCY", 2))
@@ -199,6 +200,27 @@ public class SchemaRegistry {
                              colorRule("greaterThan", 0.0, "var(--success)"),
                              colorRule("lessThan", 0.0, "var(--error)")
                      ))
+                     .build();
+    }
+
+    private Schema isProfit() {
+        return Schema.builder()
+                     .id("isProfit")
+                     .label("isProfit")
+                     .type(FieldType.BOOLEAN)
+                     .semanticType(SemanticType.BOOLEAN)
+                     .source(SchemaSource.COMPUTED)
+                     .role(SchemaRole.SYSTEM_REQUIRED)
+                     .dependencies(List.of("pnl"))
+                     .formula("[pnl] > 0")
+                     .ast(
+                             binary(
+                                     field("pnl"),
+                                     ">",
+                                     constant(0.0)
+                             )
+                     )
+                     .display(display("YES_NO", 2))
                      .build();
     }
 
@@ -212,7 +234,7 @@ public class SchemaRegistry {
                      .role(SchemaRole.SYSTEM_REQUIRED)
                      .dependencies(List.of("pnl"))
                      .formula("[PnL] / 500")
-                     .ast(binary(key("pnl"), "/", constant(500.0)))
+                     .ast(binary(field("pnl"), "/", constant(500.0)))
                      .display(display("RATIO", 2))
                      .colorRules(List.of(
                              colorRule("greaterThan", 0.0, "var(--success)"),

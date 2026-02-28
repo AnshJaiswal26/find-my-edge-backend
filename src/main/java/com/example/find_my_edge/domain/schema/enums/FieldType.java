@@ -12,7 +12,7 @@ public enum FieldType {
     }
 
     @JsonCreator
-    public static ComputeMode fromJson(String value) {
-        return ComputeMode.valueOf(value.toUpperCase());
+    public static FieldType fromJson(String value) {
+        return FieldType.valueOf(value.toUpperCase());
     }
 }

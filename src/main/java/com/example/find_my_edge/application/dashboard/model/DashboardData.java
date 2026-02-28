@@ -1,7 +1,6 @@
 package com.example.find_my_edge.application.dashboard.model;
 
-import com.example.find_my_edge.domain.schema.model.Schema;
-import com.example.find_my_edge.domain.trade.model.Trade;
+import com.example.find_my_edge.api.schema.dto.SchemaResponseDto;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartLayoutConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
@@ -16,13 +15,13 @@ import java.util.Map;
 public class DashboardData {
 
     // Global Trade Store
-    private Map<String , Schema> schemasById;
+    private Map<String, SchemaResponseDto> schemasById;
 
     private List<String> schemasOrder;
 
-    private Map<String, Trade> tradesById;
+    private Map<String, Map<String, Object>> tradesById;
 
-    private Map<String, Trade> derivedByTradeId;
+    private Map<String, Map<String, Object>> derivedByTradeId;
 
     private List<String> tradesOrder;
 
