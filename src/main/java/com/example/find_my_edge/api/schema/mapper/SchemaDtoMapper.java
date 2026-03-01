@@ -22,9 +22,6 @@ public class SchemaDtoMapper {
     private final JsonUtil jsonUtil;
 
     /* ---------------- REQUEST → DOMAIN ---------------- */
-
-    /* ---------------- REQUEST → DOMAIN ---------------- */
-
     public Schema toSchema(SchemaRequestDto dto) {
 
         if (dto == null) return null;
@@ -35,6 +32,9 @@ public class SchemaDtoMapper {
                      .semanticType(dto.getSemanticType())
                      .mode(dto.getMode())
                      .hidden(dto.getHidden())
+
+                     .source(dto.getSource())
+                     .role(dto.getRole())
 
                      .ast(copy(dto.getAst(), AstConfig.class))
                      .formula(dto.getFormula())

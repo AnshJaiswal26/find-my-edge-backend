@@ -32,7 +32,13 @@ public class TradeInitializer {
 
         tradeService.deleteAll();
 
-        tradeService.createAll(trades); //  seed into DB
+        tradeService.createAll(
+                trades
+                        .stream()
+                        .sorted(
+                                (a, b) ->
+                                        Math.toIntExact(((Number) a.getValues().get("date")).longValue() - ((Number) b.getValues().get("date")).longValue())).toList()
+        ); //  seed into DB
     }
 
     private List<Trade> generateTrades() {

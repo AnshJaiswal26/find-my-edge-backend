@@ -3,6 +3,7 @@ package com.example.find_my_edge.domain.schema.service.impl;
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
 import com.example.find_my_edge.common.auth.AuthService;
+import com.example.find_my_edge.domain.schema.entity.SchemaOverrideEntity;
 import com.example.find_my_edge.domain.schema.enums.SchemaRole;
 import com.example.find_my_edge.domain.schema.enums.SchemaSource;
 import com.example.find_my_edge.domain.schema.enums.ViewType;
@@ -26,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +48,8 @@ public class SchemaServiceImpl implements SchemaService {
     /* ---------------- CREATE ---------------- */
     @Override
     public Schema create(Schema schema) {
+
+        schema.validateForWrite();
 
         String userId = authService.getCurrentUserId();
 
@@ -83,54 +85,89 @@ public class SchemaServiceImpl implements SchemaService {
     /* ---------------- UPDATE ---------------- */
     @Override
     public Schema update(String schemaId, Schema schema) {
+        System.out.println(schema);
+        schema.validateForWrite();
 
         String userId = authService.getCurrentUserId();
 
         SchemaEntity existing = schemaRepository
                 .findByIdAndUserId(schemaId, userId)
-                .orElseThrow(() -> new SchemaNotFoundException(schemaId));
+                .orElse(null);
 
-        // SYSTEM PROTECTION
-        if (existing.getRole() != SchemaRole.USER_DEFINED) {
-            throw new SchemaOperationNotAllowedException("System schema cannot be modified");
+        if (schemaRegistry.exists(schemaId)) {
+
+            SchemaOverrideEntity schemaOverrideEntity =
+                    overrideService.getOrExisting(schemaId, userId);
+
+            schemaOverrideEntity.setHidden(schema.getHidden());
+            schemaOverrideEntity.setColorRulesJson(jsonUtil.toJsonList(schema.getColorRules()));
+            schemaOverrideEntity.setDisplayJson(jsonUtil.toJson(schema.getDisplay()));
+
+            overrideService.save(schemaOverrideEntity);
+
+            Schema baseSchema = schemaRegistry.get(schemaId);
+
+            return overrideService.applySingleOverride(baseSchema, schemaOverrideEntity);
+
+        } else if (existing == null) {
+            throw new SchemaNotFoundException(schemaId);
         }
 
         SchemaEntity incoming = mapper.toEntity(schema);
 
-        applyAllowedUpdates(existing, incoming);
+        incoming.setId(existing.getId());
 
-        // HANDLE COMPUTED UPDATE (CRITICAL)
-        if (existing.getSource() == SchemaSource.COMPUTED &&
-            existing.getFormula() != null &&
-            !existing.getFormula().isBlank()) {
+        applyUpdateStrategy(existing, incoming);
+
+        SchemaEntity saved = schemaRepository.save(existing);
+
+        return mapper.toModel(saved);
+    }
+
+    private void applyUpdateStrategy(SchemaEntity existing, SchemaEntity incoming) {
+
+        SchemaRole role = existing.getRole();
+        SchemaSource source = existing.getSource();
+
+        // ✅ USER_DEFINED → full control
+        if (role == SchemaRole.USER_DEFINED) {
+
+            if (source == SchemaSource.COMPUTED) {
+                applyComputedUserUpdate(existing, incoming);
+            } else {
+                applyUserUpdate(existing, incoming);
+            }
+        }
+    }
+
+    private void applyUserUpdate(SchemaEntity existing, SchemaEntity incoming) {
+
+        existing.setLabel(incoming.getLabel());
+        existing.setFormula(incoming.getFormula());
+        existing.setDependencies(incoming.getDependencies());
+
+        existing.setDisplayJson(incoming.getDisplayJson());
+        existing.setColorRulesJson(incoming.getColorRulesJson());
+        existing.setHidden(incoming.getHidden());
+    }
+
+    private void applyComputedUserUpdate(SchemaEntity existing, SchemaEntity incoming) {
+
+        existing.setLabel(incoming.getLabel());
+        existing.setFormula(incoming.getFormula());
+        existing.setDependencies(incoming.getDependencies());
+
+        existing.setDisplayJson(incoming.getDisplayJson());
+        existing.setColorRulesJson(incoming.getColorRulesJson());
+        existing.setHidden(incoming.getHidden());
+
+        // 🔥 CRITICAL: AST validation here (not outside)
+        if (existing.getFormula() != null && !existing.getFormula().isBlank()) {
 
             AstResult astResult = astPipeline.buildAst(existing.getFormula());
 
             existing.setAstJson(jsonUtil.toJson(astResult.getAstNode()));
             existing.setDependencies(new ArrayList<>(astResult.getDependencies()));
-        }
-
-        return mapper.toModel(schemaRepository.save(existing));
-    }
-
-    private void applyAllowedUpdates(SchemaEntity existing, SchemaEntity incoming) {
-
-        switch (existing.getRole()) {
-
-            case SYSTEM_REQUIRED, SYSTEM_OPTIONAL -> {
-                existing.setHidden(incoming.getHidden());
-                existing.setDisplayJson(incoming.getDisplayJson());
-                existing.setColorRulesJson(incoming.getColorRulesJson());
-            }
-
-            case USER_DEFINED -> {
-                existing.setLabel(incoming.getLabel());
-                existing.setFormula(incoming.getFormula());
-                existing.setDependencies(incoming.getDependencies());
-                existing.setDisplayJson(incoming.getDisplayJson());
-                existing.setColorRulesJson(incoming.getColorRulesJson());
-                existing.setHidden(incoming.getHidden());
-            }
         }
     }
 

@@ -27,6 +27,9 @@ public class SchemaRequestDto {
     private String formula;
     private List<String> dependencies;
 
+    private SchemaSource source;
+    private SchemaRole role;
+
     private Double initialValue;
     private Boolean hidden;
 

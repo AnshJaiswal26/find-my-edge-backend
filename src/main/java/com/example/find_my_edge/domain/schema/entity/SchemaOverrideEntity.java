@@ -25,6 +25,8 @@ public class SchemaOverrideEntity {
     @Column(nullable = false)
     private String schemaId; // system schema reference
 
+    private Boolean hidden;
+
     @Column(columnDefinition = "TEXT")
     private String displayJson;
 

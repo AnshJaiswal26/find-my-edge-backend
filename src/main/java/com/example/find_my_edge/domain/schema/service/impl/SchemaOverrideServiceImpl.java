@@ -63,6 +63,10 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
         Schema copy = copySchema(system);
 
         try {
+            if (override.getHidden() != null) {
+                copy.setHidden(override.getHidden());
+            }
+
             if (override.getDisplayJson() != null) {
                 DisplayConfig display =
                         jsonUtil.fromJson(override.getDisplayJson(), DisplayConfig.class);
@@ -133,6 +137,22 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
         }
 
         return copy;
+    }
+
+    @Override
+    public SchemaOverrideEntity getOrExisting(String schemaId, String userId) {
+        return overrideRepository.findByUserIdAndSchemaId(userId, schemaId)
+                                 .orElseGet(() -> {
+                                     SchemaOverrideEntity schemaOverrideEntity = new SchemaOverrideEntity();
+                                     schemaOverrideEntity.setUserId(userId);
+                                     schemaOverrideEntity.setSchemaId(schemaId);
+                                     return schemaOverrideEntity;
+                                 });
+    }
+
+    @Override
+    public SchemaOverrideEntity save(SchemaOverrideEntity schemaOverrideEntity) {
+        return overrideRepository.save(schemaOverrideEntity);
     }
 
     private Schema copySchema(Schema system) {

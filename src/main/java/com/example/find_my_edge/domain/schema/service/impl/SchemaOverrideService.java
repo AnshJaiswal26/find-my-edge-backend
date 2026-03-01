@@ -11,4 +11,8 @@ public interface SchemaOverrideService {
     Schema applySingleOverride(Schema system, SchemaOverrideEntity override);
 
     Schema applyOverride(Schema system, String userId);
+
+    SchemaOverrideEntity getOrExisting(String schemaId, String userId);
+
+    SchemaOverrideEntity save(SchemaOverrideEntity schemaOverrideEntity);
 }

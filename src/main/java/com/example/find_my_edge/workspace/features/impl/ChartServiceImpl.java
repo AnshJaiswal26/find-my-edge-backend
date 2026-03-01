@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -109,7 +108,7 @@ public class ChartServiceImpl implements ChartService {
             ChartConfig chart = getChartOrThrow(page, chartId);
 
             if (chart.getMeta().getCategory().equals(ChartCategory.SERIES.key())) {
-                chart.setYSeriesConfig(seriesConfig);
+                chart.setYSeries(seriesConfig);
             } else {
                 chart.setSeriesConfig(seriesConfig);
             }

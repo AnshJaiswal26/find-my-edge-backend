@@ -71,7 +71,7 @@ public class ComputeServiceImpl implements ComputeService {
             List<Trade> trades
     ) {
         ComputationContext ctx = buildContext(schemasById, trades);
-        return computeAggregate(formulas, null, schemasById, trades, ctx);
+        return computeAggregate(formulas, null, schemasById, ctx);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ComputeServiceImpl implements ComputeService {
             List<Trade> trades
     ) {
         ComputationContext ctx = buildContext(schemasById, trades);
-        return computeAggregate(null, astConfigs, schemasById, trades, ctx);
+        return computeAggregate(null, astConfigs, schemasById, ctx);
     }
 
     // ============================
@@ -187,7 +187,6 @@ public class ComputeServiceImpl implements ComputeService {
             Map<String, String> formulas,
             Map<String, AstConfig> astConfigs,
             Map<String, Schema> schemasById,
-            List<Trade> trades,
             ComputationContext ctx
     ) {
 
@@ -203,34 +202,36 @@ public class ComputeServiceImpl implements ComputeService {
             String key = entry.getKey();
             AstNode astNode = entry.getValue();
 
-            futures.put(key, computeExecutor.submit(() -> {
+            futures.put(
+                    key, computeExecutor.submit(() -> {
 
-                Object result = aggregateExecutor.execute(
-                        astNode,
-                        (index, schemaKey) -> {
-                            if (index < 0 || index >= tradeIds.size()) return null;
+                        Object result = aggregateExecutor.execute(
+                                astNode,
+                                (index, schemaKey) -> {
+                                    if (index < 0 || index >= tradeIds.size()) return null;
 
-                            String tradeId = tradeIds.get(index);
-                            Map<String, Object> computed = ctx.getComputed().get(tradeId);
-                            if (computed != null && computed.containsKey(schemaKey)) {
-                                return computed.get(schemaKey);
-                            }
+                                    String tradeId = tradeIds.get(index);
+                                    Map<String, Object> computed = ctx.getComputed().get(tradeId);
+                                    if (computed != null && computed.containsKey(schemaKey)) {
+                                        return computed.get(schemaKey);
+                                    }
 
-                            Map<String, Object> raw = ctx.getRaw().get(tradeId);
-                            return raw != null ? raw.get(schemaKey) : null;
-                        },
-                        tradeIds::size,
-                        schemaTypeMap::get
-                );
+                                    Map<String, Object> raw = ctx.getRaw().get(tradeId);
+                                    return raw != null ? raw.get(schemaKey) : null;
+                                },
+                                tradeIds::size,
+                                schemaTypeMap::get
+                        );
 
-                if (result == null) return null;
+                        if (result == null) return null;
 
-                if (!(result instanceof Number)) {
-                    throw new AstException("Non-numeric result for key: " + key);
-                }
+                        if (!(result instanceof Number)) {
+                            throw new AstException("Non-numeric result for key: " + key);
+                        }
 
-                return ((Number) result).doubleValue();
-            }));
+                        return ((Number) result).doubleValue();
+                    })
+            );
         }
 
         return collectFutures(futures);

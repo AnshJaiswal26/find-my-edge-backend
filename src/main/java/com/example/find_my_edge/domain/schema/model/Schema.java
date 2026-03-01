@@ -6,6 +6,7 @@ import com.example.find_my_edge.common.config.AstConfig;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 import com.example.find_my_edge.common.config.DisplayConfig;
 import com.example.find_my_edge.domain.schema.enums.*;
+import com.example.find_my_edge.domain.schema.exception.SchemaValidationException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -163,5 +164,63 @@ public class Schema implements HasDependencies {
      */
     public boolean hasOptions() {
         return options != null && !options.isEmpty();
+    }
+
+    public void validateForWrite() {
+
+        validateSourceRoleCombination();
+
+        if (isUserDefined() || isComputed()) {
+            validateComputation();
+            validateDependencies();
+        }
+    }
+
+    private void validateSourceRoleCombination() {
+
+        boolean valid = switch (source) {
+
+            case SYSTEM -> role == SchemaRole.SYSTEM_REQUIRED
+                           || role == SchemaRole.SYSTEM_OPTIONAL;
+
+            case USER -> role == SchemaRole.USER_DEFINED;
+
+            case COMPUTED -> role == SchemaRole.USER_DEFINED
+                             || role == SchemaRole.SYSTEM_REQUIRED
+                             || role == SchemaRole.SYSTEM_OPTIONAL;
+        };
+
+        if (!valid) {
+            throw new SchemaValidationException(
+                    "Invalid Schema combination: " + source + " + " + role
+            );
+        }
+    }
+
+    private void validateComputation() {
+
+        if (isComputed() && !hasFormula() && ast == null) {
+            throw new SchemaValidationException(
+                    "Computed schema must have formula or AST"
+            );
+        }
+
+        // Optional strict rule
+        if (!isComputed() && hasFormula()) {
+            System.out.println(isComputed() + source.toString());
+            System.out.println(hasFormula());
+            throw new SchemaValidationException(
+                    "Non-computed schema cannot have formula"
+            );
+        }
+    }
+
+    private void validateDependencies() {
+
+        if (hasDependencies() && !isComputed()) {
+            throw new SchemaValidationException(
+                    "Only computed schema can have dependencies"
+            );
+        }
     }
 }

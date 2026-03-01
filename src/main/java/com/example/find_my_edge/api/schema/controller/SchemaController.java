@@ -40,6 +40,7 @@ public class SchemaController extends BaseController {
             @RequestBody SchemaRequestDto request
     ) {
         Schema update = schemaService.update(id, schemaDTOMapper.toSchema(request));
+        System.out.println(update);
         return buildResponse(schemaDTOMapper.toResponse(update), "Schema updated successfully");
     }
 

@@ -129,12 +129,14 @@ public class SchemaRegistry {
                 pnl(),
                 riskReward(),
                 isProfit(),
+
                 Schema.builder()
                       .id("emotion")
                       .label("Emotion")
                       .type(FieldType.SELECT)
                       .semanticType(SemanticType.STRING)
                       .source(SchemaSource.SYSTEM)
+                      .role(SchemaRole.SYSTEM_OPTIONAL)
                       .options(List.of("Calm", "Fear", "Greed"))
                       .display(display("badge", null))
                       .build()
@@ -154,7 +156,8 @@ public class SchemaRegistry {
                      .label(label)
                      .type(type)
                      .semanticType(semanticType)
-                     .source(SchemaSource.SYSTEM);
+                     .source(SchemaSource.SYSTEM)
+                     .role(SchemaRole.SYSTEM_REQUIRED);
     }
 
     /* ---------------- COMPUTED ---------------- */

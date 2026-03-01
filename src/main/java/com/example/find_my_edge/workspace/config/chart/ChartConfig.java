@@ -2,8 +2,8 @@ package com.example.find_my_edge.workspace.config.chart;
 
 import com.example.find_my_edge.analytics.config.FilterConfig;
 import com.example.find_my_edge.analytics.config.GroupConfig;
-import com.example.find_my_edge.analytics.config.GroupRangeConfig;
 import com.example.find_my_edge.analytics.config.SortConfig;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -18,8 +18,12 @@ public class ChartConfig {
     private SortConfig sort;
     private GroupConfig groupSpec;
     private List<FilterConfig> filters = new ArrayList<>();
-    private GroupRangeConfig selection;
-    private SeriesConfig xSeriesConfig;
-    private List<SeriesConfig> ySeriesConfig = new ArrayList<>();
-    private List<SeriesConfig> seriesConfig = new ArrayList<>();
+    private SelectionConfig selection;
+
+    @JsonProperty("xSeriesConfig")
+    private SeriesConfig xSeries;
+
+    @JsonProperty("ySeriesConfig")
+    private List<SeriesConfig> ySeries;
+    private List<SeriesConfig> seriesConfig;
 }
