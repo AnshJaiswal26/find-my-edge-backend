@@ -1,0 +1,77 @@
+package com.example.find_my_edge.schema.controller;
+
+
+import com.example.find_my_edge.common.controller.BaseController;
+import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.schema.dto.SchemaOrderRequestDto;
+import com.example.find_my_edge.schema.dto.SchemaRequestDto;
+import com.example.find_my_edge.schema.dto.SchemaResponseDto;
+import com.example.find_my_edge.schema.dto.SchemaResponseDtoBundle;
+import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
+import com.example.find_my_edge.schema.model.Schema;
+import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.service.SchemaService;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+@RestController
+@RequestMapping("/api/schema")
+@RequiredArgsConstructor
+public class SchemaController extends BaseController {
+
+    private final SchemaService schemaService;
+    private final SchemaDtoMapper schemaDTOMapper;
+
+    /* ---------------- CREATE ---------------- */
+    @PostMapping
+    public ResponseEntity<ApiResponse<SchemaResponseDto>> createSchema(@RequestBody SchemaRequestDto request) {
+        Schema schema = schemaService.create(schemaDTOMapper.toSchema(request));
+        return buildResponse(schemaDTOMapper.toResponse(schema), "Schema created successfully");
+    }
+
+    /* ---------------- UPDATE ---------------- */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<SchemaResponseDto>> updateSchema(
+            @PathVariable String id,
+            @RequestBody SchemaRequestDto request
+    ) {
+        Schema update = schemaService.update(id, schemaDTOMapper.toSchema(request));
+        System.out.println(update);
+        return buildResponse(schemaDTOMapper.toResponse(update), "Schema updated successfully");
+    }
+
+    /* ---------------- GET ALL ---------------- */
+    @GetMapping
+    public ResponseEntity<ApiResponse<SchemaResponseDtoBundle>> getAllSchemas() {
+        SchemaBundle all = schemaService.getAll();
+        return buildResponse(schemaDTOMapper.toSchemaDTOBundle(all), "Schemas fetched successfully");
+    }
+
+    /* ---------------- GET BY ID ---------------- */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<SchemaResponseDto>> getSchemaById(@PathVariable String id) {
+        Schema schema = schemaService.getById(id);
+        return buildResponse(schemaDTOMapper.toResponse(schema), "Schema fetched successfully");
+    }
+
+    /* ---------------- DELETE ---------------- */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Object>> deleteSchema(@PathVariable String id) {
+        schemaService.delete(id);
+        return buildResponse(null, "Schema deleted successfully");
+    }
+
+
+    @PutMapping("/order")
+    public ResponseEntity<ApiResponse<List<String>>> updateOrder(
+            @RequestBody SchemaOrderRequestDto dto
+    ) {
+
+        List<String> newOrder = schemaService.updateOrder(dto.getOrder(), dto.getViewType());
+        return buildResponse(newOrder, "Schema order updated successfully");
+    }
+}

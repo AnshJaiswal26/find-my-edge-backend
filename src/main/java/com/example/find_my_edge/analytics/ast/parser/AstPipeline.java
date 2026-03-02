@@ -5,7 +5,7 @@ import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.validator.AstSemanticValidator;
 import com.example.find_my_edge.analytics.ast.validator.AstTypeValidator;
-import com.example.find_my_edge.domain.schema.model.Schema;
+import com.example.find_my_edge.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

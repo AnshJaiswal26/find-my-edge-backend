@@ -22,20 +22,20 @@ public class ChartServiceImpl implements ChartService {
     private final WorkspaceService workspaceService;
 
     @Override
-    public ChartConfig create(String pageName, ChartConfig dto) {
-        validateChart(dto);
+    public ChartConfig create(String pageName, ChartConfig config) {
+        validateChart(config);
 
         workspaceService.getPageAndModify(page -> {
-            String chartId = dto.getMeta().getId();
+            String chartId = config.getMeta().getId();
 
             if (page.getCharts().containsKey(chartId)) {
                 throw new InvalidChartConfigException("Chart already exists with id: " + chartId);
             }
 
-            page.getCharts().put(chartId, dto);
+            page.getCharts().put(chartId, config);
         }, pageName);
 
-        return dto;
+        return config;
     }
 
     @Override
@@ -51,18 +51,18 @@ public class ChartServiceImpl implements ChartService {
     }
 
     @Override
-    public ChartConfig update(String pageName, String chartId, ChartConfig dto) {
-        validateChart(dto);
+    public ChartConfig update(String pageName, String chartId, ChartConfig config) {
+        validateChart(config);
 
         workspaceService.getPageAndModify(page -> {
             if (!page.getCharts().containsKey(chartId)) {
                 throw new ChartNotFoundException(chartId);
             }
 
-            page.getCharts().put(chartId, dto);
+            page.getCharts().put(chartId, config);
         }, pageName);
 
-        return dto;
+        return config;
     }
 
     @Override

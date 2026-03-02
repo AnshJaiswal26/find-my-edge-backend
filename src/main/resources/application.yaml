@@ -18,3 +18,12 @@ spring:
   jackson:
     time-zone: Asia/Kolkata
 
+dhan:
+  base-url: ${DHAN_BASE_URL:https://api.dhan.co}
+  auth-url: ${DHAN_AUTH_URL:https://auth.dhan.co}
+  client-id: ${DHAN_CLIENT_ID}
+  app-id: ${DHAN_APP_ID}
+  app-secret: ${DHAN_APP_SECRET}
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:5173}

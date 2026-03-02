@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ColorRuleConfig {
     private String operator;  // greaterThan, lessThan, equals
-    private Double value;
+    private Object value;
     private Double from;
     private Double to;
     private String color;

@@ -5,7 +5,7 @@ import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.config.GroupRangeConfig;
 import com.example.find_my_edge.analytics.engine.filter.FilterOperation;
 import com.example.find_my_edge.analytics.engine.filter.FilterOperationRegistry;
-import com.example.find_my_edge.domain.trade.model.Trade;
+import com.example.find_my_edge.trade.model.Trade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

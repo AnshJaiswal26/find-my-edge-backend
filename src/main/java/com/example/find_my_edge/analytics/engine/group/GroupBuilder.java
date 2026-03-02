@@ -2,7 +2,7 @@ package com.example.find_my_edge.analytics.engine.group;
 
 import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
-import com.example.find_my_edge.domain.trade.model.Trade;
+import com.example.find_my_edge.trade.model.Trade;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

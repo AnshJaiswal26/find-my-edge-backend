@@ -12,15 +12,14 @@ import com.example.find_my_edge.analytics.ast.parser.PostfixConverter;
 import com.example.find_my_edge.analytics.ast.parser.Tokenizer;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.common.config.AstConfig;
-import com.example.find_my_edge.domain.trade.entity.TradeEntity;
-import com.example.find_my_edge.domain.trade.repository.TradeRepository;
+import com.example.find_my_edge.trade.entity.TradeEntity;
+import com.example.find_my_edge.trade.repository.TradeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 
 import java.util.List;
-import java.util.Map;
 
 import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
