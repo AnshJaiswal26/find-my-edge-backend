@@ -16,11 +16,24 @@ public class TableController extends BaseController {
 
     @PostMapping("table/columnWidth/{columnId}")
     public ResponseEntity<ApiResponse<Integer>> updateColumnWidth(
-            @PathVariable String columnId, @PathVariable String pageName, int width
+            @PathVariable String columnId, @PathVariable String pageName, @RequestBody Integer width
     ) {
+        System.out.println(columnId + pageName + width);
+        tableService.updateColumnWidth(pageName, columnId, width);
         return buildResponse(
-                tableService.updateColumnWidth(pageName, columnId, width),
+                null,
                 "Column width updated successfully"
+        );
+    }
+
+    @PostMapping("table/highlightRow/{rowId}")
+    public ResponseEntity<ApiResponse<Integer>> highlightRow(
+            @PathVariable String rowId, @PathVariable String pageName, @RequestBody Boolean highlight
+    ) {
+        tableService.updateHighLightedRow(pageName, rowId, highlight);
+        return buildResponse(
+                null,
+                "Highlight row updated successfully"
         );
     }
 }

@@ -27,17 +27,31 @@ public class TradeEntityMapper {
         // 🔥 Extract structured fields from values
 
         entity.setExternalId((String) values.get("externalId"));
+        values.remove("externalId");
 
         entity.setDate(getLong(values.get("date")));
+        values.remove("date");
+
         entity.setEntryTime(getLong(values.get("entryTime")));
+        values.remove("entryTime");
+
         entity.setExitTime(getLong(values.get("exitTime")));
+        values.remove("exitTime");
 
         entity.setSymbol((String) values.get("symbol"));
+        values.remove("symbol");
+
         entity.setDirection((String) values.get("direction"));
+        values.remove("direction");
 
         entity.setPnl(getDouble(values.get("pnl")));
+        values.remove("pnl");
+
         entity.setCharges(getDouble(values.get("charges")));
-        entity.setQuantity(getInteger(values.get("quantity")));
+        values.remove("charges");
+
+        entity.setQuantity(getInteger(values.get("qty")));
+        values.remove("qty");
 
         // 🔥 Keep full values JSON (including structured fields if you want)
         entity.setValues(values);
@@ -79,15 +93,21 @@ public class TradeEntityMapper {
     /* ---------------- HELPERS ---------------- */
 
     private Long getLong(Object val) {
-        return val == null ? null : ((Number) val).longValue();
+        if(val == null) return null;
+
+        return val instanceof Number num ? ((Number) num).longValue() : 0;
     }
 
     private Double getDouble(Object val) {
-        return val == null ? null : ((Number) val).doubleValue();
+        if(val == null) return null;
+
+        return val instanceof Number num ? ((Number) num).doubleValue() : 0.0;
     }
 
     private Integer getInteger(Object val) {
-        return val == null ? null : ((Number) val).intValue();
+        if(val == null) return null;
+
+        return val instanceof Number num ? ((Number) num).intValue() : 0;
     }
 
     private void putIfNotNull(Map<String, Object> map, String key, Object value) {

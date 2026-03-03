@@ -14,10 +14,8 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.InputStream;
 import java.util.List;
 
-@Configuration
 public class GoogleSheetConfig {
 
-    @Bean
     public Sheets sheets() {
         try {
             InputStream inputStream = new ClassPathResource("credentials/service-account.json").getInputStream();

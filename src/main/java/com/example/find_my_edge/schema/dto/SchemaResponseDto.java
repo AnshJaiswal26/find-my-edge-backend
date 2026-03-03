@@ -3,7 +3,6 @@ package com.example.find_my_edge.schema.dto;
 import com.example.find_my_edge.common.config.AstConfig;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 import com.example.find_my_edge.common.config.DisplayConfig;
-import com.example.find_my_edge.domain.schema.enums.*;
 import com.example.find_my_edge.schema.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,6 +26,7 @@ public class SchemaResponseDto {
     private ComputeMode mode;
     private AstConfig ast;
     private String formula;
+    private String idFormula;
     private List<String> dependencies;
 
     /* SOURCE */

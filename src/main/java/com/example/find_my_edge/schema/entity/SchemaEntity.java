@@ -1,6 +1,5 @@
 package com.example.find_my_edge.schema.entity;
 
-import com.example.find_my_edge.domain.schema.enums.*;
 import com.example.find_my_edge.schema.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,6 +42,8 @@ public class SchemaEntity {
     private String astJson; // store AstDTO as JSON
 
     private String formula = "";
+
+    private String idFormula = "";
 
     @ElementCollection
     @CollectionTable(

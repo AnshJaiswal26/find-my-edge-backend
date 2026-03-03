@@ -13,12 +13,14 @@ import com.example.find_my_edge.trade.model.Trade;
 import com.example.find_my_edge.trade.repository.TradeRepository;
 import com.example.find_my_edge.trade.service.TradeService;
 
+import com.example.find_my_edge.workspace.service.WorkspaceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,6 +36,8 @@ public class TradeServiceImpl implements TradeService {
     private final TradeRepository tradeRepository;
     private final TradeEntityMapper mapper;
     private final ProcessedTradeMapper processedTradeMapper;
+
+    private final WorkspaceService workspaceService;
 
     private final DhanTradeService dhanTradeService;
 
@@ -145,6 +149,7 @@ public class TradeServiceImpl implements TradeService {
                 .orElseThrow(() -> new TradeNotFoundException(id));
 
         tradeRepository.delete(entity);
+        workspaceService.removeTradeReferences(id);
     }
 
 
@@ -193,7 +198,7 @@ public class TradeServiceImpl implements TradeService {
         tradeRepository.saveAll(entities);
     }
 
-    private List<ProcessedTrade> fetchAllPages(String fromDate, String toDate) {
+    private List<ProcessedTrade> fetchAllPages(LocalDate fromDate, LocalDate toDate) {
 
         List<ProcessedTrade> allTrades = new ArrayList<>();
         int page = 0;
@@ -221,8 +226,8 @@ public class TradeServiceImpl implements TradeService {
 
         String userId = authService.getCurrentUserId();
 
-        String fromDate = "2000-01-01";
-        String toDate = LocalDate.now().toString();
+        LocalDate fromDate = LocalDate.of(2000, 1, 1);
+        LocalDate toDate = LocalDate.now();
 
         List<ProcessedTrade> raw = fetchAllPages(fromDate, toDate);
 
@@ -242,11 +247,14 @@ public class TradeServiceImpl implements TradeService {
 
         Instant lastFetchedAt = dhanOAuthService.getLastFetchedAt();
 
-        String fromDate = (lastFetchedAt != null)
-                          ? convertToDate(lastFetchedAt.minusSeconds(86400)) // 🔥 buffer
-                          : "2000-01-01";
+        ZoneId zone = ZoneId.systemDefault();
 
-        String toDate = LocalDate.now().toString();
+        LocalDateTime fromDateTime = (lastFetchedAt != null)
+                                     ? LocalDateTime.ofInstant(lastFetchedAt, zone).minusDays(1)
+                                     : LocalDateTime.of(2000, 1, 1, 0, 0);
+
+        LocalDate fromDate = fromDateTime.toLocalDate();
+        LocalDate toDate = LocalDate.now();
 
         List<ProcessedTrade> raw = fetchAllPages(fromDate, toDate);
 
@@ -260,7 +268,7 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
-    public List<Trade> fetchCustomAndSave(String fromDate, String toDate) {
+    public List<Trade> fetchCustomAndSave(LocalDate fromDate, LocalDate toDate) {
 
         List<ProcessedTrade> raw = fetchAllPages(fromDate, toDate);
 
@@ -276,18 +284,11 @@ public class TradeServiceImpl implements TradeService {
                 LocalDate.now()
                          .plusDays(1)
                          .atStartOfDay(ZoneId.of("Asia/Kolkata"))
-                         .toInstant()
+                         .toInstant(),
+                userId
         );
     }
 
-    private String convertToDate(Instant instant) {
-        if (instant == null) return "2000-01-01";
-
-        return instant
-                .atZone(ZoneId.of("Asia/Kolkata")) // 🔥 important
-                .toLocalDate()
-                .toString(); // YYYY-MM-DD
-    }
 
     private List<Trade> mapAndSort(List<ProcessedTrade> trades) {
 

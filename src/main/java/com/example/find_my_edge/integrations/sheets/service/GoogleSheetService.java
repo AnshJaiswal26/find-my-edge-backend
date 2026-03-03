@@ -28,7 +28,7 @@ public class GoogleSheetService {
     private static final Pattern COLUMN_ERROR_PATTERN =
             Pattern.compile("columnIndex\\[(\\d+)] is after last column in grid\\[(\\d+)]");
 
-    private final Sheets sheets;
+    private Sheets sheets;
     private final SheetWriteQueue sheetWriteQueue;
     private final SseEmitterRegistry sseEmitterRegistry;
 

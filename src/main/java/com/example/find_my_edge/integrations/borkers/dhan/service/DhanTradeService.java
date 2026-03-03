@@ -2,15 +2,16 @@ package com.example.find_my_edge.integrations.borkers.dhan.service;
 
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
 import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeDto;
-import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeResponseDto;
 import com.example.find_my_edge.integrations.borkers.dhan.exception.NoTradesFound;
 import com.example.find_my_edge.integrations.borkers.dhan.exception.TradeFetchFailed;
 import com.example.find_my_edge.integrations.borkers.dhan.model.ProcessedTrade;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,14 +23,17 @@ public class DhanTradeService {
     private final DhanOAuthService oauthService;
     private final DhanConfig config;
 
-    public List<ProcessedTrade> getTrades(String fromDate, String toDate, int page) {
+    public List<ProcessedTrade> getTrades(LocalDate fromDate, LocalDate toDate, int page) {
 
         String token = oauthService.getValidToken();
 
-        String url = config.getBaseUrl() +
-                     "/v2/trades/" + fromDate + "/" + toDate + "/" + page;
+        String validatedFrom = fromDate.toString();
+        String validatedTo = toDate.toString();
 
-        DhanTradeResponseDto dhanTradeResponseDto =
+        String url = config.getBaseUrl() +
+                     "/v2/trades/" + validatedFrom + "/" + validatedTo + "/" + page;
+
+        List<DhanTradeDto> trades =
                 restClient.get()
                           .uri(url)
                           .headers(headers -> {
@@ -38,20 +42,20 @@ public class DhanTradeService {
                           })
                           .retrieve()
                           .onStatus(
-                                  HttpStatusCode::isError, (req, res) -> {
+                                  HttpStatusCode::isError,
+                                  (req, res) -> {
                                       throw new TradeFetchFailed("Dhan API failed");
                                   }
                           )
-                          .body(DhanTradeResponseDto.class);
+                          .body(new ParameterizedTypeReference<List<DhanTradeDto>>() {
+                          });
 
-        if (dhanTradeResponseDto == null
-            || dhanTradeResponseDto.getData() == null
-            || dhanTradeResponseDto.getData().isEmpty()
+        if (trades == null || trades.isEmpty()
         ) {
             throw new NoTradesFound("No trade data found");
         }
 
-        return processTrades(dhanTradeResponseDto.getData());
+        return processTrades(trades);
     }
 
     public List<ProcessedTrade> processTrades(List<DhanTradeDto> trades) {

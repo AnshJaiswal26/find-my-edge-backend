@@ -5,7 +5,6 @@ import com.example.find_my_edge.analytics.ast.util.HasDependencies;
 import com.example.find_my_edge.common.config.AstConfig;
 import com.example.find_my_edge.common.config.ColorRuleConfig;
 import com.example.find_my_edge.common.config.DisplayConfig;
-import com.example.find_my_edge.domain.schema.enums.*;
 import com.example.find_my_edge.schema.enums.*;
 import com.example.find_my_edge.schema.exception.SchemaValidationException;
 import lombok.AllArgsConstructor;
@@ -43,6 +42,9 @@ public class Schema implements HasDependencies {
 
     @Builder.Default
     private String formula = "";
+
+    @Builder.Default
+    private String idFormula = "";
 
     @Builder.Default
     private List<String> dependencies = new ArrayList<>();
@@ -134,7 +136,7 @@ public class Schema implements HasDependencies {
      * Does this schema have a formula?
      */
     public boolean hasFormula() {
-        return formula != null && !formula.isBlank();
+        return formula != null && !formula.isBlank() && idFormula !=null  && !idFormula.isBlank();
     }
 
     /**
@@ -224,4 +226,5 @@ public class Schema implements HasDependencies {
             );
         }
     }
+
 }

@@ -5,6 +5,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(
+        name = "schema_order",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"userId", "viewType"})
+        }
+)
 @Data
 public class SchemaOrderEntity {
 
@@ -12,10 +18,11 @@ public class SchemaOrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String userId;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ViewType viewType;
 
     @Column(name = "schemas_order", columnDefinition = "JSON")

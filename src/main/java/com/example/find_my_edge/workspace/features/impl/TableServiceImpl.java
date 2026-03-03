@@ -11,12 +11,20 @@ public class TableServiceImpl implements TableService {
     private final WorkspaceService workspaceService;
 
     @Override
-    public Integer updateColumnWidth(String pageName, String id, Integer width) {
+    public void updateColumnWidth(String pageName, String id, Integer width) {
         workspaceService.getPageAndModify(
                 page ->
                         page.getColumnWidths().put(id, width),
                 pageName
         );
-        return width;
+    }
+
+    @Override
+    public void updateHighLightedRow(String pageName, String id, Boolean highlight) {
+        workspaceService.getPageAndModify(
+                page ->
+                        page.getHighlightedRows().put(id, highlight),
+                pageName
+        );
     }
 }

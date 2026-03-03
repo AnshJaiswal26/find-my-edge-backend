@@ -8,9 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SchemaOrderRepository extends JpaRepository<SchemaOrderEntity, String> {
-
-    Optional<SchemaOrderEntity> findByUserId(String id);
+public interface SchemaOrderRepository extends JpaRepository<SchemaOrderEntity, Long> {
 
     Optional<SchemaOrderEntity> findByUserIdAndViewType(String userId, ViewType viewType);
 }

@@ -3,9 +3,6 @@ package com.example.find_my_edge.schema.service.impl;
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
 import com.example.find_my_edge.common.auth.AuthService;
-import com.example.find_my_edge.schema.dto.SchemaRequestDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDtoBundle;
 import com.example.find_my_edge.schema.entity.SchemaOverrideEntity;
 import com.example.find_my_edge.schema.enums.SchemaRole;
 import com.example.find_my_edge.schema.enums.SchemaSource;
@@ -27,6 +24,7 @@ import com.example.find_my_edge.schema.repository.SchemaRepository;
 import com.example.find_my_edge.schema.service.SchemaOverrideService;
 import com.example.find_my_edge.schema.service.SchemaService;
 
+import com.example.find_my_edge.workspace.service.WorkspaceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +44,8 @@ public class SchemaServiceImpl implements SchemaService {
 
     private final SchemaRegistry schemaRegistry;
     private final SchemaOverrideService overrideService;
+
+    private final WorkspaceService workspaceService;
 
     private final SchemaDtoMapper dtoMapper;
     private final SchemaMapper mapper;
@@ -73,7 +73,7 @@ public class SchemaServiceImpl implements SchemaService {
         // HANDLE COMPUTED
         if (schema.isComputed() && schema.hasFormula()) {
 
-            AstResult astResult = astPipeline.buildAst(schema.getFormula());
+            AstResult astResult = astPipeline.buildAst(schema.getIdFormula());
 
             entity.setAstJson(jsonUtil.toJson(astResult.getAstNode()));
             entity.setDependencies(new ArrayList<>(astResult.getDependencies()));
@@ -150,6 +150,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         existing.setLabel(incoming.getLabel());
         existing.setFormula(incoming.getFormula());
+        existing.setIdFormula(incoming.getIdFormula());
         existing.setDependencies(incoming.getDependencies());
 
         existing.setDisplayJson(incoming.getDisplayJson());
@@ -161,6 +162,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         existing.setLabel(incoming.getLabel());
         existing.setFormula(incoming.getFormula());
+        existing.setIdFormula(incoming.getIdFormula());
         existing.setDependencies(incoming.getDependencies());
 
         existing.setDisplayJson(incoming.getDisplayJson());
@@ -168,9 +170,9 @@ public class SchemaServiceImpl implements SchemaService {
         existing.setHidden(incoming.getHidden());
 
         // 🔥 CRITICAL: AST validation here (not outside)
-        if (existing.getFormula() != null && !existing.getFormula().isBlank()) {
+        if (existing.getIdFormula() != null && !existing.getIdFormula().isBlank()) {
 
-            AstResult astResult = astPipeline.buildAst(existing.getFormula());
+            AstResult astResult = astPipeline.buildAst(existing.getIdFormula());
 
             existing.setAstJson(jsonUtil.toJson(astResult.getAstNode()));
             existing.setDependencies(new ArrayList<>(astResult.getDependencies()));
@@ -226,7 +228,7 @@ public class SchemaServiceImpl implements SchemaService {
             byId.put(schema.getId(), schema);
         }
 
-        List<String> order = getUserOrder(userId);
+        List<String> order = getUserOrder(userId, ViewType.DEFAULT);
 
         if (order.isEmpty()) {
             order.addAll(schemaRegistry.getOrder());
@@ -271,6 +273,7 @@ public class SchemaServiceImpl implements SchemaService {
             );
         }
 
+        workspaceService.removeSchemaReferences(id);
         schemaRepository.delete(schema);
 
         updateOrderOnDelete(userId, id);
@@ -279,7 +282,49 @@ public class SchemaServiceImpl implements SchemaService {
     /* ---------------- ORDER ---------------- */
 
     @Override
+    public List<String> getOrder(ViewType viewType) {
+
+        String userId = authService.getCurrentUserId();
+
+        List<String> defaultOrder = getUserOrder(userId, ViewType.DEFAULT);
+
+        if (viewType == ViewType.DEFAULT) {
+            return defaultOrder;
+        }
+
+        List<String> viewOrder = getUserOrder(userId, viewType);
+
+        if (defaultOrder.isEmpty() && viewOrder.isEmpty()) {
+            return new ArrayList<>(schemaRegistry.getOrder());
+        }
+
+        Set<String> defaultSet = new LinkedHashSet<>(defaultOrder);
+
+        // Merge: preserve custom order, append missing schemas
+        List<String> merged = new ArrayList<>();
+
+        // Keep only valid IDs from viewOrder
+        for (String id : viewOrder) {
+            if (defaultSet.contains(id)) {
+                merged.add(id);
+            }
+        }
+
+        // Append missing ones from default
+        for (String id : defaultOrder) {
+            if (!merged.contains(id)) {
+                merged.add(id);
+            }
+        }
+
+        return merged;
+    }
+
+    @Transactional
+    @Override
     public List<String> updateOrder(List<String> order, ViewType viewType) {
+
+        System.out.println("updateOrder() method called");
 
         String userId = authService.getCurrentUserId();
 
@@ -333,7 +378,9 @@ public class SchemaServiceImpl implements SchemaService {
         // 6. Save using correct util
         entity.setOrder(jsonUtil.toJsonList(cleanedOrder));
 
+        System.out.println("Before save: " + entity);
         schemaOrderRepository.save(entity);
+        System.out.println("After save");
 
         return cleanedOrder;
     }
@@ -354,6 +401,10 @@ public class SchemaServiceImpl implements SchemaService {
 
         List<String> order = jsonUtil.fromJsonList(entity.getOrder(), String.class);
 
+        if(order.isEmpty()){
+            order.addAll(schemaRegistry.getOrder());
+        }
+
         order.add(schemaId);
 
         entity.setOrder(jsonUtil.toJson(order));
@@ -373,9 +424,9 @@ public class SchemaServiceImpl implements SchemaService {
                 });
     }
 
-    private List<String> getUserOrder(String userId) {
+    private List<String> getUserOrder(String userId, ViewType viewType) {
         return schemaOrderRepository.
-                findByUserId(userId)
+                findByUserIdAndViewType(userId, viewType)
                 .map(e -> jsonUtil.fromJsonList(e.getOrder(), String.class))
                 .orElse(new ArrayList<>());
     }

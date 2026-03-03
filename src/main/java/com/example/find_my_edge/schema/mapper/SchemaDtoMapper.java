@@ -38,6 +38,7 @@ public class SchemaDtoMapper {
 
                      .ast(copy(dto.getAst(), AstConfig.class))
                      .formula(dto.getFormula())
+                     .idFormula(dto.getIdFormula())
                      .dependencies(safeList(dto.getDependencies()))
 
                      .initialValue(dto.getInitialValue())
@@ -67,6 +68,7 @@ public class SchemaDtoMapper {
 
         dto.setAst(copy(schema.getAst(), AstConfig.class));
         dto.setFormula(schema.getFormula());
+        dto.setIdFormula(schema.getIdFormula());
         dto.setDependencies(safeList(schema.getDependencies()));
 
         dto.setInitialValue(schema.getInitialValue());

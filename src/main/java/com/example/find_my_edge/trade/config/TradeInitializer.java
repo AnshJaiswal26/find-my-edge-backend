@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.Random;
 
 @Component
-@RequiredArgsConstructor
 public class TradeInitializer {
 
-    private final TradeService tradeService;
     private final Random random = new Random();
 
     private static final int DAYS = 60;
@@ -26,23 +24,13 @@ public class TradeInitializer {
     private static final LocalTime MARKET_OPEN = LocalTime.of(9, 15);
     private static final LocalTime MARKET_CLOSE = LocalTime.of(15, 30);
 
-    @PostConstruct
-    public void init() {
-        List<Trade> trades = generateTrades();
+    private final List<Trade> trades = new ArrayList<>();
 
-        tradeService.deleteAll();
-
-        tradeService.createAll(
-                trades
-                        .stream()
-                        .sorted(
-                                (a, b) ->
-                                        Math.toIntExact(((Number) a.getValues().get("date")).longValue() - ((Number) b.getValues().get("date")).longValue())).toList()
-        ); //  seed into DB
+    public TradeInitializer() {
+        generateTrades();
     }
 
     private List<Trade> generateTrades() {
-        List<Trade> trades = new ArrayList<>();
 
         LocalDate startDate = LocalDate.now().minusDays(DAYS);
         int tradeCounter = 1;

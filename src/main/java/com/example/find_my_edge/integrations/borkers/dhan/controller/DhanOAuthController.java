@@ -1,5 +1,6 @@
 package com.example.find_my_edge.integrations.borkers.dhan.controller;
 
+import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.config.FrontendConfig;
 import com.example.find_my_edge.integrations.borkers.dhan.service.DhanOAuthService;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/integrations/dhan")
@@ -47,12 +47,10 @@ public class DhanOAuthController {
 
 
     @GetMapping("/status")
-    public ResponseEntity<?> status() {
+    public ResponseEntity<ApiResponse<Object>> status() {
 
-        boolean connected = dhanOAuthService.isConnected();
+        ApiResponse<Object> status = dhanOAuthService.isConnected();
 
-        return ResponseEntity.ok(Map.of(
-                "connected", connected
-        ));
+        return ResponseEntity.ok(status);
     }
 }

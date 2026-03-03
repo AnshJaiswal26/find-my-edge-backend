@@ -14,18 +14,6 @@ import java.util.Map;
 @Builder
 public class DashboardData {
 
-    // Global Trade Store
-    private Map<String, SchemaResponseDto> schemasById;
-
-    private List<String> schemasOrder;
-
-    private Map<String, Map<String, Object>> tradesById;
-
-    private Map<String, Map<String, Object>> derivedByTradeId;
-
-    private List<String> tradesOrder;
-
-
     // Dashboard Store
     private Map<String, ChartLayoutConfig> chartGridLayout;
 

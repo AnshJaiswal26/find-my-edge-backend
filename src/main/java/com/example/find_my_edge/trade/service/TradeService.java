@@ -1,8 +1,8 @@
 package com.example.find_my_edge.trade.service;
 
 import com.example.find_my_edge.trade.model.Trade;
-import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TradeService {
@@ -25,5 +25,5 @@ public interface TradeService {
 
     List<Trade> fetchIncrementalAndSave();
 
-    List<Trade> fetchCustomAndSave(String fromDate, String toDate);
+    List<Trade> fetchCustomAndSave(LocalDate fromDate, LocalDate toDate);
 }

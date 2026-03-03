@@ -9,9 +9,11 @@ import com.example.find_my_edge.trade.model.Trade;
 import com.example.find_my_edge.trade.service.TradeService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -85,12 +87,42 @@ public class TradeController extends BaseController {
         return buildResponse(null, "Trade deleted successfully");
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> getTrades(
-            @RequestParam String fromDate,
-            @RequestParam String toDate,
-            @RequestParam(defaultValue = "0") int page
+    @PostMapping("/sync/full")
+    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> fullSync() {
+
+        List<Trade> trades = tradeService.fetchAllAndSave();
+
+        List<TradeResponseDto> response = trades.stream()
+                                                .map(tradeDtoMapper::toResponse)
+                                                .toList();
+
+        return buildResponse(response, "Full sync completed");
+    }
+
+    @PostMapping("/sync/incremental")
+    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> incrementalSync() {
+
+        List<Trade> trades = tradeService.fetchIncrementalAndSave();
+
+        List<TradeResponseDto> response = trades.stream()
+                                                .map(tradeDtoMapper::toResponse)
+                                                .toList();
+
+        return buildResponse(response, "Incremental sync completed");
+    }
+
+    @GetMapping("/sync/custom")
+    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> customSync(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
     ) {
-        tradeService.fetchFromDhan(fromDate, toDate, page)
+
+        List<Trade> trades = tradeService.fetchCustomAndSave(fromDate, toDate);
+
+        List<TradeResponseDto> response = trades.stream()
+                                                .map(tradeDtoMapper::toResponse)
+                                                .toList();
+
+        return buildResponse(response, "Custom sync completed");
     }
 }

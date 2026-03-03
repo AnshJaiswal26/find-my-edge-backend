@@ -31,6 +31,7 @@ public class SchemaMapper {
 
                                .astJson(jsonUtil.toJson(schema.getAst()))
                                .formula(schema.getFormula())
+                               .idFormula(schema.getIdFormula())
                                .dependencies(safeList(schema.getDependencies()))
 
                                .initialValue(schema.getInitialValue())
@@ -63,6 +64,7 @@ public class SchemaMapper {
 
                          .ast(jsonUtil.fromJson(entity.getAstJson(), AstConfig.class))
                          .formula(entity.getFormula())
+                         .idFormula(entity.getIdFormula())
                          .dependencies(safeList(entity.getDependencies()))
 
                          // safe to expose

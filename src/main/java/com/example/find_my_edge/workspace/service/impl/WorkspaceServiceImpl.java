@@ -3,6 +3,7 @@ package com.example.find_my_edge.workspace.service.impl;
 import com.example.find_my_edge.common.auth.AuthService;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.entity.WorkspaceEntity;
+import com.example.find_my_edge.workspace.enums.PageType;
 import com.example.find_my_edge.workspace.exception.PageNotFoundException;
 import com.example.find_my_edge.workspace.exception.WorkspaceNotFoundException;
 import com.example.find_my_edge.workspace.model.WorkspaceData;
@@ -125,5 +126,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         }
 
         return data.getPages();
+    }
+
+    @Override
+    public void removeSchemaReferences(String schemaId) {
+        getPageAndModify(
+                page -> page.getColumnWidths().remove(schemaId),
+                PageType.TRADE_METRIC.key()
+        );
+    }
+
+    @Override
+    public void removeTradeReferences(String tradeId) {
+        getPageAndModify(
+                page -> page.getHighlightedRows().remove(tradeId),
+                PageType.TRADE_METRIC.key()
+        );
     }
 }

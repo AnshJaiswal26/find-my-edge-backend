@@ -24,7 +24,7 @@ public class WorkspaceRegistry {
     private final WorkspaceService workspaceService;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         workspaceService.delete();
         WorkspaceEntity workspaceEntity = workspaceService.get();
         workspaceEntity.setData(createDefaultWorkspace());
@@ -38,6 +38,7 @@ public class WorkspaceRegistry {
         Map<String, PageConfig> pages = new HashMap<>();
 
         pages.put(PageType.DASHBOARD.key(), defaultDashboard());
+        pages.put(PageType.TRADE_METRIC.key(), defaultTradeMetric());
 
         data.setPages(pages);
 
@@ -55,6 +56,16 @@ public class WorkspaceRegistry {
         // default stats
         page.setStatsById(statRegistry.getStatsById());
         page.setStatsOrder(statRegistry.getOrder());
+
+        return page;
+    }
+
+    private PageConfig defaultTradeMetric() {
+
+        PageConfig page = new PageConfig();
+
+        page.setColumnWidths(new HashMap<>());
+        page.setHighlightedRows(new HashMap<>());
 
         return page;
     }

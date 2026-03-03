@@ -1,7 +1,10 @@
 package com.example.find_my_edge.integrations.borkers.dhan.service;
 
 import com.example.find_my_edge.common.auth.AuthService;
+import com.example.find_my_edge.common.enums.ResponseState;
+import com.example.find_my_edge.common.response.ApiResponse;
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
+import com.example.find_my_edge.integrations.borkers.dhan.dto.ConnectionStatusResponseDto;
 import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanAccessTokenResponseDto;
 import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanConsentResponseDto;
 import com.example.find_my_edge.integrations.borkers.dhan.entity.DhanTokenEntity;
@@ -10,6 +13,7 @@ import com.example.find_my_edge.integrations.borkers.dhan.exception.TokenExpired
 import com.example.find_my_edge.integrations.borkers.dhan.exception.UserNotConnectedException;
 import com.example.find_my_edge.integrations.borkers.dhan.repository.DhanTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -98,22 +102,38 @@ public class DhanOAuthService {
 
         DhanTokenEntity token =
                 repo.findByUserId(userId)
-                    .orElseThrow(() -> new UserNotConnectedException("User not connected to Dhan"));
+                    .orElseThrow(() -> new UserNotConnectedException("User not connected to dhan"));
 
         if (token.getExpiry().minusSeconds(60).isBefore(Instant.now())) {
-            throw new TokenExpiredException("TOKEN_EXPIRED");
+            throw new TokenExpiredException("Access token is expired");
         }
 
         return token.getAccessToken();
     }
 
-    public boolean isConnected() {
+    public ApiResponse<Object> isConnected() {
+
         try {
             getValidToken();
-            return true;
-        } catch (UserNotConnectedException | TokenExpiredException e) {
-            return false;
+        } catch (UserNotConnectedException e) {
+            return ApiResponse.builder()
+                              .httpStatus(HttpStatus.OK.value())
+                              .state(ResponseState.NOT_CONNECTED)
+                              .message(e.getMessage())
+                              .build();
+        } catch (TokenExpiredException e) {
+            return ApiResponse.builder()
+                              .httpStatus(HttpStatus.OK.value())
+                              .state(ResponseState.TOKEN_EXPIRED)
+                              .message(e.getMessage())
+                              .build();
         }
+
+        return ApiResponse.builder()
+                          .httpStatus(HttpStatus.OK.value())
+                          .state(ResponseState.CONNECTED)
+                          .message("User is already connected to dhan")
+                          .build();
     }
 
     public Instant getLastFetchedAt() {
@@ -124,8 +144,7 @@ public class DhanOAuthService {
                    .orElse(null);
     }
 
-    public void updateLastFetchedAt(Instant instant) {
-        String userId = authService.getCurrentUserId();
+    public void updateLastFetchedAt(Instant instant, String userId) {
 
         DhanTokenEntity token = repo.findByUserId(userId)
                                     .orElseThrow();

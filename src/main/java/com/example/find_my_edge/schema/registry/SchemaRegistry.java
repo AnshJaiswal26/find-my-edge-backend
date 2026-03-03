@@ -193,6 +193,7 @@ public class SchemaRegistry {
                      .role(SchemaRole.SYSTEM_REQUIRED)
                      .dependencies(List.of("entryTime", "exitTime"))
                      .formula("[Exit Time] - [Entry Time]")
+                     .idFormula("@{exitTime} - @{entryTime}")
                      .ast(binary(field("exitTime"), "-", field("entryTime")))
                      .display(display("HH:mm:ss", 0))
                      .colorRules(List.of(
@@ -212,6 +213,7 @@ public class SchemaRegistry {
                      .role(SchemaRole.SYSTEM_REQUIRED)
                      .dependencies(List.of("exit", "entry", "qty"))
                      .formula("([Exit] - [Entry]) * [Qty]")
+                     .idFormula("(@{exit} - @{entry}) * @{qty}")
                      .ast(
                              binary(
                                      binary(field("exit"), "-", field("entry")),

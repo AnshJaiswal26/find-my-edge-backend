@@ -20,4 +20,8 @@ public interface WorkspaceService {
     PageConfig getPage(String page);
 
     void delete();
+
+    void removeSchemaReferences(String schemaId);
+
+    void removeTradeReferences(String tradeId);
 }

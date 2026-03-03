@@ -165,6 +165,7 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
                      .mode(system.getMode())
                      .ast(system.getAst())
                      .formula(system.getFormula())
+                     .idFormula(system.getIdFormula())
                      .dependencies(system.getDependencies())
                      .source(system.getSource())
                      .role(system.getRole())

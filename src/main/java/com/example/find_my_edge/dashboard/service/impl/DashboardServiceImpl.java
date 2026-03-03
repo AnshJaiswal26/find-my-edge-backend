@@ -3,7 +3,6 @@ package com.example.find_my_edge.dashboard.service.impl;
 import com.example.find_my_edge.analytics.model.TradeContextSplit;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.schema.dto.SchemaResponseDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDtoBundle;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.dashboard.model.DashboardData;
 import com.example.find_my_edge.dashboard.service.DashboardService;
@@ -54,22 +53,21 @@ public class DashboardServiceImpl implements DashboardService {
             throw new PageNotFoundException("Dashboard page config not found");
         }
 
-        List<String> schemasOrder = schemaBundle.getSchemasOrder();
+//        List<String> schemasOrder = schemaBundle.getSchemasOrder();
         Map<String, Schema> schemas = schemaBundle.getSchemasById();
 
-        TradeContextSplit tradeContextSplit =
-                computeService.getTradeContextSplit(schemas, trades);
+//        TradeContextSplit tradeContextSplit =
+//                computeService.getTradeContextSplit(schemas, trades);
 
-        Map<String, SchemaResponseDto> schemasById = new HashMap<>();
+//        Map<String, SchemaResponseDto> schemasById = new HashMap<>();
 
-        schemas.forEach((key, value) ->
-                                schemasById.put(key, schemaDtoMapper.toResponse(value))
-        );
+//        schemas.forEach((key, value) ->
+//                                schemasById.put(key, schemaDtoMapper.toResponse(value)));
 
-        List<String> tradesOrder = tradeContextSplit.getTradesOrder();
+//        List<String> tradesOrder = tradeContextSplit.getTradesOrder();
 
-        Map<String, Map<String, Object>> raw = tradeContextSplit.getRaw();
-        Map<String, Map<String, Object>> computed = tradeContextSplit.getComputed();
+//        Map<String, Map<String, Object>> raw = tradeContextSplit.getRaw();
+//        Map<String, Map<String, Object>> computed = tradeContextSplit.getComputed();
 
         Map<String, ChartConfig> charts = page.getCharts();
         List<String> chartOrder = page.getChartOrder();
@@ -83,11 +81,6 @@ public class DashboardServiceImpl implements DashboardService {
 
         return DashboardData.builder()
                             .chartGridLayout(chartGridLayout)
-                            .schemasById(schemasById)
-                            .schemasOrder(schemasOrder)
-                            .tradesOrder(tradesOrder)
-                            .tradesById(raw)
-                            .derivedByTradeId(computed)
                             .charts(charts)
                             .chartOrder(chartOrder)
                             .statsById(statsById)

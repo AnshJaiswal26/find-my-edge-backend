@@ -21,5 +21,7 @@ public interface SchemaService {
 
     void delete(String id);
 
+    List<String> getOrder(ViewType viewType);
+
     List<String> updateOrder(List<String> order, ViewType viewType);
 }

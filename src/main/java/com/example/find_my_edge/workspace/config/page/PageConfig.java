@@ -33,10 +33,11 @@ public class PageConfig {
     @Builder.Default
     private Map<String, StatConfig> statsById = new HashMap<>();
 
-    // Table
-    @Builder.Default
-    private List<String> columnsOrder = new ArrayList<>();
+    // table
     @Builder.Default
     private Map<String, Integer> columnWidths = new HashMap<>();
+
+    @Builder.Default
+    private Map<String, Boolean> highlightedRows = new HashMap<>();
 
 }
