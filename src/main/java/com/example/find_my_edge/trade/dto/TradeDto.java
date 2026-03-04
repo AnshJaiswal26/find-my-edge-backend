@@ -7,9 +7,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class TradeResponseDto {
+public class TradeDto {
 
     private String id;
+
+    private String externalId;
+
+    private Long date;
+
+    private Integer entryTime;
+    private Integer exitTime;
+
+    private String symbol;
+
+    private String direction;
+
+    private Integer qty;
+
+    private Double entryPrice;
+    private Double exitPrice;
+
+    private Double charges;
 
     private Map<String, Object> values = new HashMap<>();
 

@@ -113,8 +113,8 @@ public class SchemaRegistry {
                       .build(),
 
                 systemField(
-                        "entry",
-                        "Entry",
+                        "entryPrice",
+                        "Entry Price",
                         FieldType.NUMBER,
                         SemanticType.NUMBER
                 )
@@ -122,8 +122,8 @@ public class SchemaRegistry {
                         .build(),
 
                 systemField(
-                        "exit",
-                        "Exit",
+                        "exitPrice",
+                        "Exit Price",
                         FieldType.NUMBER,
                         SemanticType.NUMBER
                 )
@@ -211,12 +211,12 @@ public class SchemaRegistry {
                      .semanticType(SemanticType.NUMBER)
                      .source(SchemaSource.COMPUTED)
                      .role(SchemaRole.SYSTEM_REQUIRED)
-                     .dependencies(List.of("exit", "entry", "qty"))
-                     .formula("([Exit] - [Entry]) * [Qty]")
-                     .idFormula("(@{exit} - @{entry}) * @{qty}")
+                     .dependencies(List.of("exitPrice", "entryPrice", "qty"))
+                     .formula("([Exit Price] - [Entry Price]) * [Qty]")
+                     .idFormula("(@{exitPrice} - @{entryPrice}) * @{qty}")
                      .ast(
                              binary(
-                                     binary(field("exit"), "-", field("entry")),
+                                     binary(field("exitPrice"), "-", field("entryPrice")),
                                      "*",
                                      field("qty")
                              )

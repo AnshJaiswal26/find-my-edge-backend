@@ -21,15 +21,18 @@ public class TradeEntity {
 
     // 🔥 structured fields
     private Long date;
-    private Long entryTime;
-    private Long exitTime;
+    private Integer entryTime;
+    private Integer exitTime;
 
     private String symbol;
     private String direction;
 
-    private Double pnl;
     private Double charges;
-    private Integer quantity;
+
+    private Double entryPrice;
+    private Double exitPrice;
+
+    private Integer qty;
 
     // 🔥 dynamic fields
     @Column(name = "field_value", columnDefinition = "JSON")

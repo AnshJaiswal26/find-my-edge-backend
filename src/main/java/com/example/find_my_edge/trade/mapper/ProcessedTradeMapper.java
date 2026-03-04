@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.Map;
 
 @Component
 public class ProcessedTradeMapper {
@@ -16,40 +15,31 @@ public class ProcessedTradeMapper {
 
         Trade trade = new Trade();
 
-        trade.setExternalId(t.getOrderId()); // 🔥 important
-
-        Map<String, Object> v = trade.getValues();
+        trade.setExternalId(t.getOrderId()); // important
 
         /* -------- DATE -------- */
         long dateEpoch = LocalDate.parse(t.getEntryTime().substring(0, 10))
                                   .atStartOfDay(ZoneOffset.UTC)
                                   .toEpochSecond();
 
-        v.put("date", dateEpoch);
+        trade.setDate(dateEpoch);
 
         /* -------- TIME -------- */
         LocalTime entry = LocalTime.parse(t.getEntryTime().substring(11));
         LocalTime exit = LocalTime.parse(t.getExitTime().substring(11));
 
-        v.put("entryTime", entry.toSecondOfDay());
-        v.put("exitTime", exit.toSecondOfDay());
-
-        v.put("duration", exit.toSecondOfDay() - entry.toSecondOfDay());
+        trade.setExitTime(entry.toSecondOfDay());
+        trade.setExitTime(exit.toSecondOfDay());
 
         /* -------- TRADE INFO -------- */
-        v.put("symbol", t.getSymbol());
-        v.put("qty", t.getQuantity());
+        trade.setSymbol(t.getSymbol());
+        trade.setQty(t.getQuantity());
 
-        v.put("entry", t.getBuyPrice());
-        v.put("exit", t.getSellPrice());
+        trade.setEntryPrice(t.getBuyPrice());
+        trade.setExitPrice(t.getSellPrice());
 
-        /* -------- PNL -------- */
-        v.put("pnl", t.getPnl());
-
-        v.put("charges", t.getCharges());
-
-        /* -------- DIRECTION -------- */
-        v.put("direction", t.getDirection()); // PUT / CALL
+        trade.setCharges(t.getCharges());
+        trade.setDirection(t.getDirection());
 
         return trade;
     }

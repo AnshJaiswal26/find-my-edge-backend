@@ -1,11 +1,12 @@
 package com.example.find_my_edge.trade.service.impl;
 
 import com.example.find_my_edge.common.auth.AuthService;
-import com.example.find_my_edge.integrations.borkers.dhan.exception.NoTradesFound;
+import com.example.find_my_edge.integrations.borkers.common.exception.NoTradesFound;
 import com.example.find_my_edge.integrations.borkers.dhan.model.ProcessedTrade;
 import com.example.find_my_edge.integrations.borkers.dhan.service.DhanOAuthService;
 import com.example.find_my_edge.integrations.borkers.dhan.service.DhanTradeService;
 import com.example.find_my_edge.trade.entity.TradeEntity;
+import com.example.find_my_edge.trade.exception.TradeIdNullException;
 import com.example.find_my_edge.trade.exception.TradeNotFoundException;
 import com.example.find_my_edge.trade.mapper.ProcessedTradeMapper;
 import com.example.find_my_edge.trade.mapper.TradeEntityMapper;
@@ -49,12 +50,16 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public Trade create(Trade trade) {
 
+        if(trade.getId() == null){
+            throw new TradeIdNullException("Trade must have an id");
+        }
+
         String userId = authService.getCurrentUserId();
         long now = Instant.now().toEpochMilli();
 
         TradeEntity entity = mapper.toEntity(trade);
 
-        entity.setId(UUID.randomUUID().toString());
+        entity.setId(trade.getId());
         entity.setUserId(userId);
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);

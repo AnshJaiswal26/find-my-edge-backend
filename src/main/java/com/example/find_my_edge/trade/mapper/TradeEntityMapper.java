@@ -19,41 +19,33 @@ public class TradeEntityMapper {
 
         entity.setId(model.getId()); // for update
 
+        // Extract structured fields from values
+
+        entity.setExternalId(model.getExternalId());
+
+        entity.setDate(model.getDate());
+
+        entity.setEntryTime(entity.getEntryTime());
+
+        entity.setExitTime(model.getExitTime());
+
+        entity.setSymbol(model.getSymbol());
+
+        entity.setDirection(model.getDirection());
+
+        entity.setCharges(model.getCharges());
+
+        entity.setEntryPrice(model.getEntryPrice());
+        entity.setExitPrice(model.getExitPrice());
+
+        entity.setQty(model.getQty());
+
         Map<String, Object> values =
                 model.getValues() != null
                 ? new HashMap<>(model.getValues())
                 : new HashMap<>();
 
-        // 🔥 Extract structured fields from values
-
-        entity.setExternalId((String) values.get("externalId"));
-        values.remove("externalId");
-
-        entity.setDate(getLong(values.get("date")));
-        values.remove("date");
-
-        entity.setEntryTime(getLong(values.get("entryTime")));
-        values.remove("entryTime");
-
-        entity.setExitTime(getLong(values.get("exitTime")));
-        values.remove("exitTime");
-
-        entity.setSymbol((String) values.get("symbol"));
-        values.remove("symbol");
-
-        entity.setDirection((String) values.get("direction"));
-        values.remove("direction");
-
-        entity.setPnl(getDouble(values.get("pnl")));
-        values.remove("pnl");
-
-        entity.setCharges(getDouble(values.get("charges")));
-        values.remove("charges");
-
-        entity.setQuantity(getInteger(values.get("qty")));
-        values.remove("qty");
-
-        // 🔥 Keep full values JSON (including structured fields if you want)
+        // Keep full values JSON (including structured fields if you want)
         entity.setValues(values);
 
         return entity;
@@ -69,50 +61,19 @@ public class TradeEntityMapper {
                 ? new HashMap<>(entity.getValues())
                 : new HashMap<>();
 
-        // 🔥 Ensure structured fields are always present in values
-
-        putIfNotNull(values, "externalId", entity.getExternalId());
-
-        putIfNotNull(values, "date", entity.getDate());
-        putIfNotNull(values, "entryTime", entity.getEntryTime());
-        putIfNotNull(values, "exitTime", entity.getExitTime());
-
-        putIfNotNull(values, "symbol", entity.getSymbol());
-        putIfNotNull(values, "direction", entity.getDirection());
-
-        putIfNotNull(values, "pnl", entity.getPnl());
-        putIfNotNull(values, "charges", entity.getCharges());
-        putIfNotNull(values, "quantity", entity.getQuantity());
-
         return Trade.builder()
                     .id(entity.getId())
+                    .externalId(entity.getExternalId())
+                    .date(entity.getDate())
+                    .entryTime(entity.getEntryTime())
+                    .exitTime(entity.getExitTime())
+                    .entryPrice(entity.getEntryPrice())
+                    .exitPrice(entity.getExitPrice())
+                    .qty(entity.getQty())
+                    .charges(entity.getCharges())
+                    .symbol(entity.getSymbol())
+                    .direction(entity.getDirection())
                     .values(values)
                     .build();
-    }
-
-    /* ---------------- HELPERS ---------------- */
-
-    private Long getLong(Object val) {
-        if(val == null) return null;
-
-        return val instanceof Number num ? ((Number) num).longValue() : 0;
-    }
-
-    private Double getDouble(Object val) {
-        if(val == null) return null;
-
-        return val instanceof Number num ? ((Number) num).doubleValue() : 0.0;
-    }
-
-    private Integer getInteger(Object val) {
-        if(val == null) return null;
-
-        return val instanceof Number num ? ((Number) num).intValue() : 0;
-    }
-
-    private void putIfNotNull(Map<String, Object> map, String key, Object value) {
-        if (value != null) {
-            map.put(key, value);
-        }
     }
 }

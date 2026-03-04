@@ -5,9 +5,5 @@ public enum ResponseState {
     ERROR,
     INFO,
     PROGRESS,
-    QUEUED,
-
-    NOT_CONNECTED,
-    CONNECTED,
-    TOKEN_EXPIRED;
+    QUEUED;
 }

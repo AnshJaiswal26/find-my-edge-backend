@@ -1,19 +1,21 @@
 package com.example.find_my_edge.integrations.borkers.dhan.service;
 
 import com.example.find_my_edge.common.auth.AuthService;
-import com.example.find_my_edge.common.enums.ResponseState;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.integrations.borkers.common.entity.BrokerTokenEntity;
+import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
-import com.example.find_my_edge.integrations.borkers.dhan.dto.ConnectionStatusResponseDto;
+import com.example.find_my_edge.integrations.borkers.common.dto.ConnectionStatusResponseDto;
 import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanAccessTokenResponseDto;
 import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanConsentResponseDto;
-import com.example.find_my_edge.integrations.borkers.dhan.entity.DhanTokenEntity;
-import com.example.find_my_edge.integrations.borkers.dhan.exception.FailedToConnect;
-import com.example.find_my_edge.integrations.borkers.dhan.exception.TokenExpiredException;
-import com.example.find_my_edge.integrations.borkers.dhan.exception.UserNotConnectedException;
-import com.example.find_my_edge.integrations.borkers.dhan.repository.DhanTokenRepository;
+import com.example.find_my_edge.integrations.borkers.common.exception.FailedToConnect;
+import com.example.find_my_edge.integrations.borkers.common.exception.TokenExpiredException;
+import com.example.find_my_edge.integrations.borkers.common.exception.UserNotConnectedException;
+import com.example.find_my_edge.integrations.borkers.common.repository.BrokerTokenRepository;
+import com.example.find_my_edge.integrations.borkers.common.enums.ConnectionStatus;
+import com.example.find_my_edge.integrations.borkers.common.service.BrokerOAuthService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -23,23 +25,31 @@ import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
-public class DhanOAuthService {
+public class DhanOAuthService implements BrokerOAuthService {
 
     private final AuthService authService;
 
-    private final DhanTokenRepository repo;
+    private final BrokerTokenRepository repo;
     private final RestClient restClient;
     private final DhanConfig config;
 
+    private void setHeaders(HttpHeaders httpHeaders) {
+        httpHeaders.set("app_id", config.getAppId());
+        httpHeaders.set("app_secret", config.getAppSecret());
+    }
+
+    @Override
+    public String getBrokerName() {
+        return "dhan";
+    }
+
+    @Override
     public String generateConsentUrl() {
 
         DhanConsentResponseDto response =
                 restClient.get()
                           .uri(config.getAuthUrl() + "/app/generate-consent?client_id=" + config.getClientId())
-                          .headers((httpHeaders) -> {
-                              httpHeaders.set("app_id", config.getAppId());
-                              httpHeaders.set("app_secret", config.getAppSecret());
-                          })
+                          .headers(this::setHeaders)
                           .retrieve()
                           .body(DhanConsentResponseDto.class);
 
@@ -54,6 +64,8 @@ public class DhanOAuthService {
                "/login/consentApp-login?consentAppId=" + consentAppId;
     }
 
+    @Transactional
+    @Override
     public void handleCallback(String tokenId) {
 
         String userId = authService.getCurrentUserId();
@@ -61,10 +73,7 @@ public class DhanOAuthService {
         DhanAccessTokenResponseDto response =
                 restClient.get()
                           .uri(config.getAuthUrl() + "/app/consumeApp-consent?tokenId=" + tokenId)
-                          .headers((httpHeaders -> {
-                              httpHeaders.set("app_id", config.getAppId());
-                              httpHeaders.set("app_secret", config.getAppSecret());
-                          }))
+                          .headers(this::setHeaders)
                           .retrieve()
                           .body(DhanAccessTokenResponseDto.class);
 
@@ -72,19 +81,21 @@ public class DhanOAuthService {
             throw new FailedToConnect("Failed to fetch access token from Dhan");
         }
 
-        String accessToken = response.getAccessToken();
-
-        String expiryTimeStr = response.getExpiryTime();
+        System.out.println("expiry raw = [" + response.getExpiryTime() + "]");
 
         try {
+            String accessToken = response.getAccessToken();
+            String expiryTimeStr = response.getExpiryTime().trim();
+
             Instant expiry = LocalDateTime.parse(expiryTimeStr)
                                           .atZone(ZoneId.of("Asia/Kolkata"))
                                           .toInstant();
 
-            DhanTokenEntity entity = repo.findByUserId(userId)
-                                         .orElse(new DhanTokenEntity());
+            BrokerTokenEntity entity = repo.findByUserIdAndBroker(userId, Broker.DHAN)
+                                           .orElse(new BrokerTokenEntity());
 
             entity.setUserId(userId);
+            entity.setBroker(Broker.DHAN);
             entity.setAccessToken(accessToken);
             entity.setExpiry(expiry);
 
@@ -96,58 +107,73 @@ public class DhanOAuthService {
 
     }
 
+    @Override
     public String getValidToken() {
 
         String userId = authService.getCurrentUserId();
 
-        DhanTokenEntity token =
-                repo.findByUserId(userId)
+        BrokerTokenEntity token =
+                repo.findByUserIdAndBroker(userId, Broker.DHAN)
                     .orElseThrow(() -> new UserNotConnectedException("User not connected to dhan"));
 
         if (token.getExpiry().minusSeconds(60).isBefore(Instant.now())) {
-            throw new TokenExpiredException("Access token is expired");
+            throw new TokenExpiredException("Access token is expired for dhan");
         }
 
         return token.getAccessToken();
     }
 
-    public ApiResponse<Object> isConnected() {
+    @Override
+    public ConnectionStatusResponseDto getConnectionStatus() {
 
         try {
             getValidToken();
         } catch (UserNotConnectedException e) {
-            return ApiResponse.builder()
-                              .httpStatus(HttpStatus.OK.value())
-                              .state(ResponseState.NOT_CONNECTED)
-                              .message(e.getMessage())
-                              .build();
+            return new ConnectionStatusResponseDto(
+                    ConnectionStatus.CONNECTED,
+                    e.getMessage()
+            );
         } catch (TokenExpiredException e) {
-            return ApiResponse.builder()
-                              .httpStatus(HttpStatus.OK.value())
-                              .state(ResponseState.TOKEN_EXPIRED)
-                              .message(e.getMessage())
-                              .build();
+            return new ConnectionStatusResponseDto(
+                    ConnectionStatus.TOKEN_EXPIRED,
+                    e.getMessage()
+            );
         }
 
-        return ApiResponse.builder()
-                          .httpStatus(HttpStatus.OK.value())
-                          .state(ResponseState.CONNECTED)
-                          .message("User is already connected to dhan")
-                          .build();
+        return new ConnectionStatusResponseDto(
+                ConnectionStatus.CONNECTED,
+                "User is already connected to dhan"
+        );
     }
 
+    @Transactional
+    @Override
+    public ConnectionStatusResponseDto disconnect() {
+        String userId = authService.getCurrentUserId();
+
+        repo.deleteByUserIdAndBroker(userId, Broker.DHAN);
+
+        return new ConnectionStatusResponseDto(
+                ConnectionStatus.DISCONNECTED,
+                "User Disconnected from dhan"
+        );
+    }
+
+    @Override
     public Instant getLastFetchedAt() {
         String userId = authService.getCurrentUserId();
 
-        return repo.findByUserId(userId)
-                   .map(DhanTokenEntity::getLastFetchedAt)
+        return repo.findByUserIdAndBroker(userId, Broker.DHAN)
+                   .map(BrokerTokenEntity::getLastFetchedAt)
                    .orElse(null);
     }
 
+    @Override
     public void updateLastFetchedAt(Instant instant, String userId) {
 
-        DhanTokenEntity token = repo.findByUserId(userId)
-                                    .orElseThrow();
+        BrokerTokenEntity token =
+                repo.findByUserIdAndBroker(userId, Broker.DHAN)
+                    .orElseThrow(() -> new UserNotConnectedException("User is not connected to dhan"));
 
         token.setLastFetchedAt(instant);
         repo.save(token);

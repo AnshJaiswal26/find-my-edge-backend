@@ -3,8 +3,7 @@ package com.example.find_my_edge.trade.controller;
 import com.example.find_my_edge.trade.mapper.TradeDtoMapper;
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.response.ApiResponse;
-import com.example.find_my_edge.trade.dto.TradeRequestDto;
-import com.example.find_my_edge.trade.dto.TradeResponseDto;
+import com.example.find_my_edge.trade.dto.TradeDto;
 import com.example.find_my_edge.trade.model.Trade;
 import com.example.find_my_edge.trade.service.TradeService;
 
@@ -27,13 +26,13 @@ public class TradeController extends BaseController {
     /* ---------------- GET ALL ---------------- */
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> getAllTrades() {
+    public ResponseEntity<ApiResponse<List<TradeDto>>> getAllTrades() {
 
         List<Trade> trades = tradeService.getAll();
 
-        List<TradeResponseDto> response = trades.stream()
-                                                .map(tradeDtoMapper::toResponse)
-                                                .toList();
+        List<TradeDto> response = trades.stream()
+                                        .map(tradeDtoMapper::toResponse)
+                                        .toList();
 
         return buildResponse(response, "Trades fetched successfully");
     }
@@ -41,40 +40,49 @@ public class TradeController extends BaseController {
     /* ---------------- GET BY ID ---------------- */
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<TradeResponseDto>> getTradeById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<TradeDto>> getTradeById(@PathVariable String id) {
 
         Trade trade = tradeService.getById(id);
 
-        return buildResponse(tradeDtoMapper.toResponse(trade), "Trade fetched successfully");
+        return buildResponse(
+                tradeDtoMapper.toResponse(trade),
+                "Trade fetched successfully"
+        );
     }
 
     /* ---------------- CREATE ---------------- */
 
     @PostMapping
-    public ResponseEntity<ApiResponse<TradeResponseDto>> createTrade(
-            @RequestBody TradeRequestDto request
+    public ResponseEntity<ApiResponse<TradeDto>> createTrade(
+            @RequestBody TradeDto request
     ) {
 
-        Trade model = tradeDtoMapper.toDomain(request);
+        Trade model = tradeDtoMapper.toModel(request);
 
         Trade saved = tradeService.create(model);
 
-        return buildResponse(tradeDtoMapper.toResponse(saved), "Trade created successfully");
+        return buildResponse(
+                tradeDtoMapper.toResponse(saved),
+                "Trade created successfully"
+        );
     }
 
     /* ---------------- UPDATE ---------------- */
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TradeResponseDto>> updateTrade(
+    public ResponseEntity<ApiResponse<TradeDto>> updateTrade(
             @PathVariable String id,
-            @RequestBody TradeRequestDto request
+            @RequestBody TradeDto request
     ) {
 
-        Trade model = tradeDtoMapper.toDomain(request);
+        Trade model = tradeDtoMapper.toModel(request);
 
         Trade updated = tradeService.update(id, model);
 
-        return buildResponse(tradeDtoMapper.toResponse(updated), "Trade updated successfully");
+        return buildResponse(
+                tradeDtoMapper.toResponse(updated),
+                "Trade updated successfully"
+        );
     }
 
     /* ---------------- DELETE ---------------- */
@@ -88,40 +96,40 @@ public class TradeController extends BaseController {
     }
 
     @PostMapping("/sync/full")
-    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> fullSync() {
+    public ResponseEntity<ApiResponse<List<TradeDto>>> fullSync() {
 
         List<Trade> trades = tradeService.fetchAllAndSave();
 
-        List<TradeResponseDto> response = trades.stream()
-                                                .map(tradeDtoMapper::toResponse)
-                                                .toList();
+        List<TradeDto> response = trades.stream()
+                                        .map(tradeDtoMapper::toResponse)
+                                        .toList();
 
         return buildResponse(response, "Full sync completed");
     }
 
     @PostMapping("/sync/incremental")
-    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> incrementalSync() {
+    public ResponseEntity<ApiResponse<List<TradeDto>>> incrementalSync() {
 
         List<Trade> trades = tradeService.fetchIncrementalAndSave();
 
-        List<TradeResponseDto> response = trades.stream()
-                                                .map(tradeDtoMapper::toResponse)
-                                                .toList();
+        List<TradeDto> response = trades.stream()
+                                        .map(tradeDtoMapper::toResponse)
+                                        .toList();
 
         return buildResponse(response, "Incremental sync completed");
     }
 
     @GetMapping("/sync/custom")
-    public ResponseEntity<ApiResponse<List<TradeResponseDto>>> customSync(
+    public ResponseEntity<ApiResponse<List<TradeDto>>> customSync(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
     ) {
 
         List<Trade> trades = tradeService.fetchCustomAndSave(fromDate, toDate);
 
-        List<TradeResponseDto> response = trades.stream()
-                                                .map(tradeDtoMapper::toResponse)
-                                                .toList();
+        List<TradeDto> response = trades.stream()
+                                        .map(tradeDtoMapper::toResponse)
+                                        .toList();
 
         return buildResponse(response, "Custom sync completed");
     }

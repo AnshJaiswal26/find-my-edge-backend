@@ -26,7 +26,5 @@ public class ProcessedTrade {
     private double buyPrice;
     private double sellPrice;
 
-    private double pnl;
-
     private double charges;
 }

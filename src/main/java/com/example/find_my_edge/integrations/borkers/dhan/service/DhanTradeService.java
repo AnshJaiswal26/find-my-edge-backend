@@ -1,9 +1,9 @@
 package com.example.find_my_edge.integrations.borkers.dhan.service;
 
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
-import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeDto;
-import com.example.find_my_edge.integrations.borkers.dhan.exception.NoTradesFound;
-import com.example.find_my_edge.integrations.borkers.dhan.exception.TradeFetchFailed;
+import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeResponseDto;
+import com.example.find_my_edge.integrations.borkers.common.exception.NoTradesFound;
+import com.example.find_my_edge.integrations.borkers.common.exception.TradeFetchFailedException;
 import com.example.find_my_edge.integrations.borkers.dhan.model.ProcessedTrade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,7 +33,7 @@ public class DhanTradeService {
         String url = config.getBaseUrl() +
                      "/v2/trades/" + validatedFrom + "/" + validatedTo + "/" + page;
 
-        List<DhanTradeDto> trades =
+        List<DhanTradeResponseDto> trades =
                 restClient.get()
                           .uri(url)
                           .headers(headers -> {
@@ -44,10 +44,10 @@ public class DhanTradeService {
                           .onStatus(
                                   HttpStatusCode::isError,
                                   (req, res) -> {
-                                      throw new TradeFetchFailed("Dhan API failed");
+                                      throw new TradeFetchFailedException("Dhan API failed");
                                   }
                           )
-                          .body(new ParameterizedTypeReference<List<DhanTradeDto>>() {
+                          .body(new ParameterizedTypeReference<List<DhanTradeResponseDto>>() {
                           });
 
         if (trades == null || trades.isEmpty()
@@ -58,11 +58,11 @@ public class DhanTradeService {
         return processTrades(trades);
     }
 
-    public List<ProcessedTrade> processTrades(List<DhanTradeDto> trades) {
+    public List<ProcessedTrade> processTrades(List<DhanTradeResponseDto> trades) {
 
-        Map<String, List<DhanTradeDto>> grouped =
+        Map<String, List<DhanTradeResponseDto>> grouped =
                 trades.stream().filter(trade -> trade.getInstrument().equals("OPTIDX"))
-                      .collect(Collectors.groupingBy(DhanTradeDto::getOrderId));
+                      .collect(Collectors.groupingBy(DhanTradeResponseDto::getOrderId));
 
         if (grouped.isEmpty()) {
             return Collections.emptyList();
@@ -70,19 +70,19 @@ public class DhanTradeService {
 
         List<ProcessedTrade> result = new ArrayList<>();
 
-        for (Map.Entry<String, List<DhanTradeDto>> entry : grouped.entrySet()) {
+        for (Map.Entry<String, List<DhanTradeResponseDto>> entry : grouped.entrySet()) {
 
-            List<DhanTradeDto> group = entry.getValue();
+            List<DhanTradeResponseDto> group = entry.getValue();
 
-            DhanTradeDto buy = null;
-            DhanTradeDto sell = null;
+            DhanTradeResponseDto buy = null;
+            DhanTradeResponseDto sell = null;
 
             double buyCharges = 0;
             double sellCharges = 0;
 
             String date = "";
 
-            for (DhanTradeDto t : group) {
+            for (DhanTradeResponseDto t : group) {
                 if ("BUY".equalsIgnoreCase(t.getTransactionType())) {
 
                     date = t.getExchangeTime().split("T")[0];
@@ -111,9 +111,6 @@ public class DhanTradeService {
 
                 double charges = buyCharges + sellCharges;
 
-                double pnl = (sell.getTradedPrice() - buy.getTradedPrice())
-                             * buy.getTradedQuantity();
-
                 result.add(
                         ProcessedTrade.builder()
                                       .orderId(buy.getOrderId())
@@ -124,7 +121,6 @@ public class DhanTradeService {
                                       .quantity(buy.getTradedQuantity())
                                       .buyPrice(buy.getTradedPrice())
                                       .sellPrice(sell.getTradedPrice())
-                                      .pnl(pnl)
                                       .charges(charges)
                                       .entryTime(buy.getExchangeTime())
                                       .exitTime(sell.getExchangeTime())
