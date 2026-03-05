@@ -52,22 +52,7 @@ public class DashboardServiceImpl implements DashboardService {
         if (page == null) {
             throw new PageNotFoundException("Dashboard page config not found");
         }
-
-//        List<String> schemasOrder = schemaBundle.getSchemasOrder();
         Map<String, Schema> schemas = schemaBundle.getSchemasById();
-
-//        TradeContextSplit tradeContextSplit =
-//                computeService.getTradeContextSplit(schemas, trades);
-
-//        Map<String, SchemaResponseDto> schemasById = new HashMap<>();
-
-//        schemas.forEach((key, value) ->
-//                                schemasById.put(key, schemaDtoMapper.toResponse(value)));
-
-//        List<String> tradesOrder = tradeContextSplit.getTradesOrder();
-
-//        Map<String, Map<String, Object>> raw = tradeContextSplit.getRaw();
-//        Map<String, Map<String, Object>> computed = tradeContextSplit.getComputed();
 
         Map<String, ChartConfig> charts = page.getCharts();
         List<String> chartOrder = page.getChartOrder();

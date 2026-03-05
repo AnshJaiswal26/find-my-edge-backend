@@ -1,6 +1,7 @@
 package com.example.find_my_edge.integrations.borkers.common.service;
 
 import com.example.find_my_edge.integrations.borkers.common.dto.ConnectionStatusResponseDto;
+import com.example.find_my_edge.integrations.borkers.common.entity.BrokerTokenEntity;
 
 import java.time.Instant;
 
@@ -12,7 +13,7 @@ public interface BrokerOAuthService {
 
     void handleCallback(String tokenId);
 
-    String getValidToken();
+    void validateToken(BrokerTokenEntity tokenEntity);
 
     ConnectionStatusResponseDto getConnectionStatus();
 
@@ -21,4 +22,6 @@ public interface BrokerOAuthService {
     Instant getLastFetchedAt();
 
     void updateLastFetchedAt(Instant instant, String userId);
+
+    String getValidToken();
 }

@@ -1,4 +1,4 @@
-package com.example.find_my_edge.integrations.borkers.dhan.model;
+package com.example.find_my_edge.integrations.borkers.common.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -2,9 +2,9 @@ package com.example.find_my_edge.integrations.borkers.dhan.service;
 
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
 import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeResponseDto;
-import com.example.find_my_edge.integrations.borkers.common.exception.NoTradesFound;
+import com.example.find_my_edge.integrations.borkers.common.exception.NoTradesFoundException;
 import com.example.find_my_edge.integrations.borkers.common.exception.TradeFetchFailedException;
-import com.example.find_my_edge.integrations.borkers.dhan.model.ProcessedTrade;
+import com.example.find_my_edge.integrations.borkers.common.model.ProcessedTrade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
@@ -52,7 +52,7 @@ public class DhanTradeService {
 
         if (trades == null || trades.isEmpty()
         ) {
-            throw new NoTradesFound("No trade data found");
+            throw new NoTradesFoundException("No trade data found");
         }
 
         return processTrades(trades);

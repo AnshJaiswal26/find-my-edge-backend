@@ -95,42 +95,5 @@ public class TradeController extends BaseController {
         return buildResponse(null, "Trade deleted successfully");
     }
 
-    @PostMapping("/sync/full")
-    public ResponseEntity<ApiResponse<List<TradeDto>>> fullSync() {
 
-        List<Trade> trades = tradeService.fetchAllAndSave();
-
-        List<TradeDto> response = trades.stream()
-                                        .map(tradeDtoMapper::toResponse)
-                                        .toList();
-
-        return buildResponse(response, "Full sync completed");
-    }
-
-    @PostMapping("/sync/incremental")
-    public ResponseEntity<ApiResponse<List<TradeDto>>> incrementalSync() {
-
-        List<Trade> trades = tradeService.fetchIncrementalAndSave();
-
-        List<TradeDto> response = trades.stream()
-                                        .map(tradeDtoMapper::toResponse)
-                                        .toList();
-
-        return buildResponse(response, "Incremental sync completed");
-    }
-
-    @GetMapping("/sync/custom")
-    public ResponseEntity<ApiResponse<List<TradeDto>>> customSync(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-    ) {
-
-        List<Trade> trades = tradeService.fetchCustomAndSave(fromDate, toDate);
-
-        List<TradeDto> response = trades.stream()
-                                        .map(tradeDtoMapper::toResponse)
-                                        .toList();
-
-        return buildResponse(response, "Custom sync completed");
-    }
 }

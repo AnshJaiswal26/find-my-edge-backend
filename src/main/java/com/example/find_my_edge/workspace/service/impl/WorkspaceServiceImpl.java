@@ -1,6 +1,6 @@
 package com.example.find_my_edge.workspace.service.impl;
 
-import com.example.find_my_edge.common.auth.AuthService;
+import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.entity.WorkspaceEntity;
 import com.example.find_my_edge.workspace.enums.PageType;
@@ -20,12 +20,12 @@ import java.util.function.Consumer;
 @Service
 @RequiredArgsConstructor
 public class WorkspaceServiceImpl implements WorkspaceService {
-    private final AuthService authService;
+    private final CurrentUserService currentUserService;
     private final WorkspaceRepository workspaceRepository;
 
     @Override  // for dev
     public WorkspaceEntity get() {
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         return workspaceRepository.findByUserId(userId)
                                   .orElseGet(() -> createDefaultWorkspace(userId));
@@ -106,7 +106,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Override
     @Transactional
     public void delete() {
-        String currentUserId = authService.getCurrentUserId();
+        String currentUserId = currentUserService.getUserId();
         workspaceRepository.deleteByUserId(currentUserId);
     }
 

@@ -21,9 +21,5 @@ public interface TradeService {
 
     void deleteAll();
 
-    List<Trade> fetchAllAndSave();
-
-    List<Trade> fetchIncrementalAndSave();
-
-    List<Trade> fetchCustomAndSave(LocalDate fromDate, LocalDate toDate);
+    void upsertTrades(List<Trade> trades);
 }

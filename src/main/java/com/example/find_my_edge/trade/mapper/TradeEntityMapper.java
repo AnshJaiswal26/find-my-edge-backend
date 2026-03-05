@@ -25,7 +25,7 @@ public class TradeEntityMapper {
 
         entity.setDate(model.getDate());
 
-        entity.setEntryTime(entity.getEntryTime());
+        entity.setEntryTime(model.getEntryTime());
 
         entity.setExitTime(model.getExitTime());
 

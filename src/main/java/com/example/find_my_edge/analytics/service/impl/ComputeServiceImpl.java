@@ -109,9 +109,26 @@ public class ComputeServiceImpl implements ComputeService {
             tradeOrder.add(tradeId);
 
             Map<String, Object> rawMap = new HashMap<>();
+
+            // core trade fields
+            rawMap.put("id", trade.getId());
+            rawMap.put("externalId", trade.getExternalId());
+            rawMap.put("date", trade.getDate());
+            rawMap.put("entryTime", trade.getEntryTime());
+            rawMap.put("exitTime", trade.getExitTime());
+            rawMap.put("symbol", trade.getSymbol());
+            rawMap.put("direction", trade.getDirection());
+            rawMap.put("qty", trade.getQty());
+            rawMap.put("entryPrice", trade.getEntryPrice());
+            rawMap.put("exitPrice", trade.getExitPrice());
+            rawMap.put("charges", trade.getCharges());
+
+            // dynamic schema values
             if (trade.getValues() != null) {
                 trade.getValues().forEach((k, v) -> {
-                    if (k != null) rawMap.put(k, v);
+                    if (k != null && v != null) {
+                        rawMap.put(k, v);
+                    }
                 });
             }
 

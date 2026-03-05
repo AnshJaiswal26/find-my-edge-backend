@@ -1,6 +1,7 @@
 package com.example.find_my_edge.integrations.borkers.common.entity;
 
 import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
+import com.example.find_my_edge.integrations.borkers.common.enums.ConnectionStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.Instant;
@@ -29,4 +30,10 @@ public class BrokerTokenEntity {
     private Instant expiry;
 
     private Instant lastFetchedAt;
+
+    private Instant connectedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ConnectionStatus status;
 }

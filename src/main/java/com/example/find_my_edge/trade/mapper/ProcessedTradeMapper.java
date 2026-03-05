@@ -1,6 +1,6 @@
 package com.example.find_my_edge.trade.mapper;
 
-import com.example.find_my_edge.integrations.borkers.dhan.model.ProcessedTrade;
+import com.example.find_my_edge.integrations.borkers.common.model.ProcessedTrade;
 import com.example.find_my_edge.trade.model.Trade;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class ProcessedTradeMapper {
         LocalTime entry = LocalTime.parse(t.getEntryTime().substring(11));
         LocalTime exit = LocalTime.parse(t.getExitTime().substring(11));
 
-        trade.setExitTime(entry.toSecondOfDay());
+        trade.setEntryTime(entry.toSecondOfDay());
         trade.setExitTime(exit.toSecondOfDay());
 
         /* -------- TRADE INFO -------- */

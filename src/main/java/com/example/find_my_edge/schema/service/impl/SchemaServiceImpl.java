@@ -2,7 +2,7 @@ package com.example.find_my_edge.schema.service.impl;
 
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
-import com.example.find_my_edge.common.auth.AuthService;
+import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.schema.entity.SchemaOverrideEntity;
 import com.example.find_my_edge.schema.enums.SchemaRole;
 import com.example.find_my_edge.schema.enums.SchemaSource;
@@ -36,7 +36,7 @@ import java.util.*;
 @Transactional
 public class SchemaServiceImpl implements SchemaService {
 
-    private final AuthService authService;
+    private final CurrentUserService currentUserService;
     private final AstPipeline astPipeline;
 
     private final SchemaRepository schemaRepository;
@@ -57,7 +57,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         schema.validateForWrite();
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         SchemaEntity entity = mapper.toEntity(schema);
 
@@ -94,7 +94,7 @@ public class SchemaServiceImpl implements SchemaService {
         System.out.println(schema);
         schema.validateForWrite();
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         SchemaEntity existing = schemaRepository
                 .findByIdAndUserId(schemaId, userId)
@@ -184,7 +184,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Transactional(Transactional.TxType.SUPPORTS)
     public Schema getById(String id) {
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         Schema system = schemaRegistry.get(id);
         if (system != null) {
@@ -204,7 +204,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Transactional(Transactional.TxType.SUPPORTS)
     public SchemaBundle getAll() {
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         List<Schema> result = new ArrayList<>();
         Map<String, Schema> byId = new HashMap<>();
@@ -246,7 +246,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public void delete(String id) {
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         SchemaEntity schema = schemaRepository
                 .findByIdAndUserId(id, userId)
@@ -284,7 +284,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<String> getOrder(ViewType viewType) {
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         List<String> defaultOrder = getUserOrder(userId, ViewType.DEFAULT);
 
@@ -326,7 +326,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         System.out.println("updateOrder() method called");
 
-        String userId = authService.getCurrentUserId();
+        String userId = currentUserService.getUserId();
 
         if (order == null || order.isEmpty()) {
             throw new SchemaOrderException("Order cannot be empty");
