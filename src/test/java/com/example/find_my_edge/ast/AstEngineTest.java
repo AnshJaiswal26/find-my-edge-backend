@@ -11,6 +11,7 @@ import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
 import com.example.find_my_edge.analytics.ast.parser.PostfixConverter;
 import com.example.find_my_edge.analytics.ast.parser.Tokenizer;
 import com.example.find_my_edge.analytics.service.ComputeService;
+import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.common.config.AstConfig;
 import com.example.find_my_edge.trade.entity.TradeEntity;
 import com.example.find_my_edge.trade.repository.TradeRepository;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,6 +56,9 @@ class AstEngineTest {
     @Autowired
     private AstPipeline astPipeline;
 
+    @Autowired
+    private CurrentUserService currentUserService;
+
     @Test
     void shouldEvaluateConstant() {
         AstConfig ast = function("ABS", binary(constant(10.0), "-", constant(20.0)));
@@ -69,7 +74,9 @@ class AstEngineTest {
     @Test
     void shouldComputeRunningSum() {
 
-        List<TradeEntity> allByUserId = tradeRepository.findAllByUserId("dev-user-123");
+        UUID userId = currentUserService.getUserId();
+
+        List<TradeEntity> allByUserId = tradeRepository.findAllByUserId(userId);
 
         AstNode ast = astBuilder.build(
                 postfixConverter.toPostfix(tokenizer.tokenize("SUM(pnl)"))).getAstNode();
@@ -94,7 +101,10 @@ class AstEngineTest {
     void shouldComputeAggregate() {
         long start = System.currentTimeMillis();
 
-        List<TradeEntity> allByUserId = tradeRepository.findAllByUserId("dev-user-123");
+        UUID userId = currentUserService.getUserId();
+
+
+        List<TradeEntity> allByUserId = tradeRepository.findAllByUserId(userId);
 
         Double pnl = allByUserId
                 .stream()
@@ -144,7 +154,10 @@ class AstEngineTest {
 
     @Test
     void astTest() {
-        List<TradeEntity> allByUserId = tradeRepository.findAllByUserId("dev-user-123");
+
+        UUID userId = currentUserService.getUserId();
+
+        List<TradeEntity> allByUserId = tradeRepository.findAllByUserId(userId);
 
         long count = allByUserId.stream().map(trade -> {
             double entry = toDouble(trade.getValues().get("entry"));

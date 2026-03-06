@@ -4,6 +4,7 @@ import com.example.find_my_edge.integrations.borkers.common.dto.ConnectionStatus
 import com.example.find_my_edge.integrations.borkers.common.entity.BrokerTokenEntity;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public interface BrokerOAuthService {
 
@@ -21,7 +22,7 @@ public interface BrokerOAuthService {
 
     Instant getLastFetchedAt();
 
-    void updateLastFetchedAt(Instant instant, String userId);
+    void updateLastFetchedAt(Instant instant, UUID userId);
 
     String getValidToken();
 }

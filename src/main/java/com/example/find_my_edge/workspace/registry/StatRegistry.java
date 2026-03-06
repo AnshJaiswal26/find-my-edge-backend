@@ -16,8 +16,6 @@ import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
 @RequiredArgsConstructor
 public class StatRegistry {
 
-    private final StatService statService;
-
     private Map<String, StatConfig> stats;
     private Set<String> statsOrder;
 

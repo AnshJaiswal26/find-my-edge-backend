@@ -14,10 +14,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+
 
     private final JwtService jwtService;
 
@@ -28,6 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+
         try {
 
             String header = request.getHeader("Authorization");
@@ -36,7 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 String token = header.substring(7);
 
-                String userId = jwtService.extractUserId(token);
+                UUID userId = jwtService.extractUserId(token);
 
                 if (userId != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null &&
@@ -68,6 +71,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getServletPath().startsWith("/auth");
+        String path = request.getServletPath();
+
+        return path.equals("/auth/login")
+               || path.equals("/auth/register")
+               || path.equals("/auth/refresh");
     }
 }

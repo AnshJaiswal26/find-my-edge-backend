@@ -1,9 +1,11 @@
 package com.example.find_my_edge.common.auth.service;
 
 
+import java.util.UUID;
+
 public interface CurrentUserService {
 
-    String getUserId();
+    UUID getUserId();
 
     boolean isAuthenticated();
 

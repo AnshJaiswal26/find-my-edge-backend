@@ -6,12 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface SchemaRepository extends JpaRepository<SchemaEntity, String> {
 
-    Optional<SchemaEntity> findByIdAndUserId(String schemaId, String userId);
+    Optional<SchemaEntity> findByIdAndUserId(String schemaId, UUID userId);
 
-    List<SchemaEntity> findAllByUserId(String userId);
+    List<SchemaEntity> findAllByUserId(UUID userId);
 
 }

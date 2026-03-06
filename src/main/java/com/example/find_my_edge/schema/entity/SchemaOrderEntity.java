@@ -4,6 +4,8 @@ import com.example.find_my_edge.schema.enums.ViewType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Table(
         name = "schema_order",
@@ -19,7 +21,7 @@ public class SchemaOrderEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String userId;
+    private UUID userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

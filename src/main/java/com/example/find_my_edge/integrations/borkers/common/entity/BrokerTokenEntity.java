@@ -5,6 +5,7 @@ import com.example.find_my_edge.integrations.borkers.common.enums.ConnectionStat
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -18,7 +19,7 @@ public class BrokerTokenEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String userId;
+    private UUID userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

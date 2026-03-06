@@ -57,7 +57,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         schema.validateForWrite();
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         SchemaEntity entity = mapper.toEntity(schema);
 
@@ -94,7 +94,7 @@ public class SchemaServiceImpl implements SchemaService {
         System.out.println(schema);
         schema.validateForWrite();
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         SchemaEntity existing = schemaRepository
                 .findByIdAndUserId(schemaId, userId)
@@ -184,7 +184,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Transactional(Transactional.TxType.SUPPORTS)
     public Schema getById(String id) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         Schema system = schemaRegistry.get(id);
         if (system != null) {
@@ -204,7 +204,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Transactional(Transactional.TxType.SUPPORTS)
     public SchemaBundle getAll() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         List<Schema> result = new ArrayList<>();
         Map<String, Schema> byId = new HashMap<>();
@@ -246,7 +246,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public void delete(String id) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         SchemaEntity schema = schemaRepository
                 .findByIdAndUserId(id, userId)
@@ -284,7 +284,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<String> getOrder(ViewType viewType) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         List<String> defaultOrder = getUserOrder(userId, ViewType.DEFAULT);
 
@@ -326,7 +326,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         System.out.println("updateOrder() method called");
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         if (order == null || order.isEmpty()) {
             throw new SchemaOrderException("Order cannot be empty");
@@ -387,7 +387,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- HELPERS ---------------- */
 
-    private void updateOrderOnCreate(String userId, String schemaId) {
+    private void updateOrderOnCreate(UUID userId, String schemaId) {
 
         SchemaOrderEntity entity = schemaOrderRepository
                 .findByUserIdAndViewType(userId, ViewType.DEFAULT)
@@ -411,7 +411,7 @@ public class SchemaServiceImpl implements SchemaService {
         schemaOrderRepository.save(entity);
     }
 
-    private void updateOrderOnDelete(String userId, String schemaId) {
+    private void updateOrderOnDelete(UUID userId, String schemaId) {
 
         schemaOrderRepository
                 .findByUserIdAndViewType(userId, ViewType.DEFAULT)
@@ -424,7 +424,7 @@ public class SchemaServiceImpl implements SchemaService {
                 });
     }
 
-    private List<String> getUserOrder(String userId, ViewType viewType) {
+    private List<String> getUserOrder(UUID userId, ViewType viewType) {
         return schemaOrderRepository.
                 findByUserIdAndViewType(userId, viewType)
                 .map(e -> jsonUtil.fromJsonList(e.getOrder(), String.class))

@@ -1,11 +1,8 @@
 package com.example.find_my_edge.workspace.registry;
 
 import com.example.find_my_edge.workspace.config.page.PageConfig;
-import com.example.find_my_edge.workspace.entity.WorkspaceEntity;
 import com.example.find_my_edge.workspace.enums.PageType;
 import com.example.find_my_edge.workspace.model.WorkspaceData;
-import com.example.find_my_edge.workspace.service.WorkspaceService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,17 +18,15 @@ public class WorkspaceRegistry {
 
     private final StatRegistry statRegistry;
 
-    private final WorkspaceService workspaceService;
+//    @PostConstruct
+//    public void init() {
+//        workspaceService.delete();
+//        WorkspaceEntity workspaceEntity = workspaceService.get();
+//        workspaceEntity.setData(createDefaultWorkspace());
+//        workspaceService.save(workspaceEntity);
+//    }
 
-    @PostConstruct
-    public void init() {
-        workspaceService.delete();
-        WorkspaceEntity workspaceEntity = workspaceService.get();
-        workspaceEntity.setData(createDefaultWorkspace());
-        workspaceService.save(workspaceEntity);
-    }
-
-    public WorkspaceData createDefaultWorkspace() {
+    public WorkspaceData createDefaultWorkspaceData() {
 
         WorkspaceData data = new WorkspaceData();
 

@@ -1,8 +1,10 @@
 package com.example.find_my_edge.workspace.exception;
 
+import java.util.UUID;
+
 public class WorkspaceNotFoundException extends WorkspaceException {
-    public WorkspaceNotFoundException(String message) {
-        super(message);
+    public WorkspaceNotFoundException(UUID userId) {
+        super("Workspace not found for user: " + userId.toString());
     }
 
     public WorkspaceNotFoundException() {

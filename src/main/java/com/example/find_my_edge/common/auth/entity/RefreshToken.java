@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -15,7 +16,7 @@ public class RefreshToken {
     @Id
     private String token;
 
-    private String userId;
+    private UUID userId;
 
     private Instant expiry;
 

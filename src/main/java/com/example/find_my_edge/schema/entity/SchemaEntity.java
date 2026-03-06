@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "trade_schemas",
@@ -25,7 +26,7 @@ public class SchemaEntity {
     private Boolean hidden = false;
 
     @Column(nullable = false)
-    private String userId;
+    private UUID userId;
 
     /* TYPE */
     @Enumerated(EnumType.STRING)

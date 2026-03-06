@@ -5,6 +5,8 @@ import com.example.find_my_edge.workspace.model.WorkspaceData;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Data
 @Table(name = "workspace")
@@ -15,7 +17,7 @@ public class WorkspaceEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String userId;
+    private UUID userId;
 
     @Convert(converter = WorkspaceDataConverter.class)
     @Column(columnDefinition = "JSON")

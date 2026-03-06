@@ -6,11 +6,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface SchemaOverrideRepository extends JpaRepository<SchemaOverrideEntity, String> {
 
-    Optional<SchemaOverrideEntity> findByUserIdAndSchemaId(String userId, String schemaId);
+    Optional<SchemaOverrideEntity> findByUserIdAndSchemaId(UUID userId, String schemaId);
 
-    List<SchemaOverrideEntity> findAllByUserId(String userId);
+    List<SchemaOverrideEntity> findAllByUserId(UUID userId);
 }

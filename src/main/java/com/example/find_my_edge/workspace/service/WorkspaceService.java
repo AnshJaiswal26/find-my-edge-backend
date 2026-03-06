@@ -4,6 +4,7 @@ import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.entity.WorkspaceEntity;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface WorkspaceService {
@@ -24,4 +25,6 @@ public interface WorkspaceService {
     void removeSchemaReferences(String schemaId);
 
     void removeTradeReferences(String tradeId);
+
+    void createDefaultWorkspace(UUID userId);
 }

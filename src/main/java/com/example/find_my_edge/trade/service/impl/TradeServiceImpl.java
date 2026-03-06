@@ -48,7 +48,7 @@ public class TradeServiceImpl implements TradeService {
             throw new TradeIdNullException("Trade must have an id");
         }
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
         long now = Instant.now().toEpochMilli();
 
         TradeEntity entity = mapper.toEntity(trade);
@@ -66,7 +66,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public void createAll(List<Trade> trades) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
         long now = Instant.now().toEpochMilli();
 
         List<TradeEntity> entityList = new ArrayList<>();
@@ -89,7 +89,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public Trade update(String id, Trade trade) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         TradeEntity existing = tradeRepository
                 .findByIdAndUserId(id, userId)
@@ -113,7 +113,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public Trade getById(String id) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         TradeEntity entity = tradeRepository
                 .findByIdAndUserId(id, userId)
@@ -128,7 +128,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public List<Trade> getAll() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         return tradeRepository.findAllByUserIdOrderByDateAscEntryTimeAsc(userId)
                               .stream()
@@ -141,7 +141,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public void delete(String id) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         TradeEntity entity = tradeRepository
                 .findByIdAndUserId(id, userId)
@@ -155,7 +155,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public void deleteAll() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         tradeRepository.deleteByUserId(userId);
     }
@@ -163,7 +163,7 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public void upsertTrades(List<Trade> trades) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
         long now = Instant.now().toEpochMilli();
 
         List<TradeEntity> entities = new ArrayList<>();

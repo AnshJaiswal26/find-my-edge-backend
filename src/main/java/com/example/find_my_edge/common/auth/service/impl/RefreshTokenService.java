@@ -2,6 +2,7 @@ package com.example.find_my_edge.common.auth.service.impl;
 
 import com.example.find_my_edge.common.auth.entity.RefreshToken;
 import com.example.find_my_edge.common.auth.repository.RefreshTokenRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,8 @@ public class RefreshTokenService {
 
     private final long REFRESH_EXPIRY = 7 * 24 * 60 * 60 * 1000L;
 
-    public String createToken(String userId) {
+    @Transactional
+    public String createToken(UUID userId) {
 
         String token = UUID.randomUUID().toString();
 
@@ -44,5 +46,10 @@ public class RefreshTokenService {
         }
 
         return refresh;
+    }
+
+    @Transactional
+    public void delete(UUID userId) {
+        repository.deleteByUserId(userId);
     }
 }

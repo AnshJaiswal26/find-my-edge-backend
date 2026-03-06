@@ -7,6 +7,7 @@ import com.example.find_my_edge.workspace.enums.PageType;
 import com.example.find_my_edge.workspace.exception.PageNotFoundException;
 import com.example.find_my_edge.workspace.exception.WorkspaceNotFoundException;
 import com.example.find_my_edge.workspace.model.WorkspaceData;
+import com.example.find_my_edge.workspace.registry.WorkspaceRegistry;
 import com.example.find_my_edge.workspace.repository.WorkspaceRepository;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import jakarta.transaction.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 @Service
@@ -23,22 +25,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     private final CurrentUserService currentUserService;
     private final WorkspaceRepository workspaceRepository;
 
-    @Override  // for dev
+    private final WorkspaceRegistry workspaceRegistry;
+
+
+    @Override
     public WorkspaceEntity get() {
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
-        return workspaceRepository.findByUserId(userId)
-                                  .orElseGet(() -> createDefaultWorkspace(userId));
-    }
-
-    private WorkspaceEntity createDefaultWorkspace(String userId) {
-        WorkspaceEntity workspace = new WorkspaceEntity();
-        workspace.setUserId(userId);
-
-        // optional: set default data
-        workspace.setData(new WorkspaceData());
-
-        return workspaceRepository.save(workspace);
+        return workspaceRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new WorkspaceNotFoundException(userId));
     }
 
     @Override
@@ -106,8 +102,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     @Override
     @Transactional
     public void delete() {
-        String currentUserId = currentUserService.getUserId();
-        workspaceRepository.deleteByUserId(currentUserId);
+        UUID userId = currentUserService.getUserId();
+        workspaceRepository.deleteByUserId(userId);
     }
 
     private WorkspaceData ensureData(WorkspaceEntity workspace) {
@@ -142,5 +138,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 page -> page.getHighlightedRows().remove(tradeId),
                 PageType.TRADE_METRIC.key()
         );
+    }
+
+    @Override
+    public void createDefaultWorkspace(UUID userId) {
+        WorkspaceEntity workspaceEntity = new WorkspaceEntity();
+        workspaceEntity.setUserId(userId);
+        workspaceEntity.setData(workspaceRegistry.createDefaultWorkspaceData());
+        save(workspaceEntity);
     }
 }

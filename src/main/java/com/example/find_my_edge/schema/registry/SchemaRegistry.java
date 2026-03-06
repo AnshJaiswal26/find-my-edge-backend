@@ -66,28 +66,25 @@ public class SchemaRegistry {
                         "date",
                         "Date",
                         FieldType.DATE,
-                        SemanticType.DATE
-                )
-                        .display(display("YYYY-MM-DD", 0))
-                        .build(),
+                        SemanticType.DATE,
+                        display("YYYY-MM-DD", 0)
+                ),
 
                 systemField(
                         "entryTime",
                         "Entry Time",
                         FieldType.TIME,
-                        SemanticType.TIME
-                )
-                        .display(display("hh:mm:ss A", 0))
-                        .build(),
+                        SemanticType.TIME,
+                        display("hh:mm:ss A", 0)
+                ),
 
                 systemField(
                         "exitTime",
                         "Exit Time",
                         FieldType.TIME,
-                        SemanticType.TIME
-                )
-                        .display(display("hh:mm:ss A", 0))
-                        .build(),
+                        SemanticType.TIME,
+                        display("hh:mm:ss A", 0)
+                ),
 
                 duration(),
 
@@ -95,9 +92,9 @@ public class SchemaRegistry {
                         "symbol",
                         "Symbol",
                         FieldType.TEXT,
-                        SemanticType.STRING
-                )
-                        .build(),
+                        SemanticType.STRING,
+                        display("", 2)
+                ),
 
                 Schema.builder()
                       .id("direction")
@@ -116,28 +113,25 @@ public class SchemaRegistry {
                         "entryPrice",
                         "Entry Price",
                         FieldType.NUMBER,
-                        SemanticType.NUMBER
-                )
-                        .display(display("NUMBER", 2))
-                        .build(),
+                        SemanticType.NUMBER,
+                        display("NUMBER", 2)
+                ),
 
                 systemField(
                         "exitPrice",
                         "Exit Price",
                         FieldType.NUMBER,
-                        SemanticType.NUMBER
-                )
-                        .display(display("NUMBER", 2))
-                        .build(),
+                        SemanticType.NUMBER,
+                        display("NUMBER", 2)
+                ),
 
                 systemField(
                         "qty",
                         "Qty",
                         FieldType.NUMBER,
-                        SemanticType.NUMBER
-                )
-                        .display(display("NUMBER", 0))
-                        .build(),
+                        SemanticType.NUMBER,
+                        display("NUMBER", 0)
+                ),
 
                 pnl(),
 
@@ -166,11 +160,12 @@ public class SchemaRegistry {
 
     /* ---------------- SYSTEM FIELD BUILDER ---------------- */
 
-    private Schema.SchemaBuilder systemField(
+    private Schema systemField(
             String id,
             String label,
             FieldType type,
-            SemanticType semanticType
+            SemanticType semanticType,
+            DisplayConfig displayConfig
     ) {
         return Schema.builder()
                      .id(id)
@@ -178,7 +173,9 @@ public class SchemaRegistry {
                      .type(type)
                      .semanticType(semanticType)
                      .source(SchemaSource.SYSTEM)
-                     .role(SchemaRole.SYSTEM_REQUIRED);
+                     .role(SchemaRole.SYSTEM_REQUIRED)
+                     .display(displayConfig)
+                     .build();
     }
 
     /* ---------------- COMPUTED ---------------- */

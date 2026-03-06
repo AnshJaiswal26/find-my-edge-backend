@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -62,7 +63,7 @@ public class DhanTradeFetcher implements BrokerTradeFetcher {
     @Override
     public List<Trade> fetchAllTrades() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         LocalDate fromDate = LocalDate.of(2000, 1, 1);
         LocalDate toDate = LocalDate.now();
@@ -79,7 +80,7 @@ public class DhanTradeFetcher implements BrokerTradeFetcher {
     @Override
     public List<Trade> fetchIncrementalTrades() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         Instant lastFetchedAt = dhanOAuthService.getLastFetchedAt();
 
@@ -109,7 +110,7 @@ public class DhanTradeFetcher implements BrokerTradeFetcher {
         return mapAndSort(raw);
     }
 
-    private void updateLastFetched(String userId) {
+    private void updateLastFetched(UUID userId) {
         dhanOAuthService.updateLastFetchedAt(
                 LocalDate.now()
                          .plusDays(1)

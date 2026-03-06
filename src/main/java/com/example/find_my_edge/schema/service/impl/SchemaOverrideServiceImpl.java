@@ -11,10 +11,7 @@ import com.example.find_my_edge.schema.service.SchemaOverrideService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +22,7 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
     private final JsonUtil jsonUtil;
 
     @Override
-    public List<Schema> applyOverrides(List<Schema> systems, String userId) {
+    public List<Schema> applyOverrides(List<Schema> systems, UUID userId) {
 
         if (systems == null || systems.isEmpty()) return systems;
 
@@ -96,7 +93,7 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
     }
 
     @Override
-    public Schema applyOverride(Schema system, String userId) {
+    public Schema applyOverride(Schema system, UUID userId) {
 
         if (system == null) return null;
 
@@ -141,7 +138,7 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
     }
 
     @Override
-    public SchemaOverrideEntity getOrExisting(String schemaId, String userId) {
+    public SchemaOverrideEntity getOrExisting(String schemaId, UUID userId) {
         return overrideRepository.findByUserIdAndSchemaId(userId, schemaId)
                                  .orElseGet(() -> {
                                      SchemaOverrideEntity schemaOverrideEntity = new SchemaOverrideEntity();

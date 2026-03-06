@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "schema_overrides",
         uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "schemaId"}))
@@ -20,7 +22,7 @@ public class SchemaOverrideEntity {
     private String id;
 
     @Column(nullable = false)
-    private String userId;
+    private UUID userId;
 
     @Column(nullable = false)
     private String schemaId; // system schema reference

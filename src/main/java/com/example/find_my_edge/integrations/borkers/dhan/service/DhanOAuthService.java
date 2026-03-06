@@ -23,6 +23,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -69,7 +70,7 @@ public class DhanOAuthService implements BrokerOAuthService {
     @Override
     public void handleCallback(String tokenId) {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         DhanAccessTokenResponseDto response =
                 restClient.get()
@@ -124,7 +125,7 @@ public class DhanOAuthService implements BrokerOAuthService {
     @Override
     public ConnectionStatusResponseDto getConnectionStatus() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         BrokerTokenEntity tokenEntity =
                 repo.findByUserIdAndBroker(userId, Broker.DHAN)
@@ -185,7 +186,7 @@ public class DhanOAuthService implements BrokerOAuthService {
     @Transactional
     @Override
     public ConnectionStatusResponseDto disconnect() {
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         BrokerTokenEntity entity =
                 repo.findByUserIdAndBroker(userId, Broker.DHAN)
@@ -210,7 +211,7 @@ public class DhanOAuthService implements BrokerOAuthService {
 
     @Override
     public Instant getLastFetchedAt() {
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         return repo.findByUserIdAndBroker(userId, Broker.DHAN)
                    .map(BrokerTokenEntity::getLastFetchedAt)
@@ -218,7 +219,7 @@ public class DhanOAuthService implements BrokerOAuthService {
     }
 
     @Override
-    public void updateLastFetchedAt(Instant instant, String userId) {
+    public void updateLastFetchedAt(Instant instant, UUID userId) {
 
         BrokerTokenEntity token =
                 repo.findByUserIdAndBroker(userId, Broker.DHAN)
@@ -231,7 +232,7 @@ public class DhanOAuthService implements BrokerOAuthService {
     @Override
     public String getValidToken() {
 
-        String userId = currentUserService.getUserId();
+        UUID userId = currentUserService.getUserId();
 
         BrokerTokenEntity token =
                 repo.findByUserIdAndBroker(userId, Broker.DHAN)

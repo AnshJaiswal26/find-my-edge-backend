@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Entity
 @Table(name = "trades",
@@ -16,7 +17,7 @@ public class TradeEntity {
     @Id
     private String id;
 
-    private String userId;
+    private UUID userId;
     private String externalId;
 
     // 🔥 structured fields
