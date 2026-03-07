@@ -2,17 +2,15 @@ package com.example.find_my_edge.trade.controller;
 
 import com.example.find_my_edge.trade.mapper.TradeDtoMapper;
 import com.example.find_my_edge.common.controller.BaseController;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.trade.dto.TradeDto;
 import com.example.find_my_edge.trade.model.Trade;
 import com.example.find_my_edge.trade.service.TradeService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController

@@ -1,5 +1,6 @@
 package com.example.find_my_edge.common.auth.service.impl;
 
+import com.example.find_my_edge.common.auth.exceptions.UserNotAuthenticatedException;
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -24,7 +25,7 @@ public class SecurityCurrentUserService implements CurrentUserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
+            throw new UserNotAuthenticatedException();
         }
 
         return (UUID) auth.getPrincipal();
@@ -38,12 +39,12 @@ public class SecurityCurrentUserService implements CurrentUserService {
 
     @Override
     public String getEmail() {
-        return null; // if stored in JWT claims
+        return null;
     }
 
     @Override
     public String getPlan() {
-        return null; // if stored in JWT claims
+        return null;
     }
 
 }

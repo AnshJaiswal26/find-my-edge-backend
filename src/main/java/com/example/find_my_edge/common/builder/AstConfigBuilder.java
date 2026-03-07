@@ -1,7 +1,7 @@
-package com.example.find_my_edge.common.config.builder;
+package com.example.find_my_edge.common.builder;
 
 import com.example.find_my_edge.analytics.ast.enums.NodeType;
-import com.example.find_my_edge.common.config.AstConfig;
+import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 
 import java.util.Arrays;
 import java.util.List;

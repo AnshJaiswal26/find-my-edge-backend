@@ -1,7 +1,7 @@
 package com.example.find_my_edge.trade_import.controller;
 
 import com.example.find_my_edge.common.controller.BaseController;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.trade_import.dto.FieldDataRequestDto;
 import com.example.find_my_edge.trade_import.dto.ImportedTradeResponseDto;
 import com.example.find_my_edge.trade_import.service.TradeImportService;

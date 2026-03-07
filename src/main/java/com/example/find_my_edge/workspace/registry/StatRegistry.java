@@ -1,16 +1,13 @@
 package com.example.find_my_edge.workspace.registry;
 
-import com.example.find_my_edge.common.config.ColorRuleConfig;
+import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
-import com.example.find_my_edge.workspace.features.StatService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-
-import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
 
 @Component
 @RequiredArgsConstructor

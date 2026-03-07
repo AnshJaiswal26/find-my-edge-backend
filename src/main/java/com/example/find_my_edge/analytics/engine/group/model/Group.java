@@ -13,11 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 public class Group {
 
-    public Group(String key, Double value) {
-        this.key = key;
-        this.value = value;
-    }
-
     private String groupId;
     private String key;
     private Double value;

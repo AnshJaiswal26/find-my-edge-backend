@@ -31,13 +31,7 @@ public class AuthController {
 
         String refreshToken = authResponse.getRefreshToken();
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                                              .httpOnly(true)
-                                              .secure(false) // change to true in production (HTTPS)
-                                              .path("/")
-                                              .maxAge(Duration.ofDays(7))
-                                              .sameSite("Lax")
-                                              .build();
+        ResponseCookie cookie = buildRefreshCookie(refreshToken);
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -57,17 +51,10 @@ public class AuthController {
 
         String refreshToken = authResponse.getRefreshToken();
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                                              .httpOnly(true)
-                                              .secure(false) // change to true in production (HTTPS)
-                                              .path("/")
-                                              .maxAge(Duration.ofDays(7))
-                                              .sameSite("Lax")
-                                              .build();
+        ResponseCookie cookie = buildRefreshCookie(refreshToken);
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        // return only access token in response body
         return ResponseEntity.ok(
                 new AuthResponse(authResponse.getAccessToken(), null)
         );
@@ -87,19 +74,23 @@ public class AuthController {
 
         String newRefreshToken = authResponse.getRefreshToken();
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
-                                              .httpOnly(true)
-                                              .secure(false)
-                                              .path("/")
-                                              .maxAge(Duration.ofDays(7))
-                                              .sameSite("Lax")
-                                              .build();
+        ResponseCookie cookie = buildRefreshCookie(newRefreshToken);
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(
                 new AuthResponse(authResponse.getAccessToken(), null)
         );
+    }
+
+    private ResponseCookie buildRefreshCookie(String token) {
+        return ResponseCookie.from("refreshToken", token)
+                             .httpOnly(true)
+                             .secure(false)
+                             .path("/")
+                             .maxAge(Duration.ofDays(7))
+                             .sameSite("Lax")
+                             .build();
     }
 
     @GetMapping("/me")

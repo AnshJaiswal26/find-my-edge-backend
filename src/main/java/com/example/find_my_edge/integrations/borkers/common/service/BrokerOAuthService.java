@@ -12,7 +12,7 @@ public interface BrokerOAuthService {
 
     String generateConsentUrl();
 
-    void handleCallback(String tokenId);
+    void handleCallback(String tokenId, UUID userId);
 
     void validateToken(BrokerTokenEntity tokenEntity);
 

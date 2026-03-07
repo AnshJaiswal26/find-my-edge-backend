@@ -1,12 +1,10 @@
 package com.example.find_my_edge.dashboard.service.impl;
 
-import com.example.find_my_edge.analytics.model.TradeContextSplit;
 import com.example.find_my_edge.analytics.service.ComputeService;
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.dashboard.model.DashboardData;
 import com.example.find_my_edge.dashboard.service.DashboardService;
-import com.example.find_my_edge.common.config.AstConfig;
+import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
 import com.example.find_my_edge.schema.service.SchemaService;
@@ -79,33 +77,20 @@ public class DashboardServiceImpl implements DashboardService {
             List<Trade> trades
     ) {
 
-        Map<String, String> userStats = new HashMap<>();
-        Map<String, AstConfig> systemStats = new HashMap<>();
+        statsById.forEach((k, v) -> {
 
-        for (Map.Entry<String, StatConfig> entry : statsById.entrySet()) {
-            if (statRegistry.has(entry.getKey())) {
-                systemStats.put(entry.getKey(), entry.getValue().getAst());
-            } else {
-                userStats.put(entry.getKey(), entry.getValue().getFormula());
-            }
-        }
+        });
 
-        Map<String, Double> userStatResults = computeService.computeAggregateForFormulas(
-                userStats, schemas, trades
+        computeService.executeAggregate(
+                statsById,
+                id -> !statRegistry.has(id) ? statsById.get(id).getFormula() : null,
+                id -> statRegistry.has(id) ? statsById.get(id).getAst() : null,
+                (id, value) -> {
+                    StatConfig statConfig = statsById.get(id);
+                    statConfig.setValue(value);
+                },
+                schemas,
+                trades
         );
-
-        Map<String, Double> systemStatResults = computeService.computeAggregateForAstConfigs(
-                systemStats, schemas, trades
-        );
-
-        for (Map.Entry<String, StatConfig> entry : statsById.entrySet()) {
-            String key = entry.getKey();
-
-            Double value = systemStatResults.containsKey(key)
-                           ? systemStatResults.get(key)
-                           : userStatResults.get(key);
-
-            entry.getValue().setValue(value);
-        }
     }
 }

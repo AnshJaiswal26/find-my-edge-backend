@@ -6,6 +6,10 @@ import com.example.find_my_edge.common.auth.dto.RegisterRequest;
 import com.example.find_my_edge.common.auth.dto.UserResponse;
 import com.example.find_my_edge.common.auth.entity.RefreshToken;
 import com.example.find_my_edge.common.auth.entity.User;
+import com.example.find_my_edge.common.auth.exceptions.InvalidCredentialsException;
+import com.example.find_my_edge.common.auth.exceptions.UserAlreadyRegisteredException;
+import com.example.find_my_edge.common.auth.exceptions.UserNotAuthenticatedException;
+import com.example.find_my_edge.common.auth.exceptions.UserNotFoundException;
 import com.example.find_my_edge.common.auth.repository.UserRepository;
 import com.example.find_my_edge.common.auth.service.AuthService;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
@@ -16,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 
@@ -35,10 +40,10 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest req) {
 
         User user = userRepository.findByEmail(req.getEmail())
-                                  .orElseThrow(() -> new RuntimeException("User not found"));
+                                  .orElseThrow(InvalidCredentialsException::new);
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
 
         String accessToken = jwtService.generateAccessToken(user);
@@ -52,11 +57,12 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest req) {
 
         if (userRepository.findByEmail(req.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already registered");
+            throw new UserAlreadyRegisteredException();
         }
 
         User user = User.builder()
                         .email(req.getEmail())
+                        .createdAt(Instant.now())
                         .username(req.getUsername())
                         .password(passwordEncoder.encode(req.getPassword()))
                         .build();
@@ -79,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
 
         // get user
         User user = userRepository.findById(token.getUserId())
-                                  .orElseThrow(() -> new RuntimeException("User not found"));
+                                  .orElseThrow(UserNotFoundException::new);
 
         // invalidate old refresh token (important for rotation)
         refreshTokenService.delete(user.getId());
@@ -96,13 +102,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserResponse me() {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        UUID userId = (UUID) authentication.getPrincipal();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new UserNotAuthenticatedException();
+        }
 
+        UUID userId = (UUID) auth.getPrincipal();
 
         User user = userRepository.findById(userId)
-                                  .orElseThrow(() -> new RuntimeException("User not found"));
+                                  .orElseThrow(UserNotFoundException::new);
 
         return UserResponse.builder()
                            .id(user.getId().toString())

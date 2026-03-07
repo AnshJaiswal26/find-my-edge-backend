@@ -1,61 +1,83 @@
 package com.example.find_my_edge.analytics.service.impl;
 
-import com.example.find_my_edge.analytics.ast.context.SchemaType;
-import com.example.find_my_edge.analytics.ast.enums.ComputationMode;
 import com.example.find_my_edge.analytics.ast.exception.AstException;
-import com.example.find_my_edge.analytics.ast.executor.AggregateExecutor;
-import com.example.find_my_edge.analytics.ast.executor.RowSequenceExecutor;
-import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
-import com.example.find_my_edge.analytics.ast.mapper.AstNodeMapper;
-import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.analytics.ast.model.AstResult;
-import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
-import com.example.find_my_edge.analytics.ast.util.DependencyResolver;
+import com.example.find_my_edge.analytics.config.GroupConfig;
+import com.example.find_my_edge.analytics.engine.aggregate.AggregateComputeEngine;
+import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
+import com.example.find_my_edge.analytics.engine.dataSet.GlobalTradeDataset;
+import com.example.find_my_edge.analytics.engine.dataSet.GroupTradeDataset;
+import com.example.find_my_edge.analytics.engine.group.GroupBuilder;
+import com.example.find_my_edge.analytics.engine.group.model.Group;
+import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.TradeContextSplit;
 import com.example.find_my_edge.analytics.service.ComputeService;
-import com.example.find_my_edge.common.config.AstConfig;
-import com.example.find_my_edge.schema.enums.ComputeMode;
+import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.trade.model.Trade;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class ComputeServiceImpl implements ComputeService {
 
-    private final AggregateExecutor aggregateExecutor;
-    private final RowSequenceExecutor rowSequenceExecutor;
-    private final DependencyResolver dependencyResolver;
-    private final AstPipeline astPipeline;
+    private final AggregateComputeEngine aggregateComputeEngine;
+    private final TradeContextBuilder tradeContextBuilder;
 
-    private final ExecutorService computeExecutor;
+    private final GroupBuilder groupBuilder;
 
-    @Getter
-    @AllArgsConstructor
-    private static class ComputationContext {
-        private final Map<String, Map<String, Object>> raw;
-        private final Map<String, Map<String, Object>> computed;
-        private final List<String> tradeOrder;
+    private final ExecutorService executorService;
+
+
+    @Override
+    public <T> void executeAggregate(
+            Map<String, T> source,
+            Function<String, String> formulaFn,
+            Function<String, AstConfig> cfgFn,
+            BiConsumer<String, Double> consumer,
+            Map<String, Schema> schemasById,
+            List<Trade> trades
+    ) {
+
+        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
+
+        Map<String, Future<Double>> futures = new HashMap<>();
+
+        for (var entry : source.entrySet()) {
+
+            String key = entry.getKey();
+
+            String formula = formulaFn.apply(key);
+
+            AstConfig config = cfgFn.apply(key);
+
+            futures.put(
+                    key, executorService.submit(
+                            () -> aggregateComputeEngine.computedAggregate(
+                                    config,
+                                    formula,
+                                    schemasById,
+                                    new GlobalTradeDataset(ctx)
+                            ))
+            );
+        }
+
+        collectFutures(futures).forEach(consumer);
     }
-
-    // ============================
-    // PUBLIC APIs
-    // ============================
 
     @Override
     public TradeContextSplit getTradeContextSplit(
             Map<String, Schema> schemasById,
             List<Trade> trades
     ) {
-        ComputationContext ctx = buildContext(schemasById, trades);
+        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
 
         return new TradeContextSplit(
                 ctx.getRaw(),
@@ -70,8 +92,13 @@ public class ComputeServiceImpl implements ComputeService {
             Map<String, Schema> schemasById,
             List<Trade> trades
     ) {
-        ComputationContext ctx = buildContext(schemasById, trades);
-        return computeAggregate(formulas, null, schemasById, ctx);
+        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
+        return aggregateComputeEngine.computeAggregate(
+                formulas,
+                null,
+                schemasById,
+                new GlobalTradeDataset(ctx)
+        );
     }
 
     @Override
@@ -80,228 +107,82 @@ public class ComputeServiceImpl implements ComputeService {
             Map<String, Schema> schemasById,
             List<Trade> trades
     ) {
-        ComputationContext ctx = buildContext(schemasById, trades);
-        return computeAggregate(null, astConfigs, schemasById, ctx);
+        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
+        return aggregateComputeEngine.computeAggregate(
+                null,
+                astConfigs,
+                schemasById,
+                new GlobalTradeDataset(ctx)
+        );
     }
 
-    // ============================
-    // CORE CONTEXT BUILDER
-    // ============================
-
-    private ComputationContext buildContext(
+    public Map<String, Double> computeAggregatePerGroupByAstConfigs(
+            GroupConfig groupConfig,
+            AstConfig astConfig,
             Map<String, Schema> schemasById,
             List<Trade> trades
     ) {
+        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
 
-        Map<String, Map<String, Object>> raw = new HashMap<>();
-        Map<String, Map<String, Object>> computed = new HashMap<>();
-        List<String> tradeOrder = new ArrayList<>();
-
-        if (trades == null || trades.isEmpty()) {
-            return new ComputationContext(raw, computed, tradeOrder);
-        }
-
-        // STEP 1: RAW
-        for (Trade trade : trades) {
-            if (trade == null || trade.getId() == null) continue;
-
-            String tradeId = trade.getId();
-            tradeOrder.add(tradeId);
-
-            Map<String, Object> rawMap = new HashMap<>();
-
-            // core trade fields
-            rawMap.put("id", trade.getId());
-            rawMap.put("externalId", trade.getExternalId());
-            rawMap.put("date", trade.getDate());
-            rawMap.put("entryTime", trade.getEntryTime());
-            rawMap.put("exitTime", trade.getExitTime());
-            rawMap.put("symbol", trade.getSymbol());
-            rawMap.put("direction", trade.getDirection());
-            rawMap.put("qty", trade.getQty());
-            rawMap.put("entryPrice", trade.getEntryPrice());
-            rawMap.put("exitPrice", trade.getExitPrice());
-            rawMap.put("charges", trade.getCharges());
-
-            // dynamic schema values
-            if (trade.getValues() != null) {
-                trade.getValues().forEach((k, v) -> {
-                    if (k != null && v != null) {
-                        rawMap.put(k, v);
-                    }
-                });
-            }
-
-            raw.put(tradeId, rawMap);
-            computed.put(tradeId, new HashMap<>());
-        }
-
-        // STEP 2: Dependency resolution
-        List<String> executionOrder = dependencyResolver.resolveExecutionOrder(
-                dependencyResolver.buildDependencyMap(schemasById.values())
-        );
-
-        Map<String, SchemaType> schemaTypeMap = buildSchemaTypeMap(schemasById);
-
-        // STEP 3: Row computation
-        for (String schemaId : executionOrder) {
-
-            Schema schema = schemasById.get(schemaId);
-            if (schema == null || schema.getAst() == null) continue;
-
-            AstNode astNode = AstNodeMapper.toNode(schema.getAst());
-
-            rowSequenceExecutor.execute(
-                    astNode,
-                    schemaId,
-                    0,
-                    schema.getInitialValue(),
-
-                    // setter
-                    (index, key, val) -> {
-                        if (index < 0 || val == null || index >= trades.size()) return;
-
-                        String tradeId = trades.get(index).getId();
-                        if (tradeId == null) return;
-
-                        computed.get(tradeId).put(key, val);
-                    },
-
-                    // getter
-                    (index, key) -> {
-                        if (index < 0 || index >= trades.size()) return null;
-
-                        String tradeId = trades.get(index).getId();
-                        if (tradeId == null) return null;
-
-                        Map<String, Object> c = computed.get(tradeId);
-                        if (c != null && c.containsKey(key)) return c.get(key);
-
-                        Map<String, Object> r = raw.get(tradeId);
-                        return r != null ? r.get(key) : null;
-                    },
-
-                    trades::size,
-                    schemaTypeMap::get,
-                    schema.getMode() == ComputeMode.ROW
-                    ? ComputationMode.BASE
-                    : ComputationMode.WINDOW
-            );
-        }
-
-        return new ComputationContext(
-                Map.copyOf(raw),
-                Map.copyOf(computed),
-                List.copyOf(tradeOrder)
-        );
+        return executeGroupAggregate(groupConfig, astConfig, null, schemasById, ctx);
     }
 
-    // ============================
-    // AGGREGATION ENGINE
-    // ============================
+    public Map<String, Double> computeAggregatePerGroupByFormula(
+            GroupConfig groupConfig,
+            String formula,
+            Map<String, Schema> schemasById,
+            List<Trade> trades
+    ) {
+        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
 
-    private Map<String, Double> computeAggregate(
-            Map<String, String> formulas,
-            Map<String, AstConfig> astConfigs,
+        return executeGroupAggregate(groupConfig, null, formula, schemasById, ctx);
+    }
+
+    public Map<String, Double> executeGroupAggregate(
+            GroupConfig groupConfig,
+            AstConfig astConfig,
+            String formula,
             Map<String, Schema> schemasById,
             ComputationContext ctx
     ) {
 
-        Map<String, AstNode> astMap = buildAstMap(formulas, astConfigs, schemasById);
+        List<String> tradeOrder = ctx.getTradeOrder();
 
-        List<String> tradeIds = ctx.getTradeOrder();
-        Map<String, SchemaType> schemaTypeMap = buildSchemaTypeMap(schemasById);
+        Map<String, Map<String, Object>> raw = ctx.getRaw();
+        Map<String, Map<String, Object>> computed = ctx.getComputed();
+
+        List<Group> groups = groupBuilder.buildGroups(
+                tradeOrder,
+                groupConfig,
+                (tradeId, key) -> {
+                    Object value = raw.get(tradeId).get(key);
+                    if (value == null) {
+                        return computed.get(tradeId).get(key);
+                    }
+                    return value;
+                }
+        );
 
         Map<String, Future<Double>> futures = new HashMap<>();
 
-        for (Map.Entry<String, AstNode> entry : astMap.entrySet()) {
-
-            String key = entry.getKey();
-            AstNode astNode = entry.getValue();
-
+        for (Group group : groups) {
             futures.put(
-                    key, computeExecutor.submit(() -> {
-
-                        Object result = aggregateExecutor.execute(
-                                astNode,
-                                (index, schemaKey) -> {
-                                    if (index < 0 || index >= tradeIds.size()) return null;
-
-                                    String tradeId = tradeIds.get(index);
-                                    Map<String, Object> computed = ctx.getComputed().get(tradeId);
-                                    if (computed != null && computed.containsKey(schemaKey)) {
-                                        return computed.get(schemaKey);
-                                    }
-
-                                    Map<String, Object> raw = ctx.getRaw().get(tradeId);
-                                    return raw != null ? raw.get(schemaKey) : null;
-                                },
-                                tradeIds::size,
-                                schemaTypeMap::get
-                        );
-
-                        if (result == null) return null;
-
-                        if (!(result instanceof Number)) {
-                            throw new AstException("Non-numeric result for key: " + key);
-                        }
-
-                        return ((Number) result).doubleValue();
-                    })
-            );
-        }
-
-        return collectFutures(futures);
-    }
-
-    // ============================
-    // HELPERS
-    // ============================
-
-    private Map<String, AstNode> buildAstMap(
-            Map<String, String> formulas,
-            Map<String, AstConfig> astConfigs,
-            Map<String, Schema> schemasById
-    ) {
-
-        Map<String, AstNode> astMap = new HashMap<>();
-
-        if (formulas != null) {
-            for (Map.Entry<String, String> entry : formulas.entrySet()) {
-                AstResult result = astPipeline.buildAst(
-                        entry.getValue(),
-                        FunctionMode.AGGREGATE,
-                        schemasById
-                );
-                astMap.put(entry.getKey(), result.getAstNode());
-            }
-        }
-
-        if (astConfigs != null) {
-            for (Map.Entry<String, AstConfig> entry : astConfigs.entrySet()) {
-                astMap.put(entry.getKey(), AstNodeMapper.toNode(entry.getValue()));
-            }
-        }
-
-        return astMap;
-    }
-
-    private Map<String, SchemaType> buildSchemaTypeMap(Map<String, Schema> schemas) {
-        Map<String, SchemaType> map = new HashMap<>();
-
-        for (Schema s : schemas.values()) {
-            if (s == null || s.getId() == null) continue;
-
-            map.put(
-                    s.getId(),
-                    new SchemaType(
-                            s.getDisplay() != null ? s.getDisplay().getFormat() : null,
-                            s.getType() != null ? s.getType().toString() : null
+                    group.getGroupId(),
+                    executorService.submit(
+                            () -> aggregateComputeEngine.computedAggregate(
+                                    astConfig,
+                                    formula,
+                                    schemasById,
+                                    new GroupTradeDataset(
+                                            ctx,
+                                            group.getTradeIds()
+                                    )
+                            )
                     )
             );
         }
 
-        return map;
+        return collectFutures(futures);
     }
 
     private Map<String, Double> collectFutures(Map<String, Future<Double>> futures) {
@@ -323,4 +204,5 @@ public class ComputeServiceImpl implements ComputeService {
 
         return result;
     }
+
 }

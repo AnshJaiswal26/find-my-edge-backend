@@ -1,7 +1,7 @@
 package com.example.find_my_edge.workspace.registry;
 
 import com.example.find_my_edge.analytics.config.SortConfig;
-import com.example.find_my_edge.common.config.ColorRuleConfig;
+import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartMetaConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-
-import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
 
 @Component
 @RequiredArgsConstructor

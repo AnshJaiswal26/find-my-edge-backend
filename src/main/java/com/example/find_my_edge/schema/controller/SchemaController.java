@@ -2,7 +2,7 @@ package com.example.find_my_edge.schema.controller;
 
 
 import com.example.find_my_edge.common.controller.BaseController;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.schema.dto.SchemaOrderRequestDto;
 import com.example.find_my_edge.schema.dto.SchemaRequestDto;
 import com.example.find_my_edge.schema.dto.SchemaResponseDto;

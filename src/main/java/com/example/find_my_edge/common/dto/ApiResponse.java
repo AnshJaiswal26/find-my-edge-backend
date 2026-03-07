@@ -1,4 +1,4 @@
-package com.example.find_my_edge.common.response;
+package com.example.find_my_edge.common.dto;
 
 import com.example.find_my_edge.common.enums.ResponseState;
 import com.fasterxml.jackson.annotation.JsonFormat;

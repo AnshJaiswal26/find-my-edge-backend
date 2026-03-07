@@ -1,4 +1,4 @@
-package com.example.find_my_edge.config;
+package com.example.find_my_edge.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

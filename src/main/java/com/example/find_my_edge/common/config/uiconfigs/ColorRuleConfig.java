@@ -1,4 +1,4 @@
-package com.example.find_my_edge.common.config;
+package com.example.find_my_edge.common.config.uiconfigs;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

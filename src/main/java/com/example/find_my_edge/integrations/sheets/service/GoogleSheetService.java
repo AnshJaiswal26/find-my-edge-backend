@@ -1,7 +1,7 @@
 package com.example.find_my_edge.integrations.sheets.service;
 
 import com.example.find_my_edge.common.enums.ResponseState;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.integrations.sheets.exception.SheetFetchException;
 import com.example.find_my_edge.integrations.sheets.builder.SheetRequestBuilder;
 import com.example.find_my_edge.integrations.sheets.dto.SheetPayload;

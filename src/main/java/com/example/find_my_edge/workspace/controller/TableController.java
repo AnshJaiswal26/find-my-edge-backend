@@ -1,7 +1,7 @@
 package com.example.find_my_edge.workspace.controller;
 
 import com.example.find_my_edge.common.controller.BaseController;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.workspace.features.TableService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

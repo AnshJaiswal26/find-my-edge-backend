@@ -1,4 +1,4 @@
-package com.example.find_my_edge.config;
+package com.example.find_my_edge.common.config;
 
 import com.example.find_my_edge.integrations.sheets.exception.SheetFetchException;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -7,8 +7,6 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStream;

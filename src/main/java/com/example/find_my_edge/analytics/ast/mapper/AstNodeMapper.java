@@ -3,7 +3,7 @@ package com.example.find_my_edge.analytics.ast.mapper;
 import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.common.config.AstConfig;
+import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 
 import java.util.List;
 import java.util.stream.Collectors;

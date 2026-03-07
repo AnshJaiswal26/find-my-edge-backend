@@ -1,6 +1,8 @@
 package com.example.find_my_edge.common.auth.service.impl;
 
 import com.example.find_my_edge.common.auth.entity.RefreshToken;
+import com.example.find_my_edge.common.auth.exceptions.InvalidRefreshTokenException;
+import com.example.find_my_edge.common.auth.exceptions.RefreshTokenExpiredException;
 import com.example.find_my_edge.common.auth.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +39,11 @@ public class RefreshTokenService {
 
         RefreshToken refresh =
                 repository.findByToken(token)
-                          .orElseThrow(() ->
-                                               new RuntimeException("Invalid refresh token"));
+                          .orElseThrow(InvalidRefreshTokenException::new);
 
         if (refresh.getExpiry().isBefore(Instant.now())) {
             repository.delete(refresh);
-            throw new RuntimeException("Refresh token expired");
+            throw new RefreshTokenExpiredException();
         }
 
         return refresh;
@@ -51,5 +52,10 @@ public class RefreshTokenService {
     @Transactional
     public void delete(UUID userId) {
         repository.deleteByUserId(userId);
+    }
+
+    @Transactional
+    public void deleteToken(String token) {
+        repository.deleteByToken(token);
     }
 }

@@ -9,6 +9,7 @@ import com.example.find_my_edge.trade.exception.TradeNotFoundException;
 import com.example.find_my_edge.trade.mapper.ProcessedTradeMapper;
 import com.example.find_my_edge.trade.mapper.TradeEntityMapper;
 import com.example.find_my_edge.trade.model.Trade;
+import com.example.find_my_edge.trade.model.TradeBundle;
 import com.example.find_my_edge.trade.repository.TradeRepository;
 import com.example.find_my_edge.trade.service.TradeService;
 
@@ -18,9 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -124,16 +123,31 @@ public class TradeServiceImpl implements TradeService {
 
     /* ---------------- GET ALL ---------------- */
 
-    @Transactional
+    @Override
+    public TradeBundle getTradeBundle() {
+
+        List<Trade> trades = getAll();
+
+        List<String> tradeOrder = new ArrayList<>();
+        Map<String, Trade> tradesById = new HashMap<>();
+
+        for (Trade trade : trades){
+            tradeOrder.add(trade.getId());
+            tradesById.put(trade.getId(), trade);
+        }
+
+        return new TradeBundle(tradeOrder, tradesById);
+    }
+
     @Override
     public List<Trade> getAll() {
 
         UUID userId = currentUserService.getUserId();
 
-        return tradeRepository.findAllByUserIdOrderByDateAscEntryTimeAsc(userId)
-                              .stream()
-                              .map(mapper::toDomain)
-                              .toList();
+        List<TradeEntity> tradeEntities =
+                tradeRepository.findAllByUserIdOrderByDateAscEntryTimeAsc(userId);
+
+        return tradeEntities.stream().map(mapper::toDomain).toList();
     }
 
     /* ---------------- DELETE ---------------- */

@@ -1,4 +1,4 @@
-package com.example.find_my_edge.common.config;
+package com.example.find_my_edge.common.config.uiconfigs;
 
 import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import lombok.AllArgsConstructor;

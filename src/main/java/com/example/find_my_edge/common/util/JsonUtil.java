@@ -1,9 +1,9 @@
 package com.example.find_my_edge.common.util;
 
+import com.example.find_my_edge.common.exceptions.JsonConversionException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class JsonUtil {
         try {
             return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            throw new RuntimeException("JSON write failed", e);
+            throw new JsonConversionException("JSON write failed", e);
         }
     }
 
@@ -31,7 +31,7 @@ public class JsonUtil {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
-            throw new RuntimeException("JSON read failed", e);
+            throw new JsonConversionException("JSON read failed", e);
         }
     }
 
@@ -45,7 +45,7 @@ public class JsonUtil {
                     objectMapper.getTypeFactory().constructCollectionType(List.class, clazz)
             );
         } catch (Exception e) {
-            throw new RuntimeException("JSON list read failed", e);
+            throw new JsonConversionException("JSON list read failed", e);
         }
     }
 
@@ -57,7 +57,7 @@ public class JsonUtil {
         try {
             return objectMapper.writeValueAsString(list);
         } catch (Exception e) {
-            throw new RuntimeException("JSON list write failed", e);
+            throw new JsonConversionException("JSON list write failed", e);
         }
     }
 
@@ -72,7 +72,7 @@ public class JsonUtil {
                          .toList();
 
         } catch (Exception e) {
-            throw new RuntimeException("JSON list copy failed", e);
+            throw new JsonConversionException("JSON list copy failed", e);
         }
     }
 
@@ -83,7 +83,7 @@ public class JsonUtil {
                     clazz
             );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to copy SchemaDTO", e);
+            throw new JsonConversionException("Failed to copy SchemaDTO", e);
         }
     }
 }

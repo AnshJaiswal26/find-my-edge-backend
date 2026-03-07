@@ -19,8 +19,6 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-//    private final SecretKey secretKey;
-
     private final long ACCESS_EXPIRY = 1000 * 60 * 15L;
 
 //    public SecretKey getKey() { // for base64 encoded secret keys
@@ -57,7 +55,6 @@ public class JwtService {
     }
 
     public boolean isValid(String token) {
-
         try {
             Claims claims = extractClaims(token);
             return !isExpired(claims);

@@ -1,7 +1,7 @@
 package com.example.find_my_edge.integrations.sheets.controller;
 
 import com.example.find_my_edge.common.enums.ResponseState;
-import com.example.find_my_edge.common.response.ApiResponse;
+import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.integrations.sheets.service.SseEmitterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpStatus;

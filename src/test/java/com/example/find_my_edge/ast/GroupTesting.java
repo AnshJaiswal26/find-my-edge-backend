@@ -1,17 +1,19 @@
 package com.example.find_my_edge.ast;
 
 import com.example.find_my_edge.analytics.config.GroupConfig;
+import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.engine.group.GroupBuilder;
-import com.example.find_my_edge.analytics.engine.group.GroupCompiler;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
+import com.example.find_my_edge.analytics.model.ComputationContext;
+import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.service.SchemaService;
 import com.example.find_my_edge.trade.model.Trade;
 import com.example.find_my_edge.trade.service.TradeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -25,31 +27,39 @@ public class GroupTesting {
     private GroupBuilder groupBuilder;
 
     @Autowired
-    private GroupCompiler groupCompiler;
+    private TradeContextBuilder builder;
+
+    @Autowired
+    private SchemaService schemaService;
+
 
     @Test
     public void grouping() {
 
         List<Trade> all = tradeService.getAll();
+        SchemaBundle bundle = schemaService.getAll();
+        ComputationContext computationContext =
+                builder.buildContext(bundle.getSchemasById(), all);
 
-        Map<String, Trade> tradesById = new HashMap<>();
-        List<String> tradeOrder = new ArrayList<>();
-
-        all.forEach(t -> {
-            tradesById.put(t.getId(), t);
-            tradeOrder.add(t.getId());
-        });
+        Map<String, Map<String, Object>> raw = computationContext.getRaw();
+        Map<String, Map<String, Object>> computed = computationContext.getComputed();
+        List<String> tradeOrder = computationContext.getTradeOrder();
 
         List<Group> groups = groupBuilder.buildGroups(
                 tradeOrder,
-                tradesById,
                 GroupConfig.builder()
                            .type("dateBucket")
                            .key("date")
                            .unit("month")
                            .build(),
-                (t, k) -> t.getValues().get(k),
-                groupCompiler
+
+                (tradeId, key) -> {
+                    Object value = raw.get(tradeId).get(key);
+                    if (value == null) {
+                        return computed.get(tradeId).get(key);
+                    }
+                    return value;
+                }
         );
 
         groups.forEach(System.out::println);

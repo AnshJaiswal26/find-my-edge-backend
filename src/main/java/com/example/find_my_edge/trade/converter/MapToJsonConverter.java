@@ -1,5 +1,6 @@
 package com.example.find_my_edge.trade.converter;
 
+import com.example.find_my_edge.common.exceptions.JsonConversionException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
@@ -18,14 +19,17 @@ public class MapToJsonConverter implements AttributeConverter<Map<String, Object
         try {
             return mapper.writeValueAsString(attribute);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new JsonConversionException(e.getMessage(), e);
         }
     }
 
     @Override
     public Map<String, Object> convertToEntityAttribute(String dbData) {
         try {
-            return mapper.readValue(dbData, new TypeReference<>() {});
+            return mapper.readValue(
+                    dbData, new TypeReference<>() {
+                    }
+            );
         } catch (Exception e) {
             return new HashMap<>();
         }

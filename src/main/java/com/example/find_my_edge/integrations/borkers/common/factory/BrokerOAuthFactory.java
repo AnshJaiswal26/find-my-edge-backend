@@ -1,5 +1,6 @@
 package com.example.find_my_edge.integrations.borkers.common.factory;
 
+import com.example.find_my_edge.integrations.borkers.common.exception.BrokerNotAvailableException;
 import com.example.find_my_edge.integrations.borkers.common.service.BrokerOAuthService;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,11 @@ public class BrokerOAuthFactory {
     }
 
     public BrokerOAuthService get(String broker) {
-        return services.get(broker);
+        BrokerOAuthService brokerOAuthService = services.get(broker);
+
+        if(brokerOAuthService == null){
+            throw new BrokerNotAvailableException("Broker not available: "+ broker);
+        }
+        return brokerOAuthService;
     }
 }

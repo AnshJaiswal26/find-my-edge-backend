@@ -1,7 +1,7 @@
 package com.example.find_my_edge.workspace.config.stat;
 
-import com.example.find_my_edge.common.config.AstConfig;
-import com.example.find_my_edge.common.config.ColorRuleConfig;
+import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
+import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

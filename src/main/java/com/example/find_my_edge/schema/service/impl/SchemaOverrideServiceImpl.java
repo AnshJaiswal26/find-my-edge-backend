@@ -1,7 +1,7 @@
 package com.example.find_my_edge.schema.service.impl;
 
-import com.example.find_my_edge.common.config.ColorRuleConfig;
-import com.example.find_my_edge.common.config.DisplayConfig;
+import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
+import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
 import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.schema.entity.SchemaOverrideEntity;
 import com.example.find_my_edge.schema.exception.SchemaOverrideException;

@@ -2,9 +2,9 @@ package com.example.find_my_edge.schema.model;
 
 
 import com.example.find_my_edge.analytics.ast.util.HasDependencies;
-import com.example.find_my_edge.common.config.AstConfig;
-import com.example.find_my_edge.common.config.ColorRuleConfig;
-import com.example.find_my_edge.common.config.DisplayConfig;
+import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
+import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
+import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
 import com.example.find_my_edge.schema.enums.*;
 import com.example.find_my_edge.schema.exception.SchemaValidationException;
 import lombok.AllArgsConstructor;

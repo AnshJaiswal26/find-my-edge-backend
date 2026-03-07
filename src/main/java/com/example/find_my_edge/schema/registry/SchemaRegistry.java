@@ -1,9 +1,7 @@
 package com.example.find_my_edge.schema.registry;
 
-import com.example.find_my_edge.common.config.ColorRuleConfig;
-import com.example.find_my_edge.common.config.DisplayConfig;
-
-import static com.example.find_my_edge.common.config.builder.AstConfigBuilder.*;
+import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
+import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
 
 import com.example.find_my_edge.schema.enums.FieldType;
 import com.example.find_my_edge.schema.enums.SchemaRole;
@@ -18,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+
+import static com.example.find_my_edge.common.builder.AstConfigBuilder.*;
 
 
 @Component

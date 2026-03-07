@@ -68,9 +68,7 @@ public class DhanOAuthService implements BrokerOAuthService {
 
     @Transactional
     @Override
-    public void handleCallback(String tokenId) {
-
-        UUID userId = currentUserService.getUserId();
+    public void handleCallback(String tokenId, UUID userId) {
 
         DhanAccessTokenResponseDto response =
                 restClient.get()
@@ -137,7 +135,7 @@ public class DhanOAuthService implements BrokerOAuthService {
                     .builder()
                     .status(ConnectionStatus.NOT_CONNECTED)
                     .connectedAt(null)
-                    .lastFetchedAt(null)
+                    .expiresOn(null)
                     .message("User has not connected to dhan")
                     .build();
         }
@@ -149,7 +147,7 @@ public class DhanOAuthService implements BrokerOAuthService {
                     .builder()
                     .status(ConnectionStatus.DISCONNECTED)
                     .connectedAt(formatTime(tokenEntity.getConnectedAt()))
-                    .lastFetchedAt(tokenEntity.getLastFetchedAt())
+                    .expiresOn(formatTime(tokenEntity.getExpiry()))
                     .message("User disconnected from dhan")
                     .build();
         }
@@ -168,7 +166,7 @@ public class DhanOAuthService implements BrokerOAuthService {
                     .builder()
                     .status(ConnectionStatus.TOKEN_EXPIRED)
                     .connectedAt(formatTime(tokenEntity.getConnectedAt()))
-                    .lastFetchedAt(tokenEntity.getLastFetchedAt())
+                    .expiresOn(formatTime(tokenEntity.getExpiry()))
                     .message(e.getMessage())
                     .build();
         }
@@ -177,7 +175,7 @@ public class DhanOAuthService implements BrokerOAuthService {
                 .builder()
                 .status(ConnectionStatus.CONNECTED)
                 .connectedAt(formatTime(tokenEntity.getConnectedAt()))
-                .lastFetchedAt(tokenEntity.getLastFetchedAt())
+                .expiresOn(formatTime(tokenEntity.getExpiry()))
                 .message("User is connected to dhan")
                 .build();
 
@@ -203,7 +201,7 @@ public class DhanOAuthService implements BrokerOAuthService {
                 .builder()
                 .status(ConnectionStatus.DISCONNECTED)
                 .connectedAt(formatTime(entity.getConnectedAt()))
-                .lastFetchedAt(entity.getLastFetchedAt())
+                .expiresOn(formatTime(entity.getExpiry()))
                 .message("User Disconnected from dhan")
                 .build();
 

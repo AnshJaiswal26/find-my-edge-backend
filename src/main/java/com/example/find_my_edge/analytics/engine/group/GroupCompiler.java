@@ -5,7 +5,7 @@ import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.config.GroupRangeConfig;
 import com.example.find_my_edge.analytics.engine.filter.FilterOperation;
 import com.example.find_my_edge.analytics.engine.filter.FilterOperationRegistry;
-import com.example.find_my_edge.trade.model.Trade;
+import com.example.find_my_edge.tradeId.model.tradeId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +22,9 @@ public class GroupCompiler {
 
     private final FilterOperationRegistry registry;
 
-    public Function<Trade, Object> compile(
+    public Function<String, Object> compile(
             GroupConfig spec,
-            BiFunction<Trade, String, Object> getValue
+            BiFunction<String, String, Object> getValue
     ) {
 
         if (spec == null || spec.getType() == null) {
@@ -34,41 +34,41 @@ public class GroupCompiler {
         switch (spec.getType()) {
 
             case "value":
-                return trade -> getValue.apply(trade, spec.getKey());
+                return tradeId -> getValue.apply(tradeId, spec.getKey());
 
             case "dateBucket":
-                return trade -> getDateBucket(
-                        getValue.apply(trade, spec.getKey()),
+                return tradeId -> getDateBucket(
+                        getValue.apply(tradeId, spec.getKey()),
                         spec.getUnit()
                 );
 
             case "timeBucket":
-                return trade -> getTimeBucket(
-                        getValue.apply(trade, spec.getKey()),
+                return tradeId -> getTimeBucket(
+                        getValue.apply(tradeId, spec.getKey()),
                         spec.getUnit()
                 );
 
             case "numberRange":
-                return trade -> matchRange(
-                        safeNumber(getValue.apply(trade, spec.getKey())),
+                return tradeId -> matchRange(
+                        safeNumber(getValue.apply(tradeId, spec.getKey())),
                         spec.getRanges()
                 );
 
             case "timeRange":
-                return trade -> matchRange(
-                        safeComparable(getValue.apply(trade, spec.getKey())),
+                return tradeId -> matchRange(
+                        safeComparable(getValue.apply(tradeId, spec.getKey())),
                         spec.getRanges()
                 );
 
             case "condition":
-                return trade -> {
-                    Object fieldValue = getValue.apply(trade, spec.getKey());
+                return tradeId -> {
+                    Object fieldValue = getValue.apply(tradeId, spec.getKey());
                     FilterOperation op = registry.get(spec.getOperator());
 
                     boolean result = op.apply(
                             fieldValue,
                             new FilterConfig(
-                                    (Double) spec.getValue(),
+                                    spec.getValue(),
                                     spec.getFrom(),
                                     spec.getTo()
                             )
