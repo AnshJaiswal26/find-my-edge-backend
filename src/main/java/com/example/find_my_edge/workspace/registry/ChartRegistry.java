@@ -8,12 +8,15 @@ import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.chart.SelectionConfig;
 import com.example.find_my_edge.workspace.enums.ChartCategory;
 import com.example.find_my_edge.workspace.enums.ChartMode;
+import com.example.find_my_edge.workspace.enums.Source;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+
+import static com.example.find_my_edge.common.builder.AstConfigBuilder.function;
 
 @Component
 @RequiredArgsConstructor
@@ -49,6 +52,10 @@ public class ChartRegistry {
         return chartOrder.stream().toList();
     }
 
+    public boolean has(String statId) {
+        return chartOrder.contains(statId);
+    }
+
     private List<ChartConfig> buildDefaultCharts() {
         return List.of(
                 barChart(),
@@ -66,6 +73,7 @@ public class ChartRegistry {
                                       .type("bar")
                                       .category(ChartCategory.SERIES.key())
                                       .mode(ChartMode.SERIES.toString())
+                                      .source(Source.SYSTEM)
                                       .build());
 
         Map<String, Object> layout = layoutRegistry.get("bar");
@@ -93,7 +101,6 @@ public class ChartRegistry {
                             .key("riskReward")
                             .name("Risk/Reward")
                             .type("number")
-                            .ast(null)
                             .colorRules(
                                     List.of(
                                             ColorRuleConfig.builder()
@@ -132,6 +139,7 @@ public class ChartRegistry {
                                       .type("line")
                                       .category(ChartCategory.SERIES.key())
                                       .mode(ChartMode.SERIES.toString())
+                                      .source(Source.SYSTEM)
                                       .build());
 
         Map<String, Object> layout = layoutRegistry.get("line");
@@ -176,6 +184,7 @@ public class ChartRegistry {
                                       .id("donut-chart-1")
                                       .type("donut")
                                       .category(ChartCategory.GROUP.key())
+                                      .source(Source.SYSTEM)
                                       .build());
 
         Map<String, Object> layout = layoutRegistry.get("pie");
@@ -189,6 +198,8 @@ public class ChartRegistry {
                                     .name("Win Rate")
                                     .type("number")
                                     .ast(function("WIN_RATE")) // AST
+                                    .formula("WIN_RATE()")
+                                    .dependencies(List.of("pnl"))
                                     .label("Wins")
                                     .color("var(--info)")
                                     .build(),
@@ -198,6 +209,8 @@ public class ChartRegistry {
                                     .name("Loss Rate")
                                     .type("number")
                                     .ast(function("LOSS_RATE")) // AST
+                                    .formula("LOSS_RATE()")
+                                    .dependencies(List.of("pnl"))
                                     .label("Losses")
                                     .color("var(--warning)")
                                     .build()
@@ -216,6 +229,7 @@ public class ChartRegistry {
                                       .id("radialBar-chart-1")
                                       .type("radialBar")
                                       .category(ChartCategory.GROUP.key())
+                                      .source(Source.SYSTEM)
                                       .build());
 
         Map<String, Object> layout = layoutRegistry.get("radialBar");
@@ -231,6 +245,8 @@ public class ChartRegistry {
                                     .name("Win Rate")
                                     .type("number")
                                     .ast(function("WIN_RATE")) // AST
+                                    .formula("WIN_RATE()")
+                                    .dependencies(List.of("pnl"))
                                     .label("Wins")
                                     .color("var(--info)")
                                     .build(),
@@ -240,6 +256,8 @@ public class ChartRegistry {
                                     .name("Loss Rate")
                                     .type("number")
                                     .ast(function("LOSS_RATE")) // AST
+                                    .formula("LOSS_RATE()")
+                                    .dependencies(List.of("pnl"))
                                     .label("Losses")
                                     .color("var(--warning)")
                                     .build()

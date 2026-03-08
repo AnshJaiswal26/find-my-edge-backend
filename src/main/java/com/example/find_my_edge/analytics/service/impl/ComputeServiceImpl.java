@@ -6,14 +6,13 @@ import com.example.find_my_edge.analytics.engine.aggregate.AggregateComputeEngin
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.engine.dataSet.GlobalTradeDataset;
 import com.example.find_my_edge.analytics.engine.dataSet.GroupTradeDataset;
+import com.example.find_my_edge.analytics.engine.dataSet.TradeDataset;
 import com.example.find_my_edge.analytics.engine.group.GroupBuilder;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.analytics.model.TradeContextSplit;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.schema.model.Schema;
-import com.example.find_my_edge.trade.model.Trade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Service
@@ -38,34 +38,36 @@ public class ComputeServiceImpl implements ComputeService {
 
     @Override
     public <T> void executeAggregate(
-            Map<String, T> source,
-            Function<String, String> formulaFn,
-            Function<String, AstConfig> cfgFn,
+            Collection<T> source,
+            Function<T, String> keyFn,
+            BiFunction<String, T, String> formulaFn,
+            BiFunction<String, T, AstConfig> cfgFn,
             BiConsumer<String, Double> consumer,
-            Map<String, Schema> schemasById,
-            List<Trade> trades
+            ComputationContext ctx
     ) {
 
-        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
+        TradeDataset dataset = new GlobalTradeDataset(ctx);
 
         Map<String, Future<Double>> futures = new HashMap<>();
 
-        for (var entry : source.entrySet()) {
+        for (T item : source) {
 
-            String key = entry.getKey();
+            String key = keyFn.apply(item);
 
-            String formula = formulaFn.apply(key);
-
-            AstConfig config = cfgFn.apply(key);
+            String formula = formulaFn.apply(key, item);
+            AstConfig config = cfgFn.apply(key, item);
 
             futures.put(
-                    key, executorService.submit(
-                            () -> aggregateComputeEngine.computedAggregate(
-                                    config,
-                                    formula,
-                                    schemasById,
-                                    new GlobalTradeDataset(ctx)
-                            ))
+                    key,
+                    executorService.submit(
+                            () ->
+                                    aggregateComputeEngine.computedAggregate(
+                                            config,
+                                            formula,
+                                            ctx.getSchemasById(),
+                                            dataset
+                                    )
+                    )
             );
         }
 
@@ -73,79 +75,33 @@ public class ComputeServiceImpl implements ComputeService {
     }
 
     @Override
-    public TradeContextSplit getTradeContextSplit(
-            Map<String, Schema> schemasById,
-            List<Trade> trades
-    ) {
-        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
-
-        return new TradeContextSplit(
-                ctx.getRaw(),
-                ctx.getComputed(),
-                ctx.getTradeOrder()
-        );
-    }
-
-    @Override
-    public Map<String, Double> computeAggregateForFormulas(
-            Map<String, String> formulas,
-            Map<String, Schema> schemasById,
-            List<Trade> trades
-    ) {
-        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
-        return aggregateComputeEngine.computeAggregate(
-                formulas,
-                null,
-                schemasById,
-                new GlobalTradeDataset(ctx)
-        );
-    }
-
-    @Override
-    public Map<String, Double> computeAggregateForAstConfigs(
-            Map<String, AstConfig> astConfigs,
-            Map<String, Schema> schemasById,
-            List<Trade> trades
-    ) {
-        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
-        return aggregateComputeEngine.computeAggregate(
-                null,
-                astConfigs,
-                schemasById,
-                new GlobalTradeDataset(ctx)
-        );
-    }
-
     public Map<String, Double> computeAggregatePerGroupByAstConfigs(
             GroupConfig groupConfig,
-            AstConfig astConfig,
-            Map<String, Schema> schemasById,
-            List<Trade> trades
+            AstConfig astConfig
     ) {
-        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
+        ComputationContext ctx = tradeContextBuilder.buildContext();
 
-        return executeGroupAggregate(groupConfig, astConfig, null, schemasById, ctx);
+        return executeGroupAggregate(groupConfig, astConfig, null, ctx);
     }
 
+    @Override
     public Map<String, Double> computeAggregatePerGroupByFormula(
             GroupConfig groupConfig,
-            String formula,
-            Map<String, Schema> schemasById,
-            List<Trade> trades
+            String formula
     ) {
-        ComputationContext ctx = tradeContextBuilder.buildContext(schemasById, trades);
+        ComputationContext ctx = tradeContextBuilder.buildContext();
 
-        return executeGroupAggregate(groupConfig, null, formula, schemasById, ctx);
+        return executeGroupAggregate(groupConfig, null, formula, ctx);
     }
 
     public Map<String, Double> executeGroupAggregate(
             GroupConfig groupConfig,
             AstConfig astConfig,
             String formula,
-            Map<String, Schema> schemasById,
             ComputationContext ctx
     ) {
 
+        Map<String, Schema> schemasById = ctx.getSchemasById();
         List<String> tradeOrder = ctx.getTradeOrder();
 
         Map<String, Map<String, Object>> raw = ctx.getRaw();

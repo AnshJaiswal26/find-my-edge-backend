@@ -1,5 +1,6 @@
 package com.example.find_my_edge.analytics.ast.util;
 
+import com.example.find_my_edge.schema.exception.SchemaDependencyException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -48,7 +49,7 @@ public class DependencyResolver {
             List<String> order
     ) {
         if (visiting.contains(schemaId)) {
-            throw new IllegalStateException("Cycle detected at schema: " + schemaId);
+            throw new SchemaDependencyException("Cycle detected at schema: " + schemaId);
         }
 
         if (visited.contains(schemaId)) return;

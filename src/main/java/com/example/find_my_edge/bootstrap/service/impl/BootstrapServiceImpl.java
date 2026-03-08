@@ -1,22 +1,21 @@
 package com.example.find_my_edge.bootstrap.service.impl;
 
-import com.example.find_my_edge.analytics.model.TradeContextSplit;
+import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
+import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.bootstrap.dto.BootstrapResponse;
 import com.example.find_my_edge.bootstrap.service.BootstrapService;
 import com.example.find_my_edge.schema.dto.SchemaResponseDto;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
-import com.example.find_my_edge.schema.model.SchemaBundle;
 import com.example.find_my_edge.schema.service.SchemaService;
-import com.example.find_my_edge.trade.model.Trade;
 import com.example.find_my_edge.trade.service.TradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,31 +28,32 @@ public class BootstrapServiceImpl implements BootstrapService {
 
     private final SchemaDtoMapper schemaDtoMapper;
 
+    private TradeContextBuilder tradeContextBuilder;
+
+
     @Override
     public BootstrapResponse init() {
+        ComputationContext ctx = tradeContextBuilder.buildContext();
 
-        SchemaBundle schemaBundle = schemaService.getAll();
-        List<Trade> trades = tradeService.getAll();
+        List<String> schemaOrder = ctx.getSchemaOrder();
+        Map<String, Schema> schemas = ctx.getSchemasById();
 
-        List<String> schemasOrder = schemaBundle.getSchemasOrder();
-        Map<String, Schema> schemas = schemaBundle.getSchemasById();
+        Map<String, SchemaResponseDto> schemasById =
+                schemas.entrySet()
+                       .stream()
+                       .collect(Collectors.toMap(
+                               Map.Entry::getKey,
+                               e -> schemaDtoMapper.toResponse(e.getValue())
+                       ));
 
-        TradeContextSplit tradeContextSplit =
-                computeService.getTradeContextSplit(schemas, trades);
+        List<String> tradesOrder = ctx.getTradeOrder();
 
-        Map<String, SchemaResponseDto> schemasById = new HashMap<>();
-
-        schemas.forEach((key, value) ->
-                                schemasById.put(key, schemaDtoMapper.toResponse(value)));
-
-        List<String> tradesOrder = tradeContextSplit.getTradesOrder();
-
-        Map<String, Map<String, Object>> raw = tradeContextSplit.getRaw();
-        Map<String, Map<String, Object>> computed = tradeContextSplit.getComputed();
+        Map<String, Map<String, Object>> raw = ctx.getRaw();
+        Map<String, Map<String, Object>> computed = ctx.getComputed();
 
         return BootstrapResponse.builder()
                                 .schemasById(schemasById)
-                                .schemasOrder(schemasOrder)
+                                .schemasOrder(schemaOrder)
                                 .tradesById(raw)
                                 .derivedByTradeId(computed)
                                 .tradesOrder(tradesOrder)

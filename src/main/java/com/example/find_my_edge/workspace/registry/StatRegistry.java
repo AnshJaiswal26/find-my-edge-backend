@@ -3,11 +3,14 @@ package com.example.find_my_edge.workspace.registry;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
+import com.example.find_my_edge.workspace.enums.Source;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+
+import static com.example.find_my_edge.common.builder.AstConfigBuilder.*;
 
 @Component
 @RequiredArgsConstructor
@@ -66,7 +69,9 @@ public class StatRegistry {
                          .type("number")
                          .ast(function("SUM", field("pnl")))
                          .formula("SUM(pnl)")
+                         .dependencies(List.of("pnl"))
                          .format("COMPACT_CURRENCY_SIGNED")
+                         .source(Source.SYSTEM)
                          .colorRules(List.of(
                                  colorRule("greaterThan", 0.0, "var(--success)"),
                                  colorRule("lessThan", 0.0, "var(--error)")
@@ -79,9 +84,11 @@ public class StatRegistry {
                          .id("stat-2")
                          .title("Avg Risk/Reward")
                          .type("number")
-                         .formula("AVG(riskReward)")
                          .ast(function("AVG", field("riskReward")))
+                         .formula("AVG(riskReward)")
+                         .dependencies(List.of("riskReward"))
                          .format("RATIO")
+                         .source(Source.SYSTEM)
                          .colorRules(new ArrayList<>())
                          .build();
     }
@@ -91,9 +98,11 @@ public class StatRegistry {
                          .id("stat-3")
                          .title("Avg Holding Time")
                          .type("duration")
-                         .formula("AVG(duration)")
                          .ast(function("AVG", field("duration")))
+                         .formula("AVG(duration)")
+                         .dependencies(List.of("duration"))
                          .format("HH:mm:ss")
+                         .source(Source.SYSTEM)
                          .colorRules(new ArrayList<>())
                          .build();
     }
@@ -103,9 +112,11 @@ public class StatRegistry {
                          .id("stat-4")
                          .title("Max Profit")
                          .type("number")
-                         .formula("MAX(pnl)")
                          .ast(function("MAX", field("pnl")))
+                         .formula("MAX(pnl)")
+                         .dependencies(List.of("pnl"))
                          .format("CURRENCY_SIGNED")
+                         .source(Source.SYSTEM)
                          .colorRules(new ArrayList<>())
                          .build();
     }
@@ -115,9 +126,11 @@ public class StatRegistry {
                          .id("stat-5")
                          .title("Max Loss")
                          .type("number")
-                         .formula("MIN(pnl)")
                          .ast(function("MIN", field("pnl")))
+                         .formula("MIN(pnl)")
+                         .dependencies(List.of("pnl"))
                          .format("CURRENCY_SIGNED")
+                         .source(Source.SYSTEM)
                          .colorRules(new ArrayList<>())
                          .build();
     }
@@ -127,9 +140,11 @@ public class StatRegistry {
                          .id("stat-6")
                          .title("Win Rate")
                          .type("number")
-                         .formula("WIN_RATE()")
                          .ast(function("WIN_RATE"))
+                         .formula("WIN_RATE()")
+                         .dependencies(List.of("pnl"))
                          .format("PERCENT")
+                         .source(Source.SYSTEM)
                          .colorRules(new ArrayList<>())
                          .build();
     }

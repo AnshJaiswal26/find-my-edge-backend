@@ -21,25 +21,16 @@ import java.util.Map;
 public class GroupTesting {
 
     @Autowired
-    private TradeService tradeService;
-
-    @Autowired
     private GroupBuilder groupBuilder;
 
     @Autowired
     private TradeContextBuilder builder;
 
-    @Autowired
-    private SchemaService schemaService;
-
 
     @Test
     public void grouping() {
 
-        List<Trade> all = tradeService.getAll();
-        SchemaBundle bundle = schemaService.getAll();
-        ComputationContext computationContext =
-                builder.buildContext(bundle.getSchemasById(), all);
+        ComputationContext computationContext = builder.buildContext();
 
         Map<String, Map<String, Object>> raw = computationContext.getRaw();
         Map<String, Map<String, Object>> computed = computationContext.getComputed();

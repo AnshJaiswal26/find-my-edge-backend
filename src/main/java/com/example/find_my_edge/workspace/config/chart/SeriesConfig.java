@@ -1,5 +1,6 @@
 package com.example.find_my_edge.workspace.config.chart;
 
+import com.example.find_my_edge.analytics.ast.util.HasDependencies;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SeriesConfig {
+public class SeriesConfig implements HasDependencies {
 
     private String key;
     private String name;
@@ -29,9 +30,15 @@ public class SeriesConfig {
 
     private List<ColorRuleConfig> colorRules = new ArrayList<>();
 
+    private Double value;
+
     private String color;
     private String markerColor;
     private String areaColor;
     private String label;
 
+    @Override
+    public String getId() {
+        return this.key;
+    }
 }

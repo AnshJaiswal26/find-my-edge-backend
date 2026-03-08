@@ -1,5 +1,7 @@
 package com.example.find_my_edge.workspace.features.impl;
 
+import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
+import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
 import com.example.find_my_edge.workspace.features.StatService;
@@ -7,6 +9,8 @@ import com.example.find_my_edge.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +19,9 @@ import java.util.Map;
 public class StatServiceImpl implements StatService {
 
     private final WorkspaceService workspaceService;
+    private final ComputeService computeService;
+    private final TradeContextBuilder tradeContextBuilder;
+
 
     /* ---------------- GET ALL ---------------- */
     @Override
@@ -45,6 +52,15 @@ public class StatServiceImpl implements StatService {
                 pageName
         );
 
+        computeService.executeAggregate(
+                List.of(stat),
+                StatConfig::getId,
+                (id, statConfig) -> statConfig.getFormula(),
+                (id, statConfig) -> null,
+                (id, value) -> stat.setValue(value),
+                tradeContextBuilder.buildContext()
+        );
+
         return stat;
     }
 
@@ -57,6 +73,7 @@ public class StatServiceImpl implements StatService {
                         page.getStatsById().put(id, stat),
                 pageName
         );
+
         return stat;
     }
 

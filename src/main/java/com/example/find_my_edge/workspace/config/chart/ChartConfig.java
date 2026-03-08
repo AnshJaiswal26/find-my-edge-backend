@@ -3,6 +3,7 @@ package com.example.find_my_edge.workspace.config.chart;
 import com.example.find_my_edge.analytics.config.FilterConfig;
 import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.config.SortConfig;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -11,6 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
+@JsonAutoDetect(
+        fieldVisibility = ANY,
+        getterVisibility = NONE,
+        isGetterVisibility = NONE
+)
 @Data
 public class ChartConfig {
     private ChartMetaConfig meta;
@@ -19,6 +28,8 @@ public class ChartConfig {
     private GroupConfig groupSpec;
     private List<FilterConfig> filters = new ArrayList<>();
     private SelectionConfig selection;
+
+    private List<Double> series = new ArrayList<>();
 
     @JsonProperty("xSeriesConfig")
     private SeriesConfig xSeries;

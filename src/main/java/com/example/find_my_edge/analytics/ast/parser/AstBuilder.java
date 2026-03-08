@@ -67,6 +67,10 @@ public class AstBuilder {
                     }
                 }
 
+                if(fnDef.getReducer().getField() != null){
+                    dependencies.add(fnDef.getReducer().getField());
+                }
+
                 AstNode node = AstNode.builder()
                                       .type(NodeType.FUNCTION)
                                       .fn(name)

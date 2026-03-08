@@ -1,29 +1,25 @@
 package com.example.find_my_edge.dashboard.service.impl;
 
+import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
+import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.service.ComputeService;
-import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.dashboard.model.DashboardData;
 import com.example.find_my_edge.dashboard.service.DashboardService;
-import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
-import com.example.find_my_edge.schema.model.Schema;
-import com.example.find_my_edge.schema.model.SchemaBundle;
-import com.example.find_my_edge.schema.service.SchemaService;
-import com.example.find_my_edge.trade.model.Trade;
-import com.example.find_my_edge.trade.service.TradeService;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartLayoutConfig;
+import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
+import com.example.find_my_edge.workspace.enums.ChartCategory;
 import com.example.find_my_edge.workspace.enums.PageType;
+import com.example.find_my_edge.workspace.enums.Source;
 import com.example.find_my_edge.workspace.exception.PageNotFoundException;
-import com.example.find_my_edge.workspace.registry.StatRegistry;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,24 +29,18 @@ public class DashboardServiceImpl implements DashboardService {
     private final WorkspaceService workspaceService;
     private final ComputeService computeService;
 
-    private final SchemaService schemaService;
-    private final TradeService tradeService;
-
-    private final SchemaDtoMapper schemaDtoMapper;
-
-    private final StatRegistry statRegistry;
+    private final TradeContextBuilder tradeContextBuilder;
 
     @Override
     public DashboardData init() {
 
-        SchemaBundle schemaBundle = schemaService.getAll();
-        List<Trade> trades = tradeService.getAll();
+        ComputationContext computationContext = tradeContextBuilder.buildContext();
+
         PageConfig page = workspaceService.getPage(PageType.DASHBOARD.key());
 
         if (page == null) {
             throw new PageNotFoundException("Dashboard page config not found");
         }
-        Map<String, Schema> schemas = schemaBundle.getSchemasById();
 
         Map<String, ChartConfig> charts = page.getCharts();
         List<String> chartOrder = page.getChartOrder();
@@ -60,7 +50,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         Map<String, ChartLayoutConfig> chartGridLayout = page.getChartGridLayout();
 
-        computeStats(statsById, schemas, trades);
+        computeStats(statsById, computationContext);
+        computeCharts(charts, computationContext);
 
         return DashboardData.builder()
                             .chartGridLayout(chartGridLayout)
@@ -73,24 +64,52 @@ public class DashboardServiceImpl implements DashboardService {
 
     public void computeStats(
             Map<String, StatConfig> statsById,
-            Map<String, Schema> schemas,
-            List<Trade> trades
+            ComputationContext computationContext
     ) {
 
-        statsById.forEach((k, v) -> {
-
-        });
-
         computeService.executeAggregate(
-                statsById,
-                id -> !statRegistry.has(id) ? statsById.get(id).getFormula() : null,
-                id -> statRegistry.has(id) ? statsById.get(id).getAst() : null,
+                statsById.entrySet(),
+                Map.Entry::getKey,
+                (id, entry) ->
+                        entry.getValue().getSource() != Source.SYSTEM
+                        ? entry.getValue().getFormula()
+                        : null,
+                (id, entry) ->
+                        entry.getValue().getSource() == Source.SYSTEM
+                        ? entry.getValue().getAst()
+                        : null,
                 (id, value) -> {
                     StatConfig statConfig = statsById.get(id);
                     statConfig.setValue(value);
                 },
-                schemas,
-                trades
+                computationContext
         );
+    }
+
+    public void computeCharts(
+            Map<String, ChartConfig> chartsById,
+            ComputationContext computationContext
+    ) {
+
+        chartsById.forEach((chartId, chart) -> {
+
+            if (chart.getMeta().getCategory().equals(ChartCategory.SERIES.key())) return;
+
+            boolean useAst = chart.getMeta().getSource() == Source.SYSTEM;
+
+            Map<String, SeriesConfig> configByKey =
+                    chart.getSeriesConfig().stream()
+                         .collect(Collectors.toMap(SeriesConfig::getKey, s -> s));
+
+            computeService.executeAggregate(
+                    chart.getSeriesConfig(),
+                    SeriesConfig::getKey,
+                    (id, cfg) -> !useAst ? cfg.getFormula() : null,
+                    (id, cfg) -> useAst ? cfg.getAst() : null,
+                    (id, value) ->
+                            configByKey.get(id).setValue(value),
+                    computationContext
+            );
+        });
     }
 }

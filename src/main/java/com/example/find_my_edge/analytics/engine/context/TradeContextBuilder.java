@@ -10,7 +10,10 @@ import com.example.find_my_edge.analytics.ast.util.SchemaTypeResolver;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.schema.enums.ComputeMode;
 import com.example.find_my_edge.schema.model.Schema;
+import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.service.SchemaService;
 import com.example.find_my_edge.trade.model.Trade;
+import com.example.find_my_edge.trade.service.TradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +30,29 @@ public class TradeContextBuilder {
 
     private final RowSequenceExecutor rowSequenceExecutor;
 
+    private final SchemaService schemaService;
+    private final TradeService tradeService;
+
+    public ComputationContext buildContext() {
+        SchemaBundle schemaBundle = schemaService.getAll();
+        List<Trade> trades = tradeService.getAll();
+
+        Map<String, Schema> schemasById = schemaBundle.getSchemasById();
+        List<String> schemasOrder = schemaBundle.getSchemasOrder();
+
+        return buildComputationContext(schemasOrder, schemasById, trades);
+    }
+
     public ComputationContext buildContext(
+            Map<String, Schema> schemasById,
+            List<String> schemasOrder,
+            List<Trade> trades
+    ) {
+        return buildComputationContext(schemasOrder, schemasById, trades);
+    }
+
+    private ComputationContext buildComputationContext(
+            List<String> schemasOrder,
             Map<String, Schema> schemasById,
             List<Trade> trades
     ) {
@@ -37,7 +62,7 @@ public class TradeContextBuilder {
         List<String> tradeOrder = new ArrayList<>();
 
         if (trades == null || trades.isEmpty()) {
-            return new ComputationContext(raw, computed, tradeOrder);
+            return new ComputationContext(raw, computed, tradeOrder, schemasById, schemasOrder);
         }
 
         // STEP 1: RAW
@@ -131,7 +156,9 @@ public class TradeContextBuilder {
         return new ComputationContext(
                 Map.copyOf(raw),
                 Map.copyOf(computed),
-                List.copyOf(tradeOrder)
+                List.copyOf(tradeOrder),
+                schemasById,
+                schemasOrder
         );
     }
 }
