@@ -93,17 +93,17 @@ public class DashboardServiceImpl implements DashboardService {
 
         chartsById.forEach((chartId, chart) -> {
 
-            if (chart.getMeta().getCategory().equals(ChartCategory.SERIES.key())) return;
+            if (chart.getCategory().equals(ChartCategory.SERIES.key())) return;
 
-            boolean useAst = chart.getMeta().getSource() == Source.SYSTEM;
+            boolean useAst = chart.getSource() == Source.SYSTEM;
 
             Map<String, SeriesConfig> configByKey =
-                    chart.getSeriesConfig().stream()
-                         .collect(Collectors.toMap(SeriesConfig::getKey, s -> s));
+                    chart.getSeries().stream()
+                         .collect(Collectors.toMap(SeriesConfig::getField, s -> s));
 
             computeService.executeAggregate(
                     chart.getSeriesConfig(),
-                    SeriesConfig::getKey,
+                    SeriesConfig::getField,
                     (id, cfg) -> !useAst ? cfg.getFormula() : null,
                     (id, cfg) -> useAst ? cfg.getAst() : null,
                     (id, value) ->

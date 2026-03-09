@@ -2,12 +2,13 @@ package com.example.find_my_edge.workspace.features;
 
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
+import com.example.find_my_edge.workspace.dto.ChartRequestDto;
 
 import java.util.List;
 import java.util.Map;
 
 public interface ChartService {
-    ChartConfig create(String page, ChartConfig dto);
+    ChartConfig create(String page, ChartRequestDto dto);
 
     ChartConfig getById(String page, String chartId);
 

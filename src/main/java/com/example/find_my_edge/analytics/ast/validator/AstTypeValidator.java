@@ -6,7 +6,7 @@ import com.example.find_my_edge.analytics.ast.exception.AstTypeValidationExcepti
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
 import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.schema.enums.FieldType;
+import com.example.find_my_edge.common.enums.FieldType;
 import com.example.find_my_edge.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

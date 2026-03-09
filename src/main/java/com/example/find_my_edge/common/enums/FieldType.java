@@ -1,4 +1,4 @@
-package com.example.find_my_edge.schema.enums;
+package com.example.find_my_edge.common.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

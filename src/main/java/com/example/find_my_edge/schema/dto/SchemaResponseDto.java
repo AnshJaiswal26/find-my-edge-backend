@@ -3,6 +3,8 @@ package com.example.find_my_edge.schema.dto;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
+import com.example.find_my_edge.common.enums.FieldType;
+import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.schema.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

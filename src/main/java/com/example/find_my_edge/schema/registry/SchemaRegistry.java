@@ -3,9 +3,9 @@ package com.example.find_my_edge.schema.registry;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
 
-import com.example.find_my_edge.schema.enums.FieldType;
+import com.example.find_my_edge.common.enums.FieldType;
 import com.example.find_my_edge.schema.enums.SchemaRole;
-import com.example.find_my_edge.schema.enums.SemanticType;
+import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.schema.enums.SchemaSource;
 
 import com.example.find_my_edge.schema.model.Schema;

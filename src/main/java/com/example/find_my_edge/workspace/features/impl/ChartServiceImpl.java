@@ -1,9 +1,10 @@
 package com.example.find_my_edge.workspace.features.impl;
 
+import com.example.find_my_edge.workspace.builder.ChartBuilder;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
-import com.example.find_my_edge.workspace.enums.ChartCategory;
+import com.example.find_my_edge.workspace.dto.ChartRequestDto;
 import com.example.find_my_edge.workspace.exception.chart.ChartNotFoundException;
 import com.example.find_my_edge.workspace.exception.chart.InvalidChartConfigException;
 import com.example.find_my_edge.workspace.features.ChartService;
@@ -21,19 +22,31 @@ public class ChartServiceImpl implements ChartService {
 
     private final WorkspaceService workspaceService;
 
+    private final ChartBuilder chartBuilder;
+
     @Override
-    public ChartConfig create(String pageName, ChartConfig config) {
+    public ChartConfig create(String pageName, ChartRequestDto dto) {
+
+        ChartConfig config = chartBuilder.buildChart(
+                dto.getChartType(),
+                dto.getLayout(),
+                dto.getXMetric(),
+                dto.getSeries()
+        );
+
         validateChart(config);
 
-        workspaceService.getPageAndModify(page -> {
-            String chartId = config.getMeta().getId();
+        workspaceService.getPageAndModify(
+                page -> {
+                    String chartId = config.getId();
 
-            if (page.getCharts().containsKey(chartId)) {
-                throw new InvalidChartConfigException("Chart already exists with id: " + chartId);
-            }
+                    if (page.getCharts().containsKey(chartId)) {
+                        throw new InvalidChartConfigException("Chart already exists with id: " + chartId);
+                    }
 
-            page.getCharts().put(chartId, config);
-        }, pageName);
+                    page.getCharts().put(chartId, config);
+                }, pageName
+        );
 
         return config;
     }
@@ -54,26 +67,30 @@ public class ChartServiceImpl implements ChartService {
     public ChartConfig update(String pageName, String chartId, ChartConfig config) {
         validateChart(config);
 
-        workspaceService.getPageAndModify(page -> {
-            if (!page.getCharts().containsKey(chartId)) {
-                throw new ChartNotFoundException(chartId);
-            }
+        workspaceService.getPageAndModify(
+                page -> {
+                    if (!page.getCharts().containsKey(chartId)) {
+                        throw new ChartNotFoundException(chartId);
+                    }
 
-            page.getCharts().put(chartId, config);
-        }, pageName);
+                    page.getCharts().put(chartId, config);
+                }, pageName
+        );
 
         return config;
     }
 
     @Override
     public void delete(String pageName, String chartId) {
-        workspaceService.getPageAndModify(page -> {
-            if (!page.getCharts().containsKey(chartId)) {
-                throw new ChartNotFoundException(chartId);
-            }
+        workspaceService.getPageAndModify(
+                page -> {
+                    if (!page.getCharts().containsKey(chartId)) {
+                        throw new ChartNotFoundException(chartId);
+                    }
 
-            page.getCharts().remove(chartId);
-        }, pageName);
+                    page.getCharts().remove(chartId);
+                }, pageName
+        );
     }
 
     @Override
@@ -86,10 +103,12 @@ public class ChartServiceImpl implements ChartService {
             throw new IllegalArgumentException("Layout cannot be null");
         }
 
-        workspaceService.getPageAndModify(page -> {
-            ChartConfig chart = getChartOrThrow(page, chartId);
-            chart.setLayout(layout);
-        }, pageName);
+        workspaceService.getPageAndModify(
+                page -> {
+                    ChartConfig chart = getChartOrThrow(page, chartId);
+                    chart.setLayout(layout);
+                }, pageName
+        );
 
         return layout;
     }
@@ -104,15 +123,12 @@ public class ChartServiceImpl implements ChartService {
             throw new IllegalArgumentException("Series config cannot be null");
         }
 
-        workspaceService.getPageAndModify(page -> {
-            ChartConfig chart = getChartOrThrow(page, chartId);
-
-            if (chart.getMeta().getCategory().equals(ChartCategory.SERIES.key())) {
-                chart.setYSeries(seriesConfig);
-            } else {
-                chart.setSeriesConfig(seriesConfig);
-            }
-        }, pageName);
+        workspaceService.getPageAndModify(
+                page -> {
+                    ChartConfig chart = getChartOrThrow(page, chartId);
+                    chart.setSeries(seriesConfig);
+                }, pageName
+        );
 
         return seriesConfig;
     }
@@ -134,16 +150,8 @@ public class ChartServiceImpl implements ChartService {
             throw new InvalidChartConfigException("ChartConfig cannot be null");
         }
 
-        if (dto.getMeta() == null) {
-            throw new InvalidChartConfigException("Chart meta cannot be null");
-        }
-
-        if (dto.getMeta().getId() == null || dto.getMeta().getId().isBlank()) {
+        if (dto.getId() == null || dto.getId().isBlank()) {
             throw new InvalidChartConfigException("Chart id cannot be null or blank");
-        }
-
-        if (dto.getMeta().getCategory() == null) {
-            throw new InvalidChartConfigException("Chart category cannot be null");
         }
     }
 }

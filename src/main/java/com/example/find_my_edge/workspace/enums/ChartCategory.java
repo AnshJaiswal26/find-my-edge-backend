@@ -4,31 +4,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ChartCategory {
-    SERIES("series"),
-    GROUP("group");
-
-    private final String key;
-
-    ChartCategory(String key) {
-        this.key = key;
-    }
+    SERIES,
+    GROUP;
 
     @JsonValue
     public String toJson() {
-        return key;
-    }
-
-    public String key(){
-        return key;
+        return this.name().toLowerCase();
     }
 
     @JsonCreator
     public static ChartCategory fromJson(String value) {
-        for (ChartCategory chartCategory : ChartCategory.values()) {
-            if (chartCategory.key.equalsIgnoreCase(value)) {
-                return chartCategory;
-            }
-        }
-        throw new IllegalArgumentException("Invalid Page: " + value);
+        return ChartCategory.valueOf(value);
     }
 }

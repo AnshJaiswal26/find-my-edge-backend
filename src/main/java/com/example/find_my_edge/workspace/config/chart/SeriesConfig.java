@@ -3,6 +3,7 @@ package com.example.find_my_edge.workspace.config.chart;
 import com.example.find_my_edge.analytics.ast.util.HasDependencies;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
+import com.example.find_my_edge.common.enums.SemanticType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,9 +18,12 @@ import java.util.List;
 @AllArgsConstructor
 public class SeriesConfig implements HasDependencies {
 
-    private String key;
+    private String id;
+    private String chartId;
+
+    private String field;
     private String name;
-    private String type; // number, string, etc
+    private SemanticType type;
 
     private AstConfig ast;
     private String formula;
@@ -37,8 +41,4 @@ public class SeriesConfig implements HasDependencies {
     private String areaColor;
     private String label;
 
-    @Override
-    public String getId() {
-        return this.key;
-    }
 }

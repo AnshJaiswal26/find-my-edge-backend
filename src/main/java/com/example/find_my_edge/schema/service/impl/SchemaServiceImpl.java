@@ -2,6 +2,8 @@ package com.example.find_my_edge.schema.service.impl;
 
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
+import com.example.find_my_edge.analytics.model.RecomputeResult;
+import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.schema.entity.SchemaOverrideEntity;
 import com.example.find_my_edge.schema.enums.SchemaRole;
@@ -15,6 +17,7 @@ import com.example.find_my_edge.schema.exception.SchemaOrderException;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.model.SchemaUpdate;
 import com.example.find_my_edge.schema.registry.SchemaRegistry;
 import com.example.find_my_edge.schema.entity.SchemaEntity;
 import com.example.find_my_edge.schema.entity.SchemaOrderEntity;
@@ -24,6 +27,7 @@ import com.example.find_my_edge.schema.repository.SchemaRepository;
 import com.example.find_my_edge.schema.service.SchemaOverrideService;
 import com.example.find_my_edge.schema.service.SchemaService;
 
+import com.example.find_my_edge.workspace.enums.PageType;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +50,8 @@ public class SchemaServiceImpl implements SchemaService {
     private final SchemaOverrideService overrideService;
 
     private final WorkspaceService workspaceService;
+
+    private final RecomputeService recomputeService;
 
     private final SchemaDtoMapper dtoMapper;
     private final SchemaMapper mapper;
@@ -90,7 +96,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- UPDATE ---------------- */
     @Override
-    public Schema update(String schemaId, Schema schema) {
+    public SchemaUpdate update(String schemaId, Schema schema) {
         System.out.println(schema);
         schema.validateForWrite();
 
@@ -113,11 +119,16 @@ public class SchemaServiceImpl implements SchemaService {
 
             Schema baseSchema = schemaRegistry.get(schemaId);
 
-            return overrideService.applySingleOverride(baseSchema, schemaOverrideEntity);
+            return new SchemaUpdate(
+                    overrideService.applySingleOverride(baseSchema, schemaOverrideEntity),
+                    null
+            );
 
         } else if (existing == null) {
             throw new SchemaNotFoundException(schemaId);
         }
+
+        String oldFormula = existing.getFormula();
 
         SchemaEntity incoming = mapper.toEntity(schema);
 
@@ -127,7 +138,19 @@ public class SchemaServiceImpl implements SchemaService {
 
         SchemaEntity saved = schemaRepository.save(existing);
 
-        return mapper.toModel(saved);
+        boolean formulaChanged = !Objects.equals(oldFormula, saved.getFormula());
+
+        RecomputeResult recomputeResult = null;
+
+        if (formulaChanged) {
+            recomputeResult =
+                    recomputeService.recomputeOnDefinitionChange(
+                            PageType.DASHBOARD.key(),
+                            schemaId
+                    );
+        }
+
+        return  new SchemaUpdate(mapper.toModel(saved), recomputeResult);
     }
 
     private void applyUpdateStrategy(SchemaEntity existing, SchemaEntity incoming) {
@@ -135,7 +158,7 @@ public class SchemaServiceImpl implements SchemaService {
         SchemaRole role = existing.getRole();
         SchemaSource source = existing.getSource();
 
-        // ✅ USER_DEFINED → full control
+        // USER_DEFINED → full control
         if (role == SchemaRole.USER_DEFINED) {
 
             if (source == SchemaSource.COMPUTED) {
@@ -169,7 +192,7 @@ public class SchemaServiceImpl implements SchemaService {
         existing.setColorRulesJson(incoming.getColorRulesJson());
         existing.setHidden(incoming.getHidden());
 
-        // 🔥 CRITICAL: AST validation here (not outside)
+        //  CRITICAL: AST validation here (not outside)
         if (existing.getIdFormula() != null && !existing.getIdFormula().isBlank()) {
 
             AstResult astResult = astPipeline.buildAst(existing.getIdFormula());
@@ -401,7 +424,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         List<String> order = jsonUtil.fromJsonList(entity.getOrder(), String.class);
 
-        if(order.isEmpty()){
+        if (order.isEmpty()) {
             order.addAll(schemaRegistry.getOrder());
         }
 

@@ -3,12 +3,15 @@ package com.example.find_my_edge.workspace.config.chart;
 import com.example.find_my_edge.analytics.config.FilterConfig;
 import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.config.SortConfig;
+import com.example.find_my_edge.workspace.enums.ChartCategory;
+import com.example.find_my_edge.workspace.enums.ChartMode;
+import com.example.find_my_edge.workspace.enums.ChartType;
+import com.example.find_my_edge.workspace.enums.Source;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -21,20 +24,25 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
         isGetterVisibility = NONE
 )
 @Data
+@Builder
 public class ChartConfig {
-    private ChartMetaConfig meta;
-    private Map<String, Object> layout = new HashMap<>();
+    private String id;
+
+    private ChartCategory category;
+
+    private ChartType type;
+    private ChartMode mode;
+    private Source source;
+
+    private XMetric xMetric;
+
+    private GroupConfig group;
+
+    private List<SeriesConfig> series;
+
+    private Map<String,Object> layout;
+
     private SortConfig sort;
-    private GroupConfig groupSpec;
-    private List<FilterConfig> filters = new ArrayList<>();
     private SelectionConfig selection;
-
-    private List<Double> series = new ArrayList<>();
-
-    @JsonProperty("xSeriesConfig")
-    private SeriesConfig xSeries;
-
-    @JsonProperty("ySeriesConfig")
-    private List<SeriesConfig> ySeries;
-    private List<SeriesConfig> seriesConfig;
+    private List<FilterConfig> filters;
 }

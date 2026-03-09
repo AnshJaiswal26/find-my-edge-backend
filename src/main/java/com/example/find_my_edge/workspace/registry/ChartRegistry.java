@@ -2,12 +2,11 @@ package com.example.find_my_edge.workspace.registry;
 
 import com.example.find_my_edge.analytics.config.SortConfig;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
-import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.ChartMetaConfig;
-import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
-import com.example.find_my_edge.workspace.config.chart.SelectionConfig;
+import com.example.find_my_edge.common.enums.SemanticType;
+import com.example.find_my_edge.workspace.config.chart.*;
 import com.example.find_my_edge.workspace.enums.ChartCategory;
 import com.example.find_my_edge.workspace.enums.ChartMode;
+import com.example.find_my_edge.workspace.enums.ChartType;
 import com.example.find_my_edge.workspace.enums.Source;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -34,8 +33,8 @@ public class ChartRegistry {
         Set<String> tempOrder = new LinkedHashSet<>();
 
         buildDefaultCharts().forEach(chart -> {
-            tempMap.put(chart.getMeta().getId(), chart);
-            tempOrder.add(chart.getMeta().getId());
+            tempMap.put(chart.getId(), chart);
+            tempOrder.add(chart.getId());
         });
 
         this.charts = Map.copyOf(tempMap);
@@ -66,204 +65,168 @@ public class ChartRegistry {
     }
 
     private ChartConfig barChart() {
-        ChartConfig config = new ChartConfig();
-
-        config.setMeta(ChartMetaConfig.builder()
-                                      .id("bar-chart-1")
-                                      .type("bar")
-                                      .category(ChartCategory.SERIES.key())
-                                      .mode(ChartMode.SERIES.toString())
-                                      .source(Source.SYSTEM)
-                                      .build());
-
         Map<String, Object> layout = layoutRegistry.get("bar");
-
         layout.put("xTitleText", "Trades");
         layout.put("xFormat", "YYYY-MM-DD");
         layout.put("yTitleText", "Risk/Reward");
         layout.put("yFormat", "RATIO");
         layout.put("title", "P&L Booked on Risk/Reward");
 
-        config.setLayout(layout);
+        return ChartConfig
+                .builder()
+                .id("bar-chart-1")
+                .type(ChartType.BAR)
+                .category(ChartCategory.SERIES)
+                .mode(ChartMode.SERIES)
+                .source(Source.SYSTEM)
+                .layout(layout)
+                .xMetric(new XMetric("date", "Date", SemanticType.NUMBER))
+                .series(
+                        List.of(
+                                SeriesConfig
+                                        .builder()
+                                        .field("riskReward")
+                                        .name("Risk/Reward")
+                                        .type(SemanticType.NUMBER)
+                                        .colorRules(
+                                                List.of(
+                                                        ColorRuleConfig
+                                                                .builder()
+                                                                .operator("greaterThan")
+                                                                .value(0.6)
+                                                                .color("var(--success)")
+                                                                .label("Reward Taken")
+                                                                .build(),
 
-        config.setSort(new SortConfig(null, "none"));
-        config.setFilters(new ArrayList<>());
-        config.setSelection(new SelectionConfig(null, null));
+                                                        ColorRuleConfig
+                                                                .builder()
+                                                                .operator("greaterThan")
+                                                                .value(0.0)
+                                                                .color("var(--warning)")
+                                                                .label("Breakeven")
+                                                                .build(),
 
-        config.setXSeries(SeriesConfig.builder()
-                                      .key("date")
-                                      .name("Date")
-                                      .type("date")
-                                      .build());
-
-        config.setYSeries(List.of(
-                SeriesConfig.builder()
-                            .key("riskReward")
-                            .name("Risk/Reward")
-                            .type("number")
-                            .colorRules(
-                                    List.of(
-                                            ColorRuleConfig.builder()
-                                                           .operator("greaterThan")
-                                                           .value(0.6)
-                                                           .color("var(--success)")
-                                                           .label("Reward Taken")
-                                                           .build(),
-
-                                            ColorRuleConfig.builder()
-                                                           .operator("greaterThan")
-                                                           .value(0.0)
-                                                           .color("var(--warning)")
-                                                           .label("Breakeven")
-                                                           .build(),
-
-                                            ColorRuleConfig.builder()
-                                                           .operator("lessThan")
-                                                           .value(0.6)
-                                                           .color("var(--error)")
-                                                           .label("Risk Taken")
-                                                           .build()
-                                    )
-                            )
-                            .build()
-        ));
-
-        return config;
+                                                        ColorRuleConfig
+                                                                .builder()
+                                                                .operator("lessThan")
+                                                                .value(0.6)
+                                                                .color("var(--error)")
+                                                                .label("Risk Taken")
+                                                                .build()
+                                                )
+                                        )
+                                        .build()
+                        ))
+                .sort(new SortConfig(null, "none"))
+                .filters(new ArrayList<>())
+                .selection(new SelectionConfig(null, null))
+                .build();
     }
 
     private ChartConfig lineChart() {
-        ChartConfig config = new ChartConfig();
-
-        config.setMeta(ChartMetaConfig.builder()
-                                      .id("line-chart-1")
-                                      .type("line")
-                                      .category(ChartCategory.SERIES.key())
-                                      .mode(ChartMode.SERIES.toString())
-                                      .source(Source.SYSTEM)
-                                      .build());
 
         Map<String, Object> layout = layoutRegistry.get("line");
-
         layout.put("xTitleText", "Date");
         layout.put("xFormat", "hh:mm:ss A");
         layout.put("yTitleText", "Pnl");
         layout.put("yFormat", "CURRENCY");
         layout.put("title", "P&L Over Time");
 
-        config.setLayout(layout);
 
-        config.setSort(new SortConfig(null, "none"));
-        config.setFilters(new ArrayList<>());
-        config.setSelection(new SelectionConfig(null, null));
-
-        config.setXSeries(SeriesConfig.builder()
-                                      .key("entryTime")
-                                      .name("Entry Time")
-                                      .type("time")
-                                      .build());
-
-        config.setYSeries(List.of(
-                SeriesConfig.builder()
-                            .key("pnl")
-                            .name("Pnl")
-                            .type("number")
-                            .label("Pnl")
-                            .color("var(--cyan)")
-                            .markerColor("var(--cyan)")
-                            .areaColor("var(--cyan)")
-                            .build()
-        ));
-
-        return config;
+        return ChartConfig.builder()
+                          .id("donut-chart-1")
+                          .type(ChartType.DONUT)
+                          .category(ChartCategory.GROUP)
+                          .source(Source.SYSTEM)
+                          .layout(layout)
+                          .xMetric(new XMetric("entryTime", "Entry Time", SemanticType.NUMBER))
+                          .series(List.of(
+                                  SeriesConfig.builder()
+                                              .field("pnl")
+                                              .name("Pnl")
+                                              .type(SemanticType.NUMBER)
+                                              .label("Pnl")
+                                              .color("var(--cyan)")
+                                              .markerColor("var(--cyan)")
+                                              .areaColor("var(--cyan)")
+                                              .build()
+                          ))
+                          .sort(new SortConfig(null, "none"))
+                          .filters(new ArrayList<>())
+                          .selection(new SelectionConfig(null, null))
+                          .build();
     }
 
     private ChartConfig pieChart() {
-        ChartConfig config = new ChartConfig();
-
-        config.setMeta(ChartMetaConfig.builder()
-                                      .id("donut-chart-1")
-                                      .type("donut")
-                                      .category(ChartCategory.GROUP.key())
-                                      .source(Source.SYSTEM)
-                                      .build());
-
         Map<String, Object> layout = layoutRegistry.get("pie");
-
         layout.put("format", "PERCENT");
 
-        config.setSeriesConfig(
-                List.of(
-                        SeriesConfig.builder()
-                                    .key("WIN_RATE")
-                                    .name("Win Rate")
-                                    .type("number")
-                                    .ast(function("WIN_RATE")) // AST
-                                    .formula("WIN_RATE()")
-                                    .dependencies(List.of("pnl"))
-                                    .label("Wins")
-                                    .color("var(--info)")
-                                    .build(),
+        return ChartConfig.builder()
+                          .id("donut-chart-1")
+                          .type(ChartType.DONUT)
+                          .category(ChartCategory.GROUP)
+                          .source(Source.SYSTEM)
+                          .layout(layout)
+                          .series(List.of(
+                                  SeriesConfig.builder()
+                                              .field("WIN_RATE")
+                                              .name("Win Rate")
+                                              .type(SemanticType.NUMBER)
+                                              .ast(function("WIN_RATE")) // AST
+                                              .formula("WIN_RATE()")
+                                              .dependencies(List.of("pnl"))
+                                              .label("Wins")
+                                              .color("var(--info)")
+                                              .build(),
 
-                        SeriesConfig.builder()
-                                    .key("LOSS_RATE")
-                                    .name("Loss Rate")
-                                    .type("number")
-                                    .ast(function("LOSS_RATE")) // AST
-                                    .formula("LOSS_RATE()")
-                                    .dependencies(List.of("pnl"))
-                                    .label("Losses")
-                                    .color("var(--warning)")
-                                    .build()
-                )
-        );
-
-        config.setLayout(layout);
-
-        return config;
+                                  SeriesConfig.builder()
+                                              .field("LOSS_RATE")
+                                              .name("Loss Rate")
+                                              .type(SemanticType.NUMBER)
+                                              .ast(function("LOSS_RATE")) // AST
+                                              .formula("LOSS_RATE()")
+                                              .dependencies(List.of("pnl"))
+                                              .label("Losses")
+                                              .color("var(--warning)")
+                                              .build()
+                          ))
+                          .build();
     }
 
     private ChartConfig radialBarChart() {
-        ChartConfig config = new ChartConfig();
-
-        config.setMeta(ChartMetaConfig.builder()
-                                      .id("radialBar-chart-1")
-                                      .type("radialBar")
-                                      .category(ChartCategory.GROUP.key())
-                                      .source(Source.SYSTEM)
-                                      .build());
 
         Map<String, Object> layout = layoutRegistry.get("radialBar");
-
         layout.put("format", "PERCENT");
 
-        config.setLayout(layout);
+        return ChartConfig.builder()
+                          .id("radialBar-chart-1")
+                          .type(ChartType.RADIAL_BAR)
+                          .category(ChartCategory.GROUP)
+                          .source(Source.SYSTEM)
+                          .layout(layout)
+                          .series(List.of(
+                                  SeriesConfig.builder()
+                                              .field("WIN_RATE")
+                                              .name("Win Rate")
+                                              .type(SemanticType.NUMBER)
+                                              .ast(function("WIN_RATE")) // AST
+                                              .formula("WIN_RATE()")
+                                              .dependencies(List.of("pnl"))
+                                              .label("Wins")
+                                              .color("var(--info)")
+                                              .build(),
 
-        config.setSeriesConfig(
-                List.of(
-                        SeriesConfig.builder()
-                                    .key("WIN_RATE")
-                                    .name("Win Rate")
-                                    .type("number")
-                                    .ast(function("WIN_RATE")) // AST
-                                    .formula("WIN_RATE()")
-                                    .dependencies(List.of("pnl"))
-                                    .label("Wins")
-                                    .color("var(--info)")
-                                    .build(),
-
-                        SeriesConfig.builder()
-                                    .key("LOSS_RATE")
-                                    .name("Loss Rate")
-                                    .type("number")
-                                    .ast(function("LOSS_RATE")) // AST
-                                    .formula("LOSS_RATE()")
-                                    .dependencies(List.of("pnl"))
-                                    .label("Losses")
-                                    .color("var(--warning)")
-                                    .build()
-                )
-        );
-
-        return config;
+                                  SeriesConfig.builder()
+                                              .field("LOSS_RATE")
+                                              .name("Loss Rate")
+                                              .type(SemanticType.NUMBER)
+                                              .ast(function("LOSS_RATE")) // AST
+                                              .formula("LOSS_RATE()")
+                                              .dependencies(List.of("pnl"))
+                                              .label("Losses")
+                                              .color("var(--warning)")
+                                              .build()
+                          ))
+                          .build();
     }
 }

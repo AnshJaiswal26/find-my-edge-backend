@@ -1,5 +1,7 @@
 package com.example.find_my_edge.schema.entity;
 
+import com.example.find_my_edge.common.enums.FieldType;
+import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.schema.enums.*;
 import jakarta.persistence.*;
 import lombok.*;

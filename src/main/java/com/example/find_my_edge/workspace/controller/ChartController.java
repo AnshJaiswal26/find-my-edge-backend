@@ -4,6 +4,7 @@ import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
+import com.example.find_my_edge.workspace.dto.ChartRequestDto;
 import com.example.find_my_edge.workspace.features.ChartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class ChartController extends BaseController {
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> create(
             @PathVariable String pageName,
-            @RequestBody ChartConfig dto
+            @RequestBody ChartRequestDto dto
     ) {
         ChartConfig created = chartService.create(pageName, dto);
         return buildResponse(created, "Chart created successfully");

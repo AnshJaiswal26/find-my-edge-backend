@@ -3,6 +3,7 @@ package com.example.find_my_edge.analytics.service.impl;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.RecomputeResult;
+import com.example.find_my_edge.analytics.model.SeriesUpdate;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.schema.model.Schema;
@@ -46,20 +47,8 @@ public class RecomputeServiceImpl implements RecomputeService {
          * ---------------- RESOLVE AFFECTED SCHEMAS ----------------
          */
 
-        Set<String> affectedSchemas = new LinkedHashSet<>();
-
-        for (String schemaId : schemaOrder) {
-
-            Schema schema = schemasById.get(schemaId);
-            if (schema == null || schema.getDependencies() == null) continue;
-
-            if (schema.getDependencies().contains(changedMetricId)
-                || affectedSchemas.stream()
-                                  .anyMatch(dep -> schema.getDependencies().contains(dep))) {
-
-                affectedSchemas.add(schemaId);
-            }
-        }
+        Set<String> affectedSchemas =
+                resolveAffectedSchemas(schemaOrder, schemasById, changedMetricId);
 
         /*
          * ---------------- FIND AFFECTED STATS ----------------
@@ -75,50 +64,18 @@ public class RecomputeServiceImpl implements RecomputeService {
                                              .anyMatch(affectedSchemas::contains))
                          .toList();
 
-        computeService.executeAggregate(
-                affectedStats,
-                StatConfig::getId,
-                (id, stat) -> stat.getFormula(),
-                (id, stat) -> stat.getAst(),
-                (id, value) -> statsById.get(id).setValue(value),
-                ctx
-        );
+        Map<String, Double> statValues = computeStats(affectedStats, ctx);
 
         /*
          * ---------------- FIND AFFECTED CHART SERIES ----------------
          */
 
-        List<SeriesConfig> affectedSeries = new ArrayList<>();
+        Map<String, Boolean> systemSeries = new HashMap<>();
 
-        for (ChartConfig chart : chartsById.values()) {
+        List<SeriesUpdate> affectedSeries =
+                resolveSeries(chartsById, systemSeries, changedMetricId);
 
-            if (chart.getSeriesConfig() == null) continue;
-
-            chart.getSeriesConfig()
-                 .stream()
-                 .filter(series ->
-                                 series.getDependencies() != null &&
-                                 series.getDependencies()
-                                       .stream()
-                                       .anyMatch(affectedSchemas::contains))
-                 .forEach(affectedSeries::add);
-        }
-
-        Map<String, SeriesConfig> seriesByKey =
-                affectedSeries.stream()
-                              .collect(Collectors.toMap(
-                                      SeriesConfig::getKey,
-                                      s -> s
-                              ));
-
-        computeService.executeAggregate(
-                affectedSeries,
-                SeriesConfig::getKey,
-                (id, series) -> series.getFormula(),
-                (id, series) -> series.getAst(),
-                (id, value) -> seriesByKey.get(id).setValue(value),
-                ctx
-        );
+        Map<String, Double> seriesValues = computeSeries(affectedSeries, systemSeries, ctx);
 
         /*
          * ---------------- BUILD TRADE UPDATES ----------------
@@ -133,13 +90,14 @@ public class RecomputeServiceImpl implements RecomputeService {
             Map<String, Object> rowComputed = computed.get(tradeId);
             if (rowComputed == null) continue;
 
-            Map<String, Object> filtered = rowComputed.entrySet()
-                                                      .stream()
-                                                      .filter(e -> affectedSchemas.contains(e.getKey()))
-                                                      .collect(Collectors.toMap(
-                                                              Map.Entry::getKey,
-                                                              Map.Entry::getValue
-                                                      ));
+            Map<String, Object> filtered =
+                    rowComputed.entrySet()
+                               .stream()
+                               .filter(e -> affectedSchemas.contains(e.getKey()))
+                               .collect(Collectors.toMap(
+                                       Map.Entry::getKey,
+                                       Map.Entry::getValue
+                               ));
 
             if (!filtered.isEmpty()) {
                 tradeUpdates.put(tradeId, filtered);
@@ -147,13 +105,14 @@ public class RecomputeServiceImpl implements RecomputeService {
         }
 
         return new RecomputeResult(
-                affectedStats,
-                affectedSeries,
+                statValues,
+                seriesValues,
                 tradeUpdates
         );
     }
 
 
+    @Override
     public RecomputeResult recomputeByTradeField(
             String pageName,
             String changedField,
@@ -170,78 +129,124 @@ public class RecomputeServiceImpl implements RecomputeService {
         List<StatConfig> affectedStats =
                 stats.values()
                      .stream()
-                     .filter(stat ->
-                                     stat.getDependencies() != null &&
-                                     stat.getDependencies().contains(changedField))
+                     .filter(s -> s.getDependencies() != null &&
+                                  s.getDependencies().contains(changedField))
                      .toList();
 
-        computeService.executeAggregate(
-                affectedStats,
-                StatConfig::getId,
-                (id, stat) -> stat.getSource() != Source.SYSTEM ? stat.getFormula() : null,
-                (id, stat) -> stat.getSource() == Source.SYSTEM ? stat.getAst() : null,
-                (id, value) -> stats.get(id).setValue(value),
-                ctx
-        );
 
-        List<SeriesConfig> affectedSeries = new ArrayList<>();
+        Map<String, Double> statsValues = computeStats(affectedStats, ctx);
+
         Map<String, Boolean> systemSeries = new HashMap<>();
 
-        for (ChartConfig chart : charts.values()) {
+        List<SeriesUpdate> affectedSeries =
+                resolveSeries(charts, systemSeries, changedField);
 
-            if (chart.getSeriesConfig() == null) continue;
-
-            boolean usesAst = chart.getMeta().getSource() == Source.SYSTEM;
-
-            chart.getSeriesConfig()
-                 .stream()
-                 .filter(series ->
-                                 series.getDependencies() != null &&
-                                 series.getDependencies().contains(changedField))
-                 .forEach(s -> {
-                     affectedSeries.add(s);
-                     systemSeries.put(s.getId(), usesAst);
-                 });
-        }
-
-        Map<String, SeriesConfig> seriesByKey =
-                affectedSeries.stream()
-                              .collect(Collectors.toMap(
-                                      SeriesConfig::getId,
-                                      s -> s
-                              ));
-
-        computeService.executeAggregate(
-                affectedSeries,
-                SeriesConfig::getId,
-                (id, s) ->
-                        Boolean.FALSE.equals(systemSeries.get(id)) ? s.getFormula() : null,
-                (id, s) ->
-                        Boolean.TRUE.equals(systemSeries.get(id)) ? s.getAst() : null,
-                (id, value) -> seriesByKey.get(id).setValue(value),
-                ctx
-        );
+        Map<String, Double> seriesValues = computeSeries(affectedSeries, systemSeries, ctx);
 
         List<String> tradeOrder = ctx.getTradeOrder();
-
         int index = tradeOrder.indexOf(changedTradeId);
 
         Map<String, Map<String, Object>> updates = new HashMap<>();
 
         for (int i = index; i < tradeOrder.size(); i++) {
-
             String tradeId = tradeOrder.get(i);
-
-            updates.put(
-                    tradeId,
-                    ctx.getComputed().get(tradeId)
-            );
+            updates.put(tradeId, ctx.getComputed().get(tradeId));
         }
 
-        return new RecomputeResult(
-                affectedStats,
-                affectedSeries,
-                updates
+        return new RecomputeResult(statsValues, seriesValues, updates);
+    }
+
+
+    private Set<String> resolveAffectedSchemas(
+            List<String> schemaOrder,
+            Map<String, Schema> schemasById,
+            String changedMetricId
+    ) {
+        Set<String> affectedSchemas = new LinkedHashSet<>();
+
+        for (String schemaId : schemaOrder) {
+
+            Schema schema = schemasById.get(schemaId);
+            if (schema == null || schema.getDependencies() == null) continue;
+
+            if (schema.getDependencies().contains(changedMetricId)
+                || affectedSchemas.stream()
+                                  .anyMatch(dep -> schema.getDependencies().contains(dep))) {
+
+                affectedSchemas.add(schemaId);
+            }
+        }
+        return affectedSchemas;
+    }
+
+    private Map<String, Double> computeStats(
+            List<StatConfig> stats,
+            ComputationContext ctx
+    ) {
+
+        Map<String, Double> statsValues = new HashMap<>();
+
+        computeService.executeAggregate(
+                stats,
+                StatConfig::getId,
+                (id, stat) -> stat.getSource() != Source.SYSTEM ? stat.getFormula() : null,
+                (id, stat) -> stat.getSource() == Source.SYSTEM ? stat.getAst() : null,
+                statsValues::put,
+                ctx
         );
+
+        return statsValues;
+    }
+
+    private List<SeriesUpdate> resolveSeries(
+            Map<String, ChartConfig> charts,
+            Map<String, Boolean> systemSeries,
+            String changedField
+    ) {
+
+        List<SeriesUpdate> result = new ArrayList<>();
+
+        for (ChartConfig chart : charts.values()) {
+
+            if (chart.getSeries() == null) continue;
+
+            boolean usesAst = chart.getSource() == Source.SYSTEM;
+
+            chart.getSeries()
+                 .stream()
+                 .filter(series -> series.getDependencies() != null &&
+                                   series.getDependencies().contains(changedField))
+                 .forEach(series -> {
+                     result.add(new SeriesUpdate(chart.getId(), series));
+                     systemSeries.put(series.getId(), usesAst);
+                 });
+        }
+
+        return result;
+    }
+
+    private Map<String, Double> computeSeries(
+            List<SeriesUpdate> seriesUpdates,
+            Map<String, Boolean> systemSeries,
+            ComputationContext ctx
+    ) {
+
+        List<SeriesConfig> series =
+                seriesUpdates.stream()
+                             .map(SeriesUpdate::getSeries)
+                             .toList();
+
+        Map<String, Double> seriesValues = new HashMap<>();
+
+        computeService.executeAggregate(
+                series,
+                SeriesConfig::getId,
+                (id, s) -> Boolean.FALSE.equals(systemSeries.get(id)) ? s.getFormula() : null,
+                (id, s) -> Boolean.TRUE.equals(systemSeries.get(id)) ? s.getAst() : null,
+                seriesValues::put,
+                ctx
+        );
+
+        return seriesValues;
     }
 }

@@ -3,13 +3,11 @@ package com.example.find_my_edge.schema.controller;
 
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.dto.ApiResponse;
-import com.example.find_my_edge.schema.dto.SchemaOrderRequestDto;
-import com.example.find_my_edge.schema.dto.SchemaRequestDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDtoBundle;
+import com.example.find_my_edge.schema.dto.*;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.model.SchemaUpdate;
 import com.example.find_my_edge.schema.service.SchemaService;
 import lombok.RequiredArgsConstructor;
 
@@ -35,13 +33,20 @@ public class SchemaController extends BaseController {
 
     /* ---------------- UPDATE ---------------- */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<SchemaResponseDto>> updateSchema(
+    public ResponseEntity<ApiResponse<SchemaUpdateResponseDto>> updateSchema(
             @PathVariable String id,
             @RequestBody SchemaRequestDto request
     ) {
-        Schema update = schemaService.update(id, schemaDTOMapper.toSchema(request));
+        SchemaUpdate update = schemaService.update(id, schemaDTOMapper.toSchema(request));
+
         System.out.println(update);
-        return buildResponse(schemaDTOMapper.toResponse(update), "Schema updated successfully");
+
+        return buildResponse(
+                new SchemaUpdateResponseDto(
+                        schemaDTOMapper.toResponse(update.getSchema()),
+                        update.getRecomputeResult()
+                ), "Schema updated successfully"
+        );
     }
 
     /* ---------------- GET ALL ---------------- */
