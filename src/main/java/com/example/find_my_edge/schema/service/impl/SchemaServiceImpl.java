@@ -51,8 +51,6 @@ public class SchemaServiceImpl implements SchemaService {
 
     private final WorkspaceService workspaceService;
 
-    private final RecomputeService recomputeService;
-
     private final SchemaDtoMapper dtoMapper;
     private final SchemaMapper mapper;
     private final JsonUtil jsonUtil;
@@ -96,7 +94,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- UPDATE ---------------- */
     @Override
-    public SchemaUpdate update(String schemaId, Schema schema) {
+    public Schema update(String schemaId, Schema schema) {
         System.out.println(schema);
         schema.validateForWrite();
 
@@ -119,16 +117,11 @@ public class SchemaServiceImpl implements SchemaService {
 
             Schema baseSchema = schemaRegistry.get(schemaId);
 
-            return new SchemaUpdate(
-                    overrideService.applySingleOverride(baseSchema, schemaOverrideEntity),
-                    null
-            );
+            return overrideService.applySingleOverride(baseSchema, schemaOverrideEntity);
 
         } else if (existing == null) {
             throw new SchemaNotFoundException(schemaId);
         }
-
-        String oldFormula = existing.getFormula();
 
         SchemaEntity incoming = mapper.toEntity(schema);
 
@@ -138,19 +131,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         SchemaEntity saved = schemaRepository.save(existing);
 
-        boolean formulaChanged = !Objects.equals(oldFormula, saved.getFormula());
-
-        RecomputeResult recomputeResult = null;
-
-        if (formulaChanged) {
-            recomputeResult =
-                    recomputeService.recomputeOnDefinitionChange(
-                            PageType.DASHBOARD.key(),
-                            schemaId
-                    );
-        }
-
-        return  new SchemaUpdate(mapper.toModel(saved), recomputeResult);
+        return mapper.toModel(saved);
     }
 
     private void applyUpdateStrategy(SchemaEntity existing, SchemaEntity incoming) {

@@ -1,10 +1,11 @@
 package com.example.find_my_edge.analytics.service.impl;
 
+
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.RecomputeResult;
 import com.example.find_my_edge.analytics.model.SeriesUpdate;
-import com.example.find_my_edge.analytics.service.ComputeService;
+import com.example.find_my_edge.analytics.service.AggregateExecutionService;
 import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
@@ -24,7 +25,9 @@ import java.util.stream.Collectors;
 public class RecomputeServiceImpl implements RecomputeService {
 
     private final WorkspaceService workspaceService;
-    private final ComputeService computeService;
+
+    private final AggregateExecutionService aggregateExecutionService;
+
     private final TradeContextBuilder tradeContextBuilder;
 
     @Override
@@ -186,7 +189,7 @@ public class RecomputeServiceImpl implements RecomputeService {
 
         Map<String, Double> statsValues = new HashMap<>();
 
-        computeService.executeAggregate(
+        aggregateExecutionService.executeAggregate(
                 stats,
                 StatConfig::getId,
                 (id, stat) -> stat.getSource() != Source.SYSTEM ? stat.getFormula() : null,
@@ -238,7 +241,7 @@ public class RecomputeServiceImpl implements RecomputeService {
 
         Map<String, Double> seriesValues = new HashMap<>();
 
-        computeService.executeAggregate(
+        aggregateExecutionService.executeAggregate(
                 series,
                 SeriesConfig::getId,
                 (id, s) -> Boolean.FALSE.equals(systemSeries.get(id)) ? s.getFormula() : null,

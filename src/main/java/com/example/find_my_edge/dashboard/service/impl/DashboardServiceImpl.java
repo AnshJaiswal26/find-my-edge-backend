@@ -2,6 +2,7 @@ package com.example.find_my_edge.dashboard.service.impl;
 
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
+import com.example.find_my_edge.analytics.service.AggregateExecutionService;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.dashboard.model.DashboardData;
 import com.example.find_my_edge.dashboard.service.DashboardService;
@@ -30,6 +31,8 @@ public class DashboardServiceImpl implements DashboardService {
     private final ComputeService computeService;
 
     private final TradeContextBuilder tradeContextBuilder;
+
+    private final AggregateExecutionService aggregateExecutionService;
 
     @Override
     public DashboardData init() {
@@ -67,7 +70,7 @@ public class DashboardServiceImpl implements DashboardService {
             ComputationContext computationContext
     ) {
 
-        computeService.executeAggregate(
+        aggregateExecutionService.executeAggregate(
                 statsById.entrySet(),
                 Map.Entry::getKey,
                 (id, entry) ->
@@ -93,7 +96,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         chartsById.forEach((chartId, chart) -> {
 
-            if (chart.getCategory().equals(ChartCategory.SERIES.key())) return;
+            if (chart.getCategory() == ChartCategory.SERIES) return;
 
             boolean useAst = chart.getSource() == Source.SYSTEM;
 
@@ -101,8 +104,8 @@ public class DashboardServiceImpl implements DashboardService {
                     chart.getSeries().stream()
                          .collect(Collectors.toMap(SeriesConfig::getField, s -> s));
 
-            computeService.executeAggregate(
-                    chart.getSeriesConfig(),
+            aggregateExecutionService.executeAggregate(
+                    chart.getSeries(),
                     SeriesConfig::getField,
                     (id, cfg) -> !useAst ? cfg.getFormula() : null,
                     (id, cfg) -> useAst ? cfg.getAst() : null,

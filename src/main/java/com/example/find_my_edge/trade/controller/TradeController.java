@@ -7,6 +7,7 @@ import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.trade.dto.TradeDto;
 import com.example.find_my_edge.trade.model.Trade;
+import com.example.find_my_edge.trade.service.TradeOrchestratorService;
 import com.example.find_my_edge.trade.service.TradeService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ public class TradeController extends BaseController {
 
     private final TradeService tradeService;
     private final TradeDtoMapper tradeDtoMapper;
+
+    private final TradeOrchestratorService orchestratorService;
 
     /* ---------------- GET ALL ---------------- */
 
@@ -92,7 +95,11 @@ public class TradeController extends BaseController {
     ) {
 
         RecomputeResult recomputeResult =
-                tradeService.updateValue(id, dto.getField(), dto.getValue());
+                orchestratorService.updateTradeValueAndRecomputed(
+                        id,
+                        dto.getField(),
+                        dto.getValue()
+                );
 
         return buildResponse(
                 recomputeResult,

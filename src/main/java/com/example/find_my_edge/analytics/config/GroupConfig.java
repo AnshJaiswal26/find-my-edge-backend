@@ -15,7 +15,7 @@ import java.util.Map;
 public class GroupConfig {
 
     private String type;
-    private String key;
+    private String field;
 
     private String unit;
     private List<GroupRangeConfig> ranges;

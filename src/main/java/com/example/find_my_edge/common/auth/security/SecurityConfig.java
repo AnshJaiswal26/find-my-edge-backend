@@ -40,7 +40,8 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/register",
                                 "/auth/refresh",
-                                "/api/integrations/*/callback"
+                                "/api/integrations/*/callback",
+                                "/api/dev/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

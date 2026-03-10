@@ -33,35 +33,35 @@ public class GroupCompiler {
         switch (spec.getType()) {
 
             case "value":
-                return tradeId -> getValue.apply(tradeId, spec.getKey());
+                return tradeId -> getValue.apply(tradeId, spec.getField());
 
             case "dateBucket":
                 return tradeId -> getDateBucket(
-                        getValue.apply(tradeId, spec.getKey()),
+                        getValue.apply(tradeId, spec.getField()),
                         spec.getUnit()
                 );
 
             case "timeBucket":
                 return tradeId -> getTimeBucket(
-                        getValue.apply(tradeId, spec.getKey()),
+                        getValue.apply(tradeId, spec.getField()),
                         spec.getUnit()
                 );
 
             case "numberRange":
                 return tradeId -> matchRange(
-                        safeNumber(getValue.apply(tradeId, spec.getKey())),
+                        safeNumber(getValue.apply(tradeId, spec.getField())),
                         spec.getRanges()
                 );
 
             case "timeRange":
                 return tradeId -> matchRange(
-                        safeComparable(getValue.apply(tradeId, spec.getKey())),
+                        safeComparable(getValue.apply(tradeId, spec.getField())),
                         spec.getRanges()
                 );
 
             case "condition":
                 return tradeId -> {
-                    Object fieldValue = getValue.apply(tradeId, spec.getKey());
+                    Object fieldValue = getValue.apply(tradeId, spec.getField());
                     FilterOperation op = registry.get(spec.getOperator());
 
                     boolean result = op.apply(

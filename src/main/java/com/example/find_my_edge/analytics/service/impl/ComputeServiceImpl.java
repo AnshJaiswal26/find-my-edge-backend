@@ -10,7 +10,9 @@ import com.example.find_my_edge.analytics.engine.dataSet.TradeDataset;
 import com.example.find_my_edge.analytics.engine.group.GroupBuilder;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
 import com.example.find_my_edge.analytics.model.ComputationContext;
+import com.example.find_my_edge.analytics.model.RecomputeResult;
 import com.example.find_my_edge.analytics.service.ComputeService;
+import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
@@ -33,46 +35,9 @@ public class ComputeServiceImpl implements ComputeService {
 
     private final GroupBuilder groupBuilder;
 
+    private final RecomputeService recomputeService;
+
     private final ExecutorService executorService;
-
-
-    @Override
-    public <T> void executeAggregate(
-            Collection<T> source,
-            Function<T, String> keyFn,
-            BiFunction<String, T, String> formulaFn,
-            BiFunction<String, T, AstConfig> cfgFn,
-            BiConsumer<String, Double> consumer,
-            ComputationContext ctx
-    ) {
-
-        TradeDataset dataset = new GlobalTradeDataset(ctx);
-
-        Map<String, Future<Double>> futures = new HashMap<>();
-
-        for (T item : source) {
-
-            String key = keyFn.apply(item);
-
-            String formula = formulaFn.apply(key, item);
-            AstConfig config = cfgFn.apply(key, item);
-
-            futures.put(
-                    key,
-                    executorService.submit(
-                            () ->
-                                    aggregateComputeEngine.computedAggregate(
-                                            config,
-                                            formula,
-                                            ctx.getSchemasById(),
-                                            dataset
-                                    )
-                    )
-            );
-        }
-
-        collectFutures(futures).forEach(consumer);
-    }
 
     @Override
     public Map<String, Double> computeAggregatePerGroupByAstConfigs(

@@ -14,6 +14,6 @@ public enum ChartCategory {
 
     @JsonCreator
     public static ChartCategory fromJson(String value) {
-        return ChartCategory.valueOf(value);
+        return ChartCategory.valueOf(value.toUpperCase());
     }
 }

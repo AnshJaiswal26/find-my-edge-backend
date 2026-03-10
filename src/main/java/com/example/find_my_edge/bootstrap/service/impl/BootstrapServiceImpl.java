@@ -21,14 +21,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BootstrapServiceImpl implements BootstrapService {
 
-    private final ComputeService computeService;
-
-    private final SchemaService schemaService;
-    private final TradeService tradeService;
-
     private final SchemaDtoMapper schemaDtoMapper;
 
-    private TradeContextBuilder tradeContextBuilder;
+    private final TradeContextBuilder tradeContextBuilder;
 
 
     @Override

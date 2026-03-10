@@ -65,6 +65,8 @@ public class ChartRegistry {
     }
 
     private ChartConfig barChart() {
+        String chartId = "bar-chart-1";
+
         Map<String, Object> layout = layoutRegistry.get("bar");
         layout.put("xTitleText", "Trades");
         layout.put("xFormat", "YYYY-MM-DD");
@@ -74,17 +76,19 @@ public class ChartRegistry {
 
         return ChartConfig
                 .builder()
-                .id("bar-chart-1")
+                .id(chartId)
                 .type(ChartType.BAR)
                 .category(ChartCategory.SERIES)
                 .mode(ChartMode.SERIES)
                 .source(Source.SYSTEM)
                 .layout(layout)
-                .xMetric(new XMetric("date", "Date", SemanticType.NUMBER))
+                .xMetric(new XMetric("date", "Date", SemanticType.DATE))
                 .series(
                         List.of(
                                 SeriesConfig
                                         .builder()
+                                        .id(UUID.randomUUID().toString())
+                                        .chartId(chartId)
                                         .field("riskReward")
                                         .name("Risk/Reward")
                                         .type(SemanticType.NUMBER)
@@ -125,6 +129,9 @@ public class ChartRegistry {
 
     private ChartConfig lineChart() {
 
+        String chartId = "line-chart-1";
+
+
         Map<String, Object> layout = layoutRegistry.get("line");
         layout.put("xTitleText", "Date");
         layout.put("xFormat", "hh:mm:ss A");
@@ -134,14 +141,17 @@ public class ChartRegistry {
 
 
         return ChartConfig.builder()
-                          .id("donut-chart-1")
-                          .type(ChartType.DONUT)
-                          .category(ChartCategory.GROUP)
+                          .id(chartId)
+                          .type(ChartType.LINE)
+                          .category(ChartCategory.SERIES)
+                          .mode(ChartMode.SERIES)
                           .source(Source.SYSTEM)
                           .layout(layout)
-                          .xMetric(new XMetric("entryTime", "Entry Time", SemanticType.NUMBER))
+                          .xMetric(new XMetric("entryTime", "Entry Time", SemanticType.TIME))
                           .series(List.of(
                                   SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
                                               .field("pnl")
                                               .name("Pnl")
                                               .type(SemanticType.NUMBER)
@@ -161,14 +171,18 @@ public class ChartRegistry {
         Map<String, Object> layout = layoutRegistry.get("pie");
         layout.put("format", "PERCENT");
 
+        String chartId = "donut-chart-1";
+
         return ChartConfig.builder()
-                          .id("donut-chart-1")
+                          .id(chartId)
                           .type(ChartType.DONUT)
                           .category(ChartCategory.GROUP)
                           .source(Source.SYSTEM)
                           .layout(layout)
                           .series(List.of(
                                   SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
                                               .field("WIN_RATE")
                                               .name("Win Rate")
                                               .type(SemanticType.NUMBER)
@@ -180,6 +194,8 @@ public class ChartRegistry {
                                               .build(),
 
                                   SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
                                               .field("LOSS_RATE")
                                               .name("Loss Rate")
                                               .type(SemanticType.NUMBER)
@@ -195,17 +211,21 @@ public class ChartRegistry {
 
     private ChartConfig radialBarChart() {
 
+        String chartId = "radialBar-chart-1";
+
         Map<String, Object> layout = layoutRegistry.get("radialBar");
         layout.put("format", "PERCENT");
 
         return ChartConfig.builder()
-                          .id("radialBar-chart-1")
+                          .id(chartId)
                           .type(ChartType.RADIAL_BAR)
                           .category(ChartCategory.GROUP)
                           .source(Source.SYSTEM)
                           .layout(layout)
                           .series(List.of(
                                   SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
                                               .field("WIN_RATE")
                                               .name("Win Rate")
                                               .type(SemanticType.NUMBER)
@@ -217,6 +237,8 @@ public class ChartRegistry {
                                               .build(),
 
                                   SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
                                               .field("LOSS_RATE")
                                               .name("Loss Rate")
                                               .type(SemanticType.NUMBER)

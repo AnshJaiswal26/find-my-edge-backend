@@ -106,6 +106,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         workspaceRepository.deleteByUserId(userId);
     }
 
+    @Transactional
+    public void deleteByUserId(UUID userId) {
+        workspaceRepository.deleteByUserId(userId);
+    }
+
     private WorkspaceData ensureData(WorkspaceEntity workspace) {
 
         if (workspace.getData() == null) {

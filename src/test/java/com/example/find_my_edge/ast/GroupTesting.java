@@ -5,10 +5,6 @@ import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.engine.group.GroupBuilder;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.schema.model.SchemaBundle;
-import com.example.find_my_edge.schema.service.SchemaService;
-import com.example.find_my_edge.trade.model.Trade;
-import com.example.find_my_edge.trade.service.TradeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +36,7 @@ public class GroupTesting {
                 tradeOrder,
                 GroupConfig.builder()
                            .type("dateBucket")
-                           .key("date")
+                           .field("date")
                            .unit("month")
                            .build(),
 

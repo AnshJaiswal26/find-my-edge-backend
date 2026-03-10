@@ -22,6 +22,8 @@ public interface WorkspaceService {
 
     void delete();
 
+    void deleteByUserId(UUID userId);
+
     void removeSchemaReferences(String schemaId);
 
     void removeTradeReferences(String tradeId);

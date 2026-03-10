@@ -8,8 +8,10 @@ import com.example.find_my_edge.workspace.enums.ChartMode;
 import com.example.find_my_edge.workspace.enums.ChartType;
 import com.example.find_my_edge.workspace.enums.Source;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 import java.util.List;
@@ -25,6 +27,8 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 )
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChartConfig {
     private String id;
 

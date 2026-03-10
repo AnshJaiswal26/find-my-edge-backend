@@ -1,7 +1,5 @@
 package com.example.find_my_edge.trade.service.impl;
 
-import com.example.find_my_edge.analytics.model.RecomputeResult;
-import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.trade.entity.TradeEntity;
 import com.example.find_my_edge.trade.exception.TradeIdNullException;
@@ -12,7 +10,6 @@ import com.example.find_my_edge.trade.model.TradeBundle;
 import com.example.find_my_edge.trade.repository.TradeRepository;
 import com.example.find_my_edge.trade.service.TradeService;
 
-import com.example.find_my_edge.workspace.enums.PageType;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +30,6 @@ public class TradeServiceImpl implements TradeService {
 
     private final WorkspaceService workspaceService;
 
-    private final RecomputeService recomputeService;
 
     private static final Map<String, BiConsumer<TradeEntity, Object>> STATIC_FIELD_UPDATERS = Map.of(
             "date", (t, v) -> t.setDate(((Number) v).longValue()),
@@ -117,7 +113,7 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
-    public RecomputeResult updateValue(String tradeId, String field, Object value) {
+    public Trade updateValue(String tradeId, String field, Object value) {
 
         UUID userId = currentUserService.getUserId();
 
@@ -135,9 +131,9 @@ public class TradeServiceImpl implements TradeService {
 
         entity.setUpdatedAt(Instant.now().toEpochMilli());
 
-        tradeRepository.save(entity);
+        TradeEntity saved = tradeRepository.save(entity);
 
-        return recomputeService.recomputeByTradeField(PageType.DASHBOARD.key(), field, tradeId);
+        return mapper.toDomain(saved);
     }
 
     /* ---------------- GET BY ID ---------------- */

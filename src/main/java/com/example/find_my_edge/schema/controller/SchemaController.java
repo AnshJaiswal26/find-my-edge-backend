@@ -9,6 +9,7 @@ import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
 import com.example.find_my_edge.schema.model.SchemaUpdate;
 import com.example.find_my_edge.schema.service.SchemaService;
+import com.example.find_my_edge.schema.service.impl.SchemaOrchestratorService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ public class SchemaController extends BaseController {
     private final SchemaService schemaService;
     private final SchemaDtoMapper schemaDTOMapper;
 
+    private final SchemaOrchestratorService orchestratorService;
+
     /* ---------------- CREATE ---------------- */
     @PostMapping
     public ResponseEntity<ApiResponse<SchemaResponseDto>> createSchema(@RequestBody SchemaRequestDto request) {
@@ -37,9 +40,13 @@ public class SchemaController extends BaseController {
             @PathVariable String id,
             @RequestBody SchemaRequestDto request
     ) {
-        SchemaUpdate update = schemaService.update(id, schemaDTOMapper.toSchema(request));
+        SchemaUpdate update =
+                orchestratorService.updateSchemaAndRecompute(
+                        id,
+                        schemaDTOMapper.toSchema(request)
+                );
 
-        System.out.println(update);
+//        System.out.println(update);
 
         return buildResponse(
                 new SchemaUpdateResponseDto(
