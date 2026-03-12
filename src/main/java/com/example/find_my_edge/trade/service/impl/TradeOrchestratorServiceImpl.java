@@ -17,8 +17,8 @@ public class TradeOrchestratorServiceImpl implements TradeOrchestratorService {
 
     @Override
     public RecomputeResult updateTradeValueAndRecomputed(
-            String field,
             String tradeId,
+            String field,
             Object value
     ) {
 

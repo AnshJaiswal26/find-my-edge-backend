@@ -4,8 +4,8 @@ import com.example.find_my_edge.analytics.model.RecomputeResult;
 
 public interface TradeOrchestratorService {
     RecomputeResult updateTradeValueAndRecomputed(
-            String field,
             String tradeId,
+            String field,
             Object value
     );
 }

@@ -134,6 +134,10 @@ public class Schema implements HasDependencies {
 
     /* ---------------- COMPUTATION HELPERS ---------------- */
 
+    public boolean hasWindowFunction(){
+        return mode == ComputeMode.CUMULATIVE;
+    }
+
     /**
      * Does this schema have a formula?
      */

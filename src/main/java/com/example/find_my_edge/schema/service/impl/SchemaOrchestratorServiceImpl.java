@@ -13,10 +13,25 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class SchemaOrchestratorServiceImpl implements SchemaOrchestratorService{
+public class SchemaOrchestratorServiceImpl implements SchemaOrchestratorService {
 
     private final SchemaService schemaService;
     private final RecomputeService recomputeService;
+
+    @Override
+    public SchemaUpdate createSchemaAndRecompute(Schema schema) {
+
+        Schema saved = schemaService.create(schema);
+
+        RecomputeResult recomputeResult = null;
+
+        if (saved.isComputed()) {
+            recomputeResult =
+                    recomputeService.recomputeOnSchemaCreation(saved.getId());
+        }
+
+        return new SchemaUpdate(saved, recomputeResult);
+    }
 
     @Override
     public SchemaUpdate updateSchemaAndRecompute(String schemaId, Schema schema) {

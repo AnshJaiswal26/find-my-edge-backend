@@ -8,6 +8,7 @@ import com.example.find_my_edge.schema.exception.SchemaOverrideException;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.repository.SchemaOverrideRepository;
 import com.example.find_my_edge.schema.service.SchemaOverrideService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -149,6 +150,7 @@ public class SchemaOverrideServiceImpl implements SchemaOverrideService {
     }
 
     @Override
+    @Transactional
     public SchemaOverrideEntity save(SchemaOverrideEntity schemaOverrideEntity) {
         return overrideRepository.save(schemaOverrideEntity);
     }

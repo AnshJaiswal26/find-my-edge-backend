@@ -2,8 +2,6 @@ package com.example.find_my_edge.schema.service.impl;
 
 import com.example.find_my_edge.analytics.ast.model.AstResult;
 import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
-import com.example.find_my_edge.analytics.model.RecomputeResult;
-import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.schema.entity.SchemaOverrideEntity;
 import com.example.find_my_edge.schema.enums.SchemaRole;
@@ -17,7 +15,6 @@ import com.example.find_my_edge.schema.exception.SchemaOrderException;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
-import com.example.find_my_edge.schema.model.SchemaUpdate;
 import com.example.find_my_edge.schema.registry.SchemaRegistry;
 import com.example.find_my_edge.schema.entity.SchemaEntity;
 import com.example.find_my_edge.schema.entity.SchemaOrderEntity;
@@ -27,9 +24,8 @@ import com.example.find_my_edge.schema.repository.SchemaRepository;
 import com.example.find_my_edge.schema.service.SchemaOverrideService;
 import com.example.find_my_edge.schema.service.SchemaService;
 
-import com.example.find_my_edge.workspace.enums.PageType;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +53,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- CREATE ---------------- */
     @Override
+    @Transactional
     public Schema create(Schema schema) {
 
         schema.validateForWrite();
@@ -64,6 +61,12 @@ public class SchemaServiceImpl implements SchemaService {
         UUID userId = currentUserService.getUserId();
 
         SchemaEntity entity = mapper.toEntity(schema);
+
+        if (schemaRepository.existsByUserIdAndLabel(userId, entity.getLabel())) {
+            throw new SchemaDependencyException(
+                    "Schema with label '" + entity.getLabel() + "' already exists"
+            );
+        }
 
         // SET SOURCE + ROLE (CRITICAL)
         if (schema.isComputed()) {
@@ -94,6 +97,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- UPDATE ---------------- */
     @Override
+    @Transactional
     public Schema update(String schemaId, Schema schema) {
         System.out.println(schema);
         schema.validateForWrite();
@@ -185,7 +189,6 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- GET BY ID ---------------- */
     @Override
-    @Transactional(Transactional.TxType.SUPPORTS)
     public Schema getById(String id) {
 
         UUID userId = currentUserService.getUserId();
@@ -205,7 +208,6 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- GET ALL ---------------- */
     @Override
-    @Transactional(Transactional.TxType.SUPPORTS)
     public SchemaBundle getAll() {
 
         UUID userId = currentUserService.getUserId();
@@ -248,6 +250,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- DELETE ---------------- */
     @Override
+    @Transactional
     public void delete(String id) {
 
         UUID userId = currentUserService.getUserId();
@@ -263,12 +266,7 @@ public class SchemaServiceImpl implements SchemaService {
         }
 
         List<String> dependents =
-                schemaRepository.findAllByUserId(userId)
-                                .stream()
-                                .filter(s -> s.getDependencies() != null &&
-                                             s.getDependencies().contains(id))
-                                .map(SchemaEntity::getLabel)
-                                .toList();
+                schemaRepository.findDependentSchemaLabels(userId, id);
 
         if (!dependents.isEmpty()) {
             throw new SchemaDependencyException(
@@ -277,8 +275,9 @@ public class SchemaServiceImpl implements SchemaService {
             );
         }
 
-        workspaceService.removeSchemaReferences(id);
         schemaRepository.delete(schema);
+
+        workspaceService.removeSchemaReferences(id);
 
         updateOrderOnDelete(userId, id);
     }
@@ -324,8 +323,8 @@ public class SchemaServiceImpl implements SchemaService {
         return merged;
     }
 
-    @Transactional
     @Override
+    @Transactional
     public List<String> updateOrder(List<String> order, ViewType viewType) {
 
         System.out.println("updateOrder() method called");
@@ -417,15 +416,20 @@ public class SchemaServiceImpl implements SchemaService {
 
     private void updateOrderOnDelete(UUID userId, String schemaId) {
 
-        schemaOrderRepository
-                .findByUserIdAndViewType(userId, ViewType.DEFAULT)
-                .ifPresent(entity -> {
+        List<SchemaOrderEntity> allByUserId =
+                schemaOrderRepository.findAllByUserId(userId);
+
+        if (allByUserId.isEmpty()) return;
+
+        List<SchemaOrderEntity> entityList =
+                allByUserId.stream().map(entity -> {
                     List<String> order = jsonUtil.fromJsonList(entity.getOrder(), String.class);
                     order.remove(schemaId);
-
                     entity.setOrder(jsonUtil.toJson(order));
-                    schemaOrderRepository.save(entity);
-                });
+                    return entity;
+                }).toList();
+
+        schemaOrderRepository.saveAll(entityList);
     }
 
     private List<String> getUserOrder(UUID userId, ViewType viewType) {

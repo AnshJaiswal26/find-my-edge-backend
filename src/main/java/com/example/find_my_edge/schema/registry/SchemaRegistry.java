@@ -4,6 +4,7 @@ import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
 
 import com.example.find_my_edge.common.enums.FieldType;
+import com.example.find_my_edge.schema.enums.ComputeMode;
 import com.example.find_my_edge.schema.enums.SchemaRole;
 import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.schema.enums.SchemaSource;
@@ -188,6 +189,7 @@ public class SchemaRegistry {
                      .semanticType(SemanticType.DURATION)
                      .source(SchemaSource.COMPUTED)
                      .role(SchemaRole.SYSTEM_REQUIRED)
+                     .mode(ComputeMode.ROW)
                      .dependencies(List.of("entryTime", "exitTime"))
                      .formula("[Exit Time] - [Entry Time]")
                      .idFormula("@{exitTime} - @{entryTime}")
@@ -208,6 +210,7 @@ public class SchemaRegistry {
                      .semanticType(SemanticType.NUMBER)
                      .source(SchemaSource.COMPUTED)
                      .role(SchemaRole.SYSTEM_REQUIRED)
+                     .mode(ComputeMode.ROW)
                      .dependencies(List.of("exitPrice", "entryPrice", "qty"))
                      .formula("([Exit Price] - [Entry Price]) * [Qty]")
                      .idFormula("(@{exitPrice} - @{entryPrice}) * @{qty}")

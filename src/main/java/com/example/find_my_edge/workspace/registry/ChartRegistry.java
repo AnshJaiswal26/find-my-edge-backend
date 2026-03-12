@@ -59,10 +59,75 @@ public class ChartRegistry {
         return List.of(
                 barChart(),
                 lineChart(),
+                lineChart1(),
                 pieChart(),
                 radialBarChart()
         );
     }
+
+//    private ChartConfig barChart() {
+//        String chartId = "bar-chart-1";
+//
+//        Map<String, Object> layout = layoutRegistry.get("bar");
+//        layout.put("xTitleText", "Trades");
+//        layout.put("xFormat", "YYYY-MM-DD");
+//        layout.put("yTitleText", "Risk/Reward");
+//        layout.put("yFormat", "RATIO");
+//        layout.put("title", "P&L Booked on Risk/Reward");
+//
+//        return ChartConfig
+//                .builder()
+//                .id(chartId)
+//                .type(ChartType.BAR)
+//                .category(ChartCategory.SERIES)
+//                .mode(ChartMode.SERIES)
+//                .source(Source.SYSTEM)
+//                .layout(layout)
+//                .xMetric(new XMetric("date", "Date", SemanticType.DATE))
+//                .series(
+//                        List.of(
+//                                SeriesConfig
+//                                        .builder()
+//                                        .id(UUID.randomUUID().toString())
+//                                        .chartId(chartId)
+//                                        .field("riskReward")
+//                                        .name("Risk/Reward")
+//                                        .type(SemanticType.NUMBER)
+//                                        .colorRules(
+//                                                List.of(
+//                                                        ColorRuleConfig
+//                                                                .builder()
+//                                                                .operator("greaterThan")
+//                                                                .value(0.6)
+//                                                                .color("var(--success)")
+//                                                                .label("Reward Taken")
+//                                                                .build(),
+//
+//                                                        ColorRuleConfig
+//                                                                .builder()
+//                                                                .operator("greaterThan")
+//                                                                .value(0.0)
+//                                                                .color("var(--warning)")
+//                                                                .label("Breakeven")
+//                                                                .build(),
+//
+//                                                        ColorRuleConfig
+//                                                                .builder()
+//                                                                .operator("lessThan")
+//                                                                .value(0.6)
+//                                                                .color("var(--error)")
+//                                                                .label("Risk Taken")
+//                                                                .build()
+//                                                )
+//                                        )
+//                                        .build()
+//                        ))
+//                .sort(new SortConfig(null, "none"))
+//                .filters(new ArrayList<>())
+//                .selection(new SelectionConfig(null, null))
+//                .build();
+//    }
+
 
     private ChartConfig barChart() {
         String chartId = "bar-chart-1";
@@ -70,9 +135,9 @@ public class ChartRegistry {
         Map<String, Object> layout = layoutRegistry.get("bar");
         layout.put("xTitleText", "Trades");
         layout.put("xFormat", "YYYY-MM-DD");
-        layout.put("yTitleText", "Risk/Reward");
-        layout.put("yFormat", "RATIO");
-        layout.put("title", "P&L Booked on Risk/Reward");
+        layout.put("yTitleText", "PnL");
+        layout.put("yFormat", "CURRENCY_SIGNED");
+        layout.put("title", "P&L Booked on Date");
 
         return ChartConfig
                 .builder()
@@ -89,33 +154,43 @@ public class ChartRegistry {
                                         .builder()
                                         .id(UUID.randomUUID().toString())
                                         .chartId(chartId)
-                                        .field("riskReward")
-                                        .name("Risk/Reward")
+                                        .field("pnl")
+                                        .label("PnL")
                                         .type(SemanticType.NUMBER)
                                         .colorRules(
                                                 List.of(
                                                         ColorRuleConfig
                                                                 .builder()
                                                                 .operator("greaterThan")
-                                                                .value(0.6)
+                                                                .value(0)
                                                                 .color("var(--success)")
-                                                                .label("Reward Taken")
+                                                                .label("PnL")
                                                                 .build(),
-
-                                                        ColorRuleConfig
-                                                                .builder()
-                                                                .operator("greaterThan")
-                                                                .value(0.0)
-                                                                .color("var(--warning)")
-                                                                .label("Breakeven")
-                                                                .build(),
-
                                                         ColorRuleConfig
                                                                 .builder()
                                                                 .operator("lessThan")
-                                                                .value(0.6)
+                                                                .value(0)
                                                                 .color("var(--error)")
-                                                                .label("Risk Taken")
+                                                                .label("PnL")
+                                                                .build()
+                                                )
+                                        )
+                                        .build(),
+                                SeriesConfig
+                                        .builder()
+                                        .id(UUID.randomUUID().toString())
+                                        .chartId(chartId)
+                                        .field("entryPrice")
+                                        .label("Entry Price")
+                                        .type(SemanticType.NUMBER)
+                                        .colorRules(
+                                                List.of(
+                                                        ColorRuleConfig
+                                                                .builder()
+                                                                .operator("always")
+                                                                .value(0)
+                                                                .color("var(--cyan)")
+                                                                .label("Entry Price")
                                                                 .build()
                                                 )
                                         )
@@ -159,6 +234,58 @@ public class ChartRegistry {
                                               .color("var(--cyan)")
                                               .markerColor("var(--cyan)")
                                               .areaColor("var(--cyan)")
+                                              .build()
+                          ))
+                          .sort(new SortConfig(null, "none"))
+                          .filters(new ArrayList<>())
+                          .selection(new SelectionConfig(null, null))
+                          .build();
+    }
+
+    private ChartConfig lineChart1() {
+
+        String chartId = "line-chart-2";
+
+
+        Map<String, Object> layout = layoutRegistry.get("line");
+        layout.put("xTitleText", "Date");
+        layout.put("xFormat", "hh:mm:ss A");
+        layout.put("yTitleText", "Pnl & Entry Price");
+        layout.put("yFormat", "NUMBER");
+        layout.put("title", "P&L and Entry Price Over Time");
+
+
+        return ChartConfig.builder()
+                          .id(chartId)
+                          .type(ChartType.LINE)
+                          .category(ChartCategory.SERIES)
+                          .mode(ChartMode.SERIES)
+                          .source(Source.SYSTEM)
+                          .layout(layout)
+                          .xMetric(new XMetric("entryTime", "Entry Time", SemanticType.TIME))
+                          .series(List.of(
+                                  SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
+                                              .field("pnl")
+                                              .name("Pnl")
+                                              .type(SemanticType.NUMBER)
+                                              .label("Pnl")
+                                              .color("var(--cyan)")
+                                              .markerColor("var(--cyan)")
+                                              .areaColor("var(--cyan)")
+                                              .build(),
+
+                                  SeriesConfig.builder()
+                                              .id(UUID.randomUUID().toString())
+                                              .chartId(chartId)
+                                              .field("entryPrice")
+                                              .name("Entry Price")
+                                              .type(SemanticType.NUMBER)
+                                              .label("Entry Price")
+                                              .color("var(--success)")
+                                              .markerColor("var(--success)")
+                                              .areaColor("var(--success)")
                                               .build()
                           ))
                           .sort(new SortConfig(null, "none"))

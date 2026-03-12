@@ -31,6 +31,25 @@ public class RecomputeServiceImpl implements RecomputeService {
     private final TradeContextBuilder tradeContextBuilder;
 
     @Override
+    public RecomputeResult recomputeOnSchemaCreation(String schemaId) {
+        ComputationContext ctx = tradeContextBuilder.buildContext();
+
+        Map<String, Map<String, Object>> computed = ctx.getComputed();
+
+        Map<String, Map<String, Object>> trades =
+                computed.entrySet()
+                        .stream()
+                        .collect(
+                                Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        e -> Map.of(schemaId, e.getValue().get(schemaId))
+                                )
+                        );
+
+        return new RecomputeResult(null, null, trades);
+    }
+
+    @Override
     public RecomputeResult recomputeOnDefinitionChange(
             String pageName,
             String changedMetricId
@@ -76,7 +95,7 @@ public class RecomputeServiceImpl implements RecomputeService {
         Map<String, Boolean> systemSeries = new HashMap<>();
 
         List<SeriesUpdate> affectedSeries =
-                resolveSeries(chartsById, systemSeries, changedMetricId);
+                resolveSeries(chartsById, systemSeries, affectedSchemas);
 
         Map<String, Double> seriesValues = computeSeries(affectedSeries, systemSeries, ctx);
 
@@ -126,14 +145,21 @@ public class RecomputeServiceImpl implements RecomputeService {
 
         ComputationContext ctx = tradeContextBuilder.buildContext();
 
+        List<String> schemaOrder = ctx.getSchemaOrder();
+        Map<String, Schema> schemasById = ctx.getSchemasById();
+
         Map<String, StatConfig> stats = page.getStatsById();
         Map<String, ChartConfig> charts = page.getCharts();
+
+        Set<String> affectedSchemas =
+                resolveAffectedSchemas(schemaOrder, schemasById, changedField);
+
 
         List<StatConfig> affectedStats =
                 stats.values()
                      .stream()
                      .filter(s -> s.getDependencies() != null &&
-                                  s.getDependencies().contains(changedField))
+                                  s.getDependencies().stream().anyMatch(affectedSchemas::contains))
                      .toList();
 
 
@@ -142,7 +168,7 @@ public class RecomputeServiceImpl implements RecomputeService {
         Map<String, Boolean> systemSeries = new HashMap<>();
 
         List<SeriesUpdate> affectedSeries =
-                resolveSeries(charts, systemSeries, changedField);
+                resolveSeries(charts, systemSeries, affectedSchemas);
 
         Map<String, Double> seriesValues = computeSeries(affectedSeries, systemSeries, ctx);
 
@@ -151,12 +177,38 @@ public class RecomputeServiceImpl implements RecomputeService {
 
         Map<String, Map<String, Object>> updates = new HashMap<>();
 
-        for (int i = index; i < tradeOrder.size(); i++) {
-            String tradeId = tradeOrder.get(i);
-            updates.put(tradeId, ctx.getComputed().get(tradeId));
+        for (String schemaId : affectedSchemas) {
+            Schema schema = schemasById.get(schemaId);
+
+            if (!schema.isComputed()) continue;
+
+            if (schema.hasWindowFunction()) {
+                for (int i = index; i < tradeOrder.size(); i++) {
+                    String tradeId = tradeOrder.get(i);
+                    updateAffectedTrades(updates, schemaId, tradeId, ctx);
+                }
+            } else {
+                updateAffectedTrades(updates, schemaId, changedTradeId, ctx);
+            }
         }
 
         return new RecomputeResult(statsValues, seriesValues, updates);
+    }
+
+    private void updateAffectedTrades(
+            Map<String, Map<String, Object>> updates,
+            String schemaId,
+            String changedTradeId,
+            ComputationContext ctx
+    ) {
+        Map<String, Object> computedTrade = ctx.getComputed().get(changedTradeId);
+        Map<String, Object> trade = updates.get(changedTradeId);
+
+        if (trade != null) {
+            trade.put(schemaId, computedTrade.get(schemaId));
+        } else {
+            updates.put(changedTradeId, new HashMap<>(Map.of(schemaId, computedTrade.get(schemaId))));
+        }
     }
 
 
@@ -204,7 +256,7 @@ public class RecomputeServiceImpl implements RecomputeService {
     private List<SeriesUpdate> resolveSeries(
             Map<String, ChartConfig> charts,
             Map<String, Boolean> systemSeries,
-            String changedField
+            Set<String> affectedSchemas
     ) {
 
         List<SeriesUpdate> result = new ArrayList<>();
@@ -218,7 +270,7 @@ public class RecomputeServiceImpl implements RecomputeService {
             chart.getSeries()
                  .stream()
                  .filter(series -> series.getDependencies() != null &&
-                                   series.getDependencies().contains(changedField))
+                                   series.getDependencies().stream().anyMatch(affectedSchemas::contains))
                  .forEach(series -> {
                      result.add(new SeriesUpdate(chart.getId(), series));
                      systemSeries.put(series.getId(), usesAst);

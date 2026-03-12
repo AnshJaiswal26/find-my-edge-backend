@@ -29,9 +29,16 @@ public class SchemaController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<SchemaResponseDto>> createSchema(@RequestBody SchemaRequestDto request) {
-        Schema schema = schemaService.create(schemaDTOMapper.toSchema(request));
-        return buildResponse(schemaDTOMapper.toResponse(schema), "Schema created successfully");
+    public ResponseEntity<ApiResponse<SchemaUpdateResponseDto>> createSchema(@RequestBody SchemaRequestDto request) {
+        SchemaUpdate schemaUpdate =
+                orchestratorService.createSchemaAndRecompute(schemaDTOMapper.toSchema(request));
+
+        return buildResponse(
+                new SchemaUpdateResponseDto(
+                        schemaDTOMapper.toResponse(schemaUpdate.getSchema()),
+                        schemaUpdate.getRecomputeResult()
+                ), "Schema created successfully"
+        );
     }
 
     /* ---------------- UPDATE ---------------- */
@@ -45,8 +52,6 @@ public class SchemaController extends BaseController {
                         id,
                         schemaDTOMapper.toSchema(request)
                 );
-
-//        System.out.println(update);
 
         return buildResponse(
                 new SchemaUpdateResponseDto(
