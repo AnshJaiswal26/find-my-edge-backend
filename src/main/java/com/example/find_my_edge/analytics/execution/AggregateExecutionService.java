@@ -1,4 +1,4 @@
-package com.example.find_my_edge.analytics.service;
+package com.example.find_my_edge.analytics.execution;
 
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;

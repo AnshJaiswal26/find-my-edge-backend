@@ -1,10 +1,15 @@
 package com.example.find_my_edge.workspace.features.impl;
 
+import com.example.find_my_edge.analytics.compute.ChartComputeService;
+import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
+import com.example.find_my_edge.analytics.model.ChartResult;
+import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.workspace.builder.ChartBuilder;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.dto.ChartRequestDto;
+import com.example.find_my_edge.workspace.enums.ChartMode;
 import com.example.find_my_edge.workspace.exception.chart.ChartNotFoundException;
 import com.example.find_my_edge.workspace.exception.chart.InvalidChartConfigException;
 import com.example.find_my_edge.workspace.features.ChartService;
@@ -24,6 +29,10 @@ public class ChartServiceImpl implements ChartService {
 
     private final ChartBuilder chartBuilder;
 
+    private final ChartComputeService chartComputeService;
+
+    private final TradeContextBuilder contextBuilder;
+
     @Override
     public ChartConfig create(String pageName, ChartRequestDto dto) {
 
@@ -35,6 +44,11 @@ public class ChartServiceImpl implements ChartService {
         );
 
         validateChart(config);
+
+        if (config.getMode() == ChartMode.GROUP_AGGREGATE) {
+            ChartResult chartResult =
+                    chartComputeService.computeChart(config, contextBuilder.buildContext());
+        }
 
         workspaceService.getPageAndModify(
                 page -> {

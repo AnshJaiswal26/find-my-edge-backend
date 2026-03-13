@@ -86,6 +86,8 @@ public class GroupCompiler {
     private Long toEpochSeconds(Object value) {
         if (value == null) return null;
 
+//        System.out.println("toEpochSeconds: "+ value);
+
         if (value instanceof Number n) {
             long v = n.longValue();
 
@@ -100,6 +102,8 @@ public class GroupCompiler {
                 // optional: only if your system ever sends days
                 return v * 86400;
             }
+
+//            System.out.println("already seconds: "+ value);
 
             // already seconds
             return v;

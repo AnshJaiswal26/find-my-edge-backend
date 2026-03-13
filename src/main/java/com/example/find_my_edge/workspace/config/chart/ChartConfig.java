@@ -8,6 +8,7 @@ import com.example.find_my_edge.workspace.enums.ChartMode;
 import com.example.find_my_edge.workspace.enums.ChartType;
 import com.example.find_my_edge.workspace.enums.Source;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,11 +41,12 @@ public class ChartConfig {
 
     private XMetric xMetric;
 
+    @JsonProperty("groupSpec")
     private GroupConfig group;
 
     private List<SeriesConfig> series;
 
-    private Map<String,Object> layout;
+    private Map<String, Object> layout;
 
     private SortConfig sort;
     private SelectionConfig selection;

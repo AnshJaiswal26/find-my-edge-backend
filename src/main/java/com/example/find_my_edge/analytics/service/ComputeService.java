@@ -7,13 +7,4 @@ import java.util.Map;
 
 public interface ComputeService {
 
-    Map<String, Double> computeAggregatePerGroupByAstConfigs(
-            GroupConfig groupConfig,
-            AstConfig astConfig
-    );
-
-    Map<String, Double> computeAggregatePerGroupByFormula(
-            GroupConfig groupConfig,
-            String formula
-    );
 }

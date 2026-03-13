@@ -1,11 +1,11 @@
-package com.example.find_my_edge.analytics.service.impl;
+package com.example.find_my_edge.analytics.execution.impl;
 
 import com.example.find_my_edge.analytics.ast.exception.AstException;
 import com.example.find_my_edge.analytics.engine.aggregate.AggregateComputeEngine;
 import com.example.find_my_edge.analytics.engine.dataSet.GlobalTradeDataset;
 import com.example.find_my_edge.analytics.engine.dataSet.TradeDataset;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.analytics.service.AggregateExecutionService;
+import com.example.find_my_edge.analytics.execution.AggregateExecutionService;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

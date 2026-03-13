@@ -50,6 +50,7 @@ public class AstConfigBuilder {
                         .build();
     }
 
+
     public static AstConfig function(String fn, AstConfig... args) {
         return function(fn, Arrays.asList(args));
     }

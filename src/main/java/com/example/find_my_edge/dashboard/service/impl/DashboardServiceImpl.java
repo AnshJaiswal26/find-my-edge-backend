@@ -2,7 +2,7 @@ package com.example.find_my_edge.dashboard.service.impl;
 
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.analytics.service.AggregateExecutionService;
+import com.example.find_my_edge.analytics.execution.AggregateExecutionService;
 import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.dashboard.model.DashboardData;
 import com.example.find_my_edge.dashboard.service.DashboardService;

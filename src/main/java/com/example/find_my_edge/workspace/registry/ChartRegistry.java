@@ -58,6 +58,7 @@ public class ChartRegistry {
     private List<ChartConfig> buildDefaultCharts() {
         return List.of(
                 barChart(),
+                barChart1(),
                 lineChart(),
                 lineChart1(),
                 pieChart(),
@@ -201,6 +202,63 @@ public class ChartRegistry {
                 .selection(new SelectionConfig(null, null))
                 .build();
     }
+
+
+    private ChartConfig barChart1() {
+        String chartId = "bar-chart-2";
+
+        Map<String, Object> layout = layoutRegistry.get("bar");
+        layout.put("xTitleText", "Trades");
+        layout.put("xFormat", "YYYY-MM-DD");
+        layout.put("yTitleText", "Duration");
+        layout.put("yFormat", "human");
+        layout.put("title", "Duration of trades");
+        layout.put("horizontal", true);
+
+        return ChartConfig
+                .builder()
+                .id(chartId)
+                .type(ChartType.BAR)
+                .category(ChartCategory.SERIES)
+                .mode(ChartMode.SERIES)
+                .source(Source.SYSTEM)
+                .layout(layout)
+                .xMetric(new XMetric("date", "Date", SemanticType.DATE))
+                .series(
+                        List.of(
+                                SeriesConfig
+                                        .builder()
+                                        .id(UUID.randomUUID().toString())
+                                        .chartId(chartId)
+                                        .field("duration")
+                                        .label("Duration")
+                                        .type(SemanticType.DURATION)
+                                        .colorRules(
+                                                List.of(
+                                                        ColorRuleConfig
+                                                                .builder()
+                                                                .operator("greaterThan")
+                                                                .value(600)
+                                                                .color("var(--error)")
+                                                                .label("Duration")
+                                                                .build(),
+                                                        ColorRuleConfig
+                                                                .builder()
+                                                                .operator("lessThan")
+                                                                .value(601)
+                                                                .color("var(--success)")
+                                                                .label("Duration")
+                                                                .build()
+                                                )
+                                        )
+                                        .build()
+                        ))
+                .sort(new SortConfig(null, "none"))
+                .filters(new ArrayList<>())
+                .selection(new SelectionConfig(null, null))
+                .build();
+    }
+
 
     private ChartConfig lineChart() {
 

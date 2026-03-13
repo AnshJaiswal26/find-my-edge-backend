@@ -41,6 +41,7 @@ public class GroupBuilder {
                        key, k -> Group.builder()
                                       .groupId(key)
                                       .key(key)
+                                      .meta(raw)
                                       .tradeIds(new ArrayList<>())
                                       .build()
                )

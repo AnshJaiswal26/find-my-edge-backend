@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 import java.util.UUID;
 
+import static com.example.find_my_edge.common.builder.AstConfigBuilder.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest

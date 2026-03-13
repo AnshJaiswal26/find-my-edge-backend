@@ -99,7 +99,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     @Transactional
     public Schema update(String schemaId, Schema schema) {
-        System.out.println(schema);
+//        System.out.println(schema);
         schema.validateForWrite();
 
         UUID userId = currentUserService.getUserId();

@@ -1,6 +1,7 @@
 package com.example.find_my_edge.common.util;
 
 import com.example.find_my_edge.common.exceptions.JsonConversionException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -84,6 +85,14 @@ public class JsonUtil {
             );
         } catch (Exception e) {
             throw new JsonConversionException("Failed to copy SchemaDTO", e);
+        }
+    }
+
+    public String pretty(Object json){
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

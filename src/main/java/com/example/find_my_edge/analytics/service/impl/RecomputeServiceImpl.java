@@ -1,18 +1,17 @@
 package com.example.find_my_edge.analytics.service.impl;
 
 
+import com.example.find_my_edge.analytics.compute.ChartComputeService;
+import com.example.find_my_edge.analytics.compute.StatComputeService;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.RecomputeResult;
 import com.example.find_my_edge.analytics.model.SeriesUpdate;
-import com.example.find_my_edge.analytics.service.AggregateExecutionService;
 import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
-import com.example.find_my_edge.workspace.enums.Source;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,9 +25,11 @@ public class RecomputeServiceImpl implements RecomputeService {
 
     private final WorkspaceService workspaceService;
 
-    private final AggregateExecutionService aggregateExecutionService;
-
     private final TradeContextBuilder tradeContextBuilder;
+
+    private final ChartComputeService chartComputeService;
+
+    private final StatComputeService statComputeService;
 
     @Override
     public RecomputeResult recomputeOnSchemaCreation(String schemaId) {
@@ -86,7 +87,8 @@ public class RecomputeServiceImpl implements RecomputeService {
                                              .anyMatch(affectedSchemas::contains))
                          .toList();
 
-        Map<String, Double> statValues = computeStats(affectedStats, ctx);
+        Map<String, Double> statValues =
+                statComputeService.computeStats(affectedStats, ctx);
 
         /*
          * ---------------- FIND AFFECTED CHART SERIES ----------------
@@ -95,9 +97,10 @@ public class RecomputeServiceImpl implements RecomputeService {
         Map<String, Boolean> systemSeries = new HashMap<>();
 
         List<SeriesUpdate> affectedSeries =
-                resolveSeries(chartsById, systemSeries, affectedSchemas);
+                chartComputeService.resolveSeries(chartsById, systemSeries, affectedSchemas);
 
-        Map<String, Double> seriesValues = computeSeries(affectedSeries, systemSeries, ctx);
+        Map<String, Double> seriesValues =
+                chartComputeService.computeSeries(affectedSeries, systemSeries, ctx);
 
         /*
          * ---------------- BUILD TRADE UPDATES ----------------
@@ -163,14 +166,16 @@ public class RecomputeServiceImpl implements RecomputeService {
                      .toList();
 
 
-        Map<String, Double> statsValues = computeStats(affectedStats, ctx);
+        Map<String, Double> statsValues =
+                statComputeService.computeStats(affectedStats, ctx);
 
         Map<String, Boolean> systemSeries = new HashMap<>();
 
         List<SeriesUpdate> affectedSeries =
-                resolveSeries(charts, systemSeries, affectedSchemas);
+                chartComputeService.resolveSeries(charts, systemSeries, affectedSchemas);
 
-        Map<String, Double> seriesValues = computeSeries(affectedSeries, systemSeries, ctx);
+        Map<String, Double> seriesValues =
+                chartComputeService.computeSeries(affectedSeries, systemSeries, ctx);
 
         List<String> tradeOrder = ctx.getTradeOrder();
         int index = tradeOrder.indexOf(changedTradeId);
@@ -234,74 +239,5 @@ public class RecomputeServiceImpl implements RecomputeService {
         return affectedSchemas;
     }
 
-    private Map<String, Double> computeStats(
-            List<StatConfig> stats,
-            ComputationContext ctx
-    ) {
 
-        Map<String, Double> statsValues = new HashMap<>();
-
-        aggregateExecutionService.executeAggregate(
-                stats,
-                StatConfig::getId,
-                (id, stat) -> stat.getSource() != Source.SYSTEM ? stat.getFormula() : null,
-                (id, stat) -> stat.getSource() == Source.SYSTEM ? stat.getAst() : null,
-                statsValues::put,
-                ctx
-        );
-
-        return statsValues;
-    }
-
-    private List<SeriesUpdate> resolveSeries(
-            Map<String, ChartConfig> charts,
-            Map<String, Boolean> systemSeries,
-            Set<String> affectedSchemas
-    ) {
-
-        List<SeriesUpdate> result = new ArrayList<>();
-
-        for (ChartConfig chart : charts.values()) {
-
-            if (chart.getSeries() == null) continue;
-
-            boolean usesAst = chart.getSource() == Source.SYSTEM;
-
-            chart.getSeries()
-                 .stream()
-                 .filter(series -> series.getDependencies() != null &&
-                                   series.getDependencies().stream().anyMatch(affectedSchemas::contains))
-                 .forEach(series -> {
-                     result.add(new SeriesUpdate(chart.getId(), series));
-                     systemSeries.put(series.getId(), usesAst);
-                 });
-        }
-
-        return result;
-    }
-
-    private Map<String, Double> computeSeries(
-            List<SeriesUpdate> seriesUpdates,
-            Map<String, Boolean> systemSeries,
-            ComputationContext ctx
-    ) {
-
-        List<SeriesConfig> series =
-                seriesUpdates.stream()
-                             .map(SeriesUpdate::getSeries)
-                             .toList();
-
-        Map<String, Double> seriesValues = new HashMap<>();
-
-        aggregateExecutionService.executeAggregate(
-                series,
-                SeriesConfig::getId,
-                (id, s) -> Boolean.FALSE.equals(systemSeries.get(id)) ? s.getFormula() : null,
-                (id, s) -> Boolean.TRUE.equals(systemSeries.get(id)) ? s.getAst() : null,
-                seriesValues::put,
-                ctx
-        );
-
-        return seriesValues;
-    }
 }

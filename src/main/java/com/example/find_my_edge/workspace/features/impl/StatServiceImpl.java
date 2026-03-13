@@ -1,8 +1,7 @@
 package com.example.find_my_edge.workspace.features.impl;
 
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
-import com.example.find_my_edge.analytics.service.AggregateExecutionService;
-import com.example.find_my_edge.analytics.service.ComputeService;
+import com.example.find_my_edge.analytics.execution.AggregateExecutionService;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
 import com.example.find_my_edge.workspace.features.StatService;
