@@ -4,7 +4,6 @@ import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.dto.ChartRequestDto;
 
-import java.util.List;
 import java.util.Map;
 
 public interface ChartService {
@@ -20,5 +19,5 @@ public interface ChartService {
 
     Map<String, Object> updateLayout(String page, String chartId, Map<String, Object> layout);
 
-    List<SeriesConfig> updateSeriesConfig(String page, String chartId, List<SeriesConfig> seriesConfig);
+    Map<String, SeriesConfig> updateSeriesConfig(String page, String chartId, Map<String, SeriesConfig> seriesConfig);
 }

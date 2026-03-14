@@ -7,10 +7,12 @@ import com.example.find_my_edge.analytics.engine.group.model.Group;
 import com.example.find_my_edge.analytics.execution.GroupSeriesExecutionService;
 import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.analytics.model.SeriesUpdate;
 import com.example.find_my_edge.analytics.execution.AggregateExecutionService;
+import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
+import com.example.find_my_edge.workspace.enums.ChartCategory;
+import com.example.find_my_edge.workspace.enums.ChartMode;
 import com.example.find_my_edge.workspace.enums.Source;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,73 +31,22 @@ public class ChartComputeService {
 
     private final AggregateComputeEngine aggregateComputeEngine;
 
-    public Map<String, Double> computeSeries(
-            List<SeriesUpdate> seriesUpdates,
-            Map<String, Boolean> systemSeries,
-            ComputationContext ctx
-    ) {
 
-        List<SeriesConfig> series =
-                seriesUpdates.stream()
-                             .map(SeriesUpdate::getSeries)
-                             .toList();
-
-        Map<String, Double> seriesValues = new HashMap<>();
-
-        aggregateExecutionService.executeAggregate(
-                series,
-                SeriesConfig::getId,
-                (id, s) -> Boolean.FALSE.equals(systemSeries.get(id)) ? s.getFormula() : null,
-                (id, s) -> Boolean.TRUE.equals(systemSeries.get(id)) ? s.getAst() : null,
-                seriesValues::put,
-                ctx
-        );
-
-        return seriesValues;
-    }
-
-    public List<SeriesUpdate> resolveSeries(
-            Map<String, ChartConfig> charts,
-            Map<String, Boolean> systemSeries,
-            Set<String> affectedSchemas
-    ) {
-
-        List<SeriesUpdate> result = new ArrayList<>();
-
-        for (ChartConfig chart : charts.values()) {
-
-            if (chart.getSeries() == null) continue;
-
-            boolean usesAst = chart.getSource() == Source.SYSTEM;
-
-            chart.getSeries()
-                 .stream()
-                 .filter(series -> series.getDependencies() != null &&
-                                   series.getDependencies().stream().anyMatch(affectedSchemas::contains))
-                 .forEach(series -> {
-                     result.add(new SeriesUpdate(chart.getId(), series));
-                     systemSeries.put(series.getId(), usesAst);
-                 });
-        }
-
-        return result;
-    }
-
-
-    public ChartResult computeChart(
+    public ChartResult computeGroupAggregateChart(
             ChartConfig chartConfig,
             ComputationContext ctx
     ) {
 
         List<Group> groups =
-                groupComputeService.buildGroups(ctx, chartConfig.getGroup());
+                groupComputeService.buildGroups(ctx, chartConfig.getGroup(), false);
 
+        boolean useAst = chartConfig.getSource() == Source.SYSTEM;
 
         Map<String, Map<String, Double>> matrix =
                 groupSeriesExecutionService.execute(
 
                         groups,
-                        chartConfig.getSeries(),
+                        chartConfig.getSeriesById().values(),
 
                         Group::getGroupId,
                         SeriesConfig::getId,
@@ -106,8 +57,8 @@ public class ChartComputeService {
                                     new GroupTradeDataset(ctx, group.getTradeIds());
 
                             return aggregateComputeEngine.computedAggregate(
-                                    series.getAst(),
-                                    series.getFormula(),
+                                    useAst ? series.getAst() : null,
+                                    !useAst ? series.getFormula() : null,
                                     ctx.getSchemasById(),
                                     dataset
                             );
@@ -119,5 +70,70 @@ public class ChartComputeService {
                           .groups(groups)
                           .series(matrix)
                           .build();
+    }
+
+    public void computeSingleAggregateChart(
+            ChartConfig chart,
+            ComputationContext computationContext
+    ) {
+
+        boolean useAst = chart.getSource() == Source.SYSTEM;
+
+        aggregateExecutionService.executeAggregate(
+                chart.getSeriesById().values(),
+                SeriesConfig::getId,
+                (id, cfg) -> !useAst ? cfg.getFormula() : null,
+                (id, cfg) -> useAst ? cfg.getAst() : null,
+                (id, value) ->
+                        chart.getSeriesById().get(id).setValue(value),
+                computationContext
+        );
+
+    }
+
+    public Map<String, ChartResult> computeCharts(
+            Map<String, ChartConfig> chartsById,
+            ComputationContext ctx
+    ) {
+
+        Map<String, ChartResult> resultMap = new HashMap<>();
+
+        for (ChartConfig chart : chartsById.values()) {
+
+            if (chart.getMode() == ChartMode.GROUP_AGGREGATE) {
+
+                ChartResult result = computeGroupAggregateChart(chart, ctx);
+                resultMap.put(chart.getId(), result);
+
+            } else if(chart.getCategory() == ChartCategory.GROUP) {
+                computeSingleAggregateChart(chart, ctx);
+            }
+        }
+
+        return resultMap;
+    }
+
+    public Map<String, ChartConfig> resolveAffectedCharts(
+            Map<String, ChartConfig> charts,
+            Set<String> affectedSchemas
+    ) {
+
+        Map<String, ChartConfig> result = new HashMap<>();
+
+        for (ChartConfig chart : charts.values()) {
+
+            boolean affected = chart.getSeriesById().values()
+                                    .stream()
+                                    .anyMatch(series ->
+                                                      series.getDependencies() != null &&
+                                                      !Collections.disjoint(series.getDependencies(), affectedSchemas)
+                                    );
+
+            if (affected) {
+                result.put(chart.getId(), chart);
+            }
+        }
+
+        return result;
     }
 }

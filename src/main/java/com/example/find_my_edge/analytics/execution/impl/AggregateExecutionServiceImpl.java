@@ -27,6 +27,7 @@ public class AggregateExecutionServiceImpl implements AggregateExecutionService 
     private final AggregateComputeEngine aggregateComputeEngine;
     private final ExecutorService executorService;
 
+
     @Override
     public <T> void executeAggregate(
             Collection<T> source,

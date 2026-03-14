@@ -140,6 +140,9 @@ public class ChartRegistry {
         layout.put("yFormat", "CURRENCY_SIGNED");
         layout.put("title", "P&L Booked on Date");
 
+        String series1Id = UUID.randomUUID().toString();
+        String series2Id = UUID.randomUUID().toString();
+
         return ChartConfig
                 .builder()
                 .id(chartId)
@@ -149,11 +152,12 @@ public class ChartRegistry {
                 .source(Source.SYSTEM)
                 .layout(layout)
                 .xMetric(new XMetric("date", "Date", SemanticType.DATE))
-                .series(
-                        List.of(
-                                SeriesConfig
+                .seriesOrder(List.of(series1Id, series2Id))
+                .seriesById(
+                        Map.of(
+                                series1Id, SeriesConfig
                                         .builder()
-                                        .id(UUID.randomUUID().toString())
+                                        .id(series1Id)
                                         .chartId(chartId)
                                         .field("pnl")
                                         .label("PnL")
@@ -177,9 +181,9 @@ public class ChartRegistry {
                                                 )
                                         )
                                         .build(),
-                                SeriesConfig
+                                series2Id, SeriesConfig
                                         .builder()
-                                        .id(UUID.randomUUID().toString())
+                                        .id(series2Id)
                                         .chartId(chartId)
                                         .field("entryPrice")
                                         .label("Entry Price")
@@ -215,6 +219,8 @@ public class ChartRegistry {
         layout.put("title", "Duration of trades");
         layout.put("horizontal", true);
 
+        String series1Id = UUID.randomUUID().toString();
+
         return ChartConfig
                 .builder()
                 .id(chartId)
@@ -224,11 +230,12 @@ public class ChartRegistry {
                 .source(Source.SYSTEM)
                 .layout(layout)
                 .xMetric(new XMetric("date", "Date", SemanticType.DATE))
-                .series(
-                        List.of(
-                                SeriesConfig
+                .seriesOrder(List.of(series1Id))
+                .seriesById(
+                        Map.of(
+                                series1Id, SeriesConfig
                                         .builder()
-                                        .id(UUID.randomUUID().toString())
+                                        .id(series1Id)
                                         .chartId(chartId)
                                         .field("duration")
                                         .label("Duration")
@@ -273,6 +280,8 @@ public class ChartRegistry {
         layout.put("title", "P&L Over Time");
 
 
+        String series1Id = UUID.randomUUID().toString();
+
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.LINE)
@@ -281,19 +290,21 @@ public class ChartRegistry {
                           .source(Source.SYSTEM)
                           .layout(layout)
                           .xMetric(new XMetric("entryTime", "Entry Time", SemanticType.TIME))
-                          .series(List.of(
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("pnl")
-                                              .name("Pnl")
-                                              .type(SemanticType.NUMBER)
-                                              .label("Pnl")
-                                              .color("var(--cyan)")
-                                              .markerColor("var(--cyan)")
-                                              .areaColor("var(--cyan)")
-                                              .build()
-                          ))
+                          .seriesOrder(List.of(series1Id))
+                          .seriesById(
+                                  Map.of(
+                                          series1Id, SeriesConfig.builder()
+                                                                 .id(series1Id)
+                                                                 .chartId(chartId)
+                                                                 .field("pnl")
+                                                                 .name("Pnl")
+                                                                 .type(SemanticType.NUMBER)
+                                                                 .label("Pnl")
+                                                                 .color("var(--cyan)")
+                                                                 .markerColor("var(--cyan)")
+                                                                 .areaColor("var(--cyan)")
+                                                                 .build()
+                                  ))
                           .sort(new SortConfig(null, "none"))
                           .filters(new ArrayList<>())
                           .selection(new SelectionConfig(null, null))
@@ -312,6 +323,8 @@ public class ChartRegistry {
         layout.put("yFormat", "NUMBER");
         layout.put("title", "P&L and Entry Price Over Time");
 
+        String series1Id = UUID.randomUUID().toString();
+        String series2Id = UUID.randomUUID().toString();
 
         return ChartConfig.builder()
                           .id(chartId)
@@ -321,30 +334,31 @@ public class ChartRegistry {
                           .source(Source.SYSTEM)
                           .layout(layout)
                           .xMetric(new XMetric("entryTime", "Entry Time", SemanticType.TIME))
-                          .series(List.of(
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("pnl")
-                                              .name("Pnl")
-                                              .type(SemanticType.NUMBER)
-                                              .label("Pnl")
-                                              .color("var(--cyan)")
-                                              .markerColor("var(--cyan)")
-                                              .areaColor("var(--cyan)")
-                                              .build(),
+                          .seriesOrder(List.of(series1Id, series2Id))
+                          .seriesById(Map.of(
+                                  series1Id, SeriesConfig.builder()
+                                                         .id(series1Id)
+                                                         .chartId(chartId)
+                                                         .field("pnl")
+                                                         .name("Pnl")
+                                                         .type(SemanticType.NUMBER)
+                                                         .label("Pnl")
+                                                         .color("var(--cyan)")
+                                                         .markerColor("var(--cyan)")
+                                                         .areaColor("var(--cyan)")
+                                                         .build(),
 
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("entryPrice")
-                                              .name("Entry Price")
-                                              .type(SemanticType.NUMBER)
-                                              .label("Entry Price")
-                                              .color("var(--success)")
-                                              .markerColor("var(--success)")
-                                              .areaColor("var(--success)")
-                                              .build()
+                                  series2Id, SeriesConfig.builder()
+                                                         .id(series2Id)
+                                                         .chartId(chartId)
+                                                         .field("entryPrice")
+                                                         .name("Entry Price")
+                                                         .type(SemanticType.NUMBER)
+                                                         .label("Entry Price")
+                                                         .color("var(--success)")
+                                                         .markerColor("var(--success)")
+                                                         .areaColor("var(--success)")
+                                                         .build()
                           ))
                           .sort(new SortConfig(null, "none"))
                           .filters(new ArrayList<>())
@@ -358,38 +372,42 @@ public class ChartRegistry {
 
         String chartId = "donut-chart-1";
 
+        String series1Id = UUID.randomUUID().toString();
+        String series2Id = UUID.randomUUID().toString();
+
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.DONUT)
                           .category(ChartCategory.GROUP)
                           .source(Source.SYSTEM)
                           .layout(layout)
-                          .series(List.of(
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("WIN_RATE")
-                                              .name("Win Rate")
-                                              .type(SemanticType.NUMBER)
-                                              .ast(function("WIN_RATE")) // AST
-                                              .formula("WIN_RATE()")
-                                              .dependencies(List.of("pnl"))
-                                              .label("Wins")
-                                              .color("var(--info)")
-                                              .build(),
+                          .seriesOrder(List.of(series1Id, series2Id))
+                          .seriesById(Map.of(
+                                  series1Id, SeriesConfig.builder()
+                                                         .id(series1Id)
+                                                         .chartId(chartId)
+                                                         .field("WIN_RATE")
+                                                         .name("Win Rate")
+                                                         .type(SemanticType.NUMBER)
+                                                         .ast(function("WIN_RATE")) // AST
+                                                         .formula("WIN_RATE()")
+                                                         .dependencies(List.of("pnl"))
+                                                         .label("Wins")
+                                                         .color("var(--info)")
+                                                         .build(),
 
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("LOSS_RATE")
-                                              .name("Loss Rate")
-                                              .type(SemanticType.NUMBER)
-                                              .ast(function("LOSS_RATE")) // AST
-                                              .formula("LOSS_RATE()")
-                                              .dependencies(List.of("pnl"))
-                                              .label("Losses")
-                                              .color("var(--warning)")
-                                              .build()
+                                  series2Id, SeriesConfig.builder()
+                                                         .id(series2Id)
+                                                         .chartId(chartId)
+                                                         .field("LOSS_RATE")
+                                                         .name("Loss Rate")
+                                                         .type(SemanticType.NUMBER)
+                                                         .ast(function("LOSS_RATE")) // AST
+                                                         .formula("LOSS_RATE()")
+                                                         .dependencies(List.of("pnl"))
+                                                         .label("Losses")
+                                                         .color("var(--warning)")
+                                                         .build()
                           ))
                           .build();
     }
@@ -401,38 +419,42 @@ public class ChartRegistry {
         Map<String, Object> layout = layoutRegistry.get("radialBar");
         layout.put("format", "PERCENT");
 
+        String series1Id = UUID.randomUUID().toString();
+        String series2Id = UUID.randomUUID().toString();
+
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.RADIAL_BAR)
                           .category(ChartCategory.GROUP)
                           .source(Source.SYSTEM)
                           .layout(layout)
-                          .series(List.of(
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("WIN_RATE")
-                                              .name("Win Rate")
-                                              .type(SemanticType.NUMBER)
-                                              .ast(function("WIN_RATE")) // AST
-                                              .formula("WIN_RATE()")
-                                              .dependencies(List.of("pnl"))
-                                              .label("Wins")
-                                              .color("var(--info)")
-                                              .build(),
+                          .seriesOrder(List.of(series1Id, series2Id))
+                          .seriesById(Map.of(
+                                  series1Id, SeriesConfig.builder()
+                                                         .id(series1Id)
+                                                         .chartId(chartId)
+                                                         .field("WIN_RATE")
+                                                         .name("Win Rate")
+                                                         .type(SemanticType.NUMBER)
+                                                         .ast(function("WIN_RATE")) // AST
+                                                         .formula("WIN_RATE()")
+                                                         .dependencies(List.of("pnl"))
+                                                         .label("Wins")
+                                                         .color("var(--info)")
+                                                         .build(),
 
-                                  SeriesConfig.builder()
-                                              .id(UUID.randomUUID().toString())
-                                              .chartId(chartId)
-                                              .field("LOSS_RATE")
-                                              .name("Loss Rate")
-                                              .type(SemanticType.NUMBER)
-                                              .ast(function("LOSS_RATE")) // AST
-                                              .formula("LOSS_RATE()")
-                                              .dependencies(List.of("pnl"))
-                                              .label("Losses")
-                                              .color("var(--warning)")
-                                              .build()
+                                  series2Id, SeriesConfig.builder()
+                                                         .id(series2Id)
+                                                         .chartId(chartId)
+                                                         .field("LOSS_RATE")
+                                                         .name("Loss Rate")
+                                                         .type(SemanticType.NUMBER)
+                                                         .ast(function("LOSS_RATE")) // AST
+                                                         .formula("LOSS_RATE()")
+                                                         .dependencies(List.of("pnl"))
+                                                         .label("Losses")
+                                                         .color("var(--warning)")
+                                                         .build()
                           ))
                           .build();
     }

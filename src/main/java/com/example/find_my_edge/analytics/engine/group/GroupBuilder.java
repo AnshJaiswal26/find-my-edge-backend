@@ -22,7 +22,8 @@ public class GroupBuilder {
     public List<Group> buildGroups(
             List<String> tradeOrder,
             GroupConfig groupSpec,
-            BiFunction<String, String, Object> getValue
+            BiFunction<String, String, Object> getValue,
+            boolean includeTradeIds
     ) {
 
         if (groupSpec == null) return null;
@@ -37,16 +38,18 @@ public class GroupBuilder {
             Object raw = getKeyFn.apply(tradeId);
             String key = GroupKeyUtil.getGroupKey(raw);
 
-            map.computeIfAbsent(
-                       key, k -> Group.builder()
-                                      .groupId(key)
-                                      .key(key)
-                                      .meta(raw)
-                                      .tradeIds(new ArrayList<>())
-                                      .build()
-               )
-               .getTradeIds()
-               .add(tradeId);
+            Group group = map.computeIfAbsent(
+                    key, k -> Group.builder()
+                                   .groupId(key)
+                                   .key(key)
+                                   .meta(raw)
+                                   .tradeIds(new ArrayList<>())
+                                   .build()
+            );
+
+            if (includeTradeIds) {
+                group.getTradeIds().add(tradeId);
+            }
         }
 
         return map.values().stream()

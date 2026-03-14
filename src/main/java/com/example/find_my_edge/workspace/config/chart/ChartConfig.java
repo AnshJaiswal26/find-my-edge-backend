@@ -44,7 +44,8 @@ public class ChartConfig {
     @JsonProperty("groupSpec")
     private GroupConfig group;
 
-    private List<SeriesConfig> series;
+    private Map<String, SeriesConfig> seriesById;
+    private List<String> seriesOrder;
 
     private Map<String, Object> layout;
 

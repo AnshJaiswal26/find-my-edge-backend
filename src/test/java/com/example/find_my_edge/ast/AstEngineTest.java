@@ -10,7 +10,6 @@ import com.example.find_my_edge.analytics.ast.parser.AstBuilder;
 import com.example.find_my_edge.analytics.ast.parser.AstPipeline;
 import com.example.find_my_edge.analytics.ast.parser.PostfixConverter;
 import com.example.find_my_edge.analytics.ast.parser.Tokenizer;
-import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.trade.entity.TradeEntity;
@@ -49,9 +48,6 @@ class AstEngineTest {
 
     @Autowired
     private AstBuilder astBuilder;
-
-    @Autowired
-    private ComputeService computeService;
 
     @Autowired
     private AstPipeline astPipeline;

@@ -11,7 +11,9 @@ public class RecomputeResult {
 
     private Map<String, Double> statValues;
 
-    private Map<String, Double> seriesValues;
+    private Map<String, Map<String, Double>>  seriesValues;
+
+    private Map<String, ChartResult> groupSeriesAggregateResult;
 
     private Map<String, Map<String, Object>> tradeUpdates;
 }

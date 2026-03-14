@@ -2,14 +2,11 @@ package com.example.find_my_edge.bootstrap.service.impl;
 
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.analytics.service.ComputeService;
 import com.example.find_my_edge.bootstrap.dto.BootstrapResponse;
 import com.example.find_my_edge.bootstrap.service.BootstrapService;
 import com.example.find_my_edge.schema.dto.SchemaResponseDto;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
-import com.example.find_my_edge.schema.service.SchemaService;
-import com.example.find_my_edge.trade.service.TradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

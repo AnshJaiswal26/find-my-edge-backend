@@ -68,4 +68,28 @@ public class DependencyResolver {
 
         order.add(schemaId); // post-order → correct topo order
     }
+
+    public Set<String> resolveAffectedSchemas(
+            List<String> order,
+            Map<String, ? extends HasDependencies> schemas,
+            String changedMetric
+    ) {
+        Set<String> affectedSchemas = new LinkedHashSet<>();
+
+        for (String schemaId : order) {
+
+            HasDependencies schema = schemas.get(schemaId);
+            if (schema == null || schema.getDependencies() == null) continue;
+
+            if (schema.getDependencies().contains(changedMetric)
+                || affectedSchemas.stream()
+                                  .anyMatch(dep -> schema.getDependencies().contains(dep))) {
+
+                affectedSchemas.add(schemaId);
+            }
+        }
+        return affectedSchemas;
+    }
+
+
 }

@@ -3,7 +3,7 @@ package com.example.find_my_edge.workspace.features.impl;
 import com.example.find_my_edge.analytics.compute.ChartComputeService;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ChartResult;
-import com.example.find_my_edge.analytics.model.ComputationContext;
+import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.workspace.builder.ChartBuilder;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -40,14 +39,15 @@ public class ChartServiceImpl implements ChartService {
                 dto.getChartType(),
                 dto.getLayout(),
                 dto.getXMetric(),
-                dto.getSeries()
+                dto.getSeriesById(),
+                dto.getSeriesOrder()
         );
 
         validateChart(config);
 
         if (config.getMode() == ChartMode.GROUP_AGGREGATE) {
             ChartResult chartResult =
-                    chartComputeService.computeChart(config, contextBuilder.buildContext());
+                    chartComputeService.computeGroupAggregateChart(config, contextBuilder.buildContext());
         }
 
         workspaceService.getPageAndModify(
@@ -59,6 +59,7 @@ public class ChartServiceImpl implements ChartService {
                     }
 
                     page.getCharts().put(chartId, config);
+                    page.getChartOrder().add(chartId);
                 }, pageName
         );
 
@@ -128,28 +129,24 @@ public class ChartServiceImpl implements ChartService {
     }
 
     @Override
-    public List<SeriesConfig> updateSeriesConfig(
+    public Map<String, SeriesConfig> updateSeriesConfig(
             String pageName,
             String chartId,
-            List<SeriesConfig> seriesConfig
+            Map<String, SeriesConfig> seriesById
     ) {
-        if (seriesConfig == null) {
+        if (seriesById == null) {
             throw new IllegalArgumentException("Series config cannot be null");
         }
 
         workspaceService.getPageAndModify(
                 page -> {
                     ChartConfig chart = getChartOrThrow(page, chartId);
-                    chart.setSeries(seriesConfig);
+                    chart.setSeriesById(seriesById);
                 }, pageName
         );
 
-        return seriesConfig;
+        return seriesById;
     }
-
-    // =========================
-    // 🔒 PRIVATE HELPERS
-    // =========================
 
     private ChartConfig getChartOrThrow(PageConfig page, String chartId) {
         ChartConfig chart = page.getCharts().get(chartId);

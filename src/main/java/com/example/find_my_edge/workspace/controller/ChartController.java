@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,7 +21,7 @@ public class ChartController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<Object>> create(
+    public ResponseEntity<ApiResponse<ChartConfig>> create(
             @PathVariable String pageName,
             @RequestBody ChartRequestDto dto
     ) {
@@ -88,9 +87,9 @@ public class ChartController extends BaseController {
     public ResponseEntity<ApiResponse<Object>> updateSeries(
             @PathVariable String pageName,
             @PathVariable String chartId,
-            @RequestBody List<SeriesConfig> seriesConfig
+            @RequestBody Map<String, SeriesConfig> seriesConfig
     ) {
-        List<SeriesConfig> updatedSeries =
+        Map<String, SeriesConfig> updatedSeries =
                 chartService.updateSeriesConfig(pageName, chartId, seriesConfig);
 
         return buildResponse(updatedSeries, "Chart series updated successfully");

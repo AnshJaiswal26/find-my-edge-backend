@@ -70,8 +70,6 @@ public class GroupTesting {
                 BootstrapResponse.class
         );
 
-//        ComputationContext computationContext = builder.buildContext();
-
         Map<String, Map<String, Object>> raw = call.getTradesById();
         Map<String, Map<String, Object>> computed = call.getDerivedByTradeId();
         List<String> tradeOrder = call.getTradesOrder();
@@ -89,9 +87,9 @@ public class GroupTesting {
                     if (value == null) {
                         return computed.get(tradeId).get(key);
                     }
-//                    System.out.println(value);
                     return value;
-                }
+                },
+                true
         );
 
         String json = jsonUtil.pretty(groups);
@@ -123,13 +121,14 @@ public class GroupTesting {
                                         .unit("day")
                                         .build());
 
+        Map<String, SeriesConfig> seriesById = chartConfig.getSeriesById();
+        List<SeriesConfig> series = chartConfig.getSeriesOrder().stream().map(seriesById::get).toList();
 
-        List<SeriesConfig> series = chartConfig.getSeries();
         series.getFirst().setAst(function("SUM", binary(field("pnl"), "-", field("charges"))));
         series.getLast().setAst(function("SUM", field("entryPrice")));
 
         ChartResult chartResult =
-                chartComputeService.computeChart(
+                chartComputeService.computeGroupAggregateChart(
                         chartConfig,
                         new ComputationContext(
                                 raw,

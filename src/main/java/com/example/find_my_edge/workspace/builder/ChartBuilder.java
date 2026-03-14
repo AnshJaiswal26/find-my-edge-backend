@@ -25,7 +25,8 @@ public class ChartBuilder {
             ChartType type,
             Map<String, Object> layoutOverrides,
             XMetric xMetric,
-            List<SeriesConfig> seriesConfigs
+            Map<String, SeriesConfig> seriesById,
+            List<String> seriesOrder
     ) {
 
         String layoutKey = getLayoutKey(type);
@@ -41,7 +42,8 @@ public class ChartBuilder {
                           .source(Source.USER)
                           .layout(layout)
                           .xMetric(requiresXMetric(type) ? xMetric : null)
-                          .series(seriesConfigs)
+                          .seriesOrder(seriesOrder)
+                          .seriesById(seriesById)
                           .sort(new SortConfig(null, "none"))
                           .filters(new ArrayList<>())
                           .selection(new SelectionConfig(null, null))

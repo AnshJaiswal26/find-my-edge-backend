@@ -17,7 +17,8 @@ public class GroupComputeService {
 
     public List<Group> buildGroups(
             ComputationContext ctx,
-            GroupConfig config
+            GroupConfig config,
+            boolean includeTradeIds
     ) {
 
         return groupBuilder.buildGroups(
@@ -32,7 +33,8 @@ public class GroupComputeService {
                     }
 
                     return value;
-                }
+                },
+                includeTradeIds
         );
     }
 }

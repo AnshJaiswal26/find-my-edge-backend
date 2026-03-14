@@ -1,5 +1,6 @@
 package com.example.find_my_edge.workspace.features.impl;
 
+import com.example.find_my_edge.analytics.compute.StatComputeService;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.execution.AggregateExecutionService;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
@@ -17,9 +18,8 @@ import java.util.Map;
 public class StatServiceImpl implements StatService {
 
     private final WorkspaceService workspaceService;
-    private final TradeContextBuilder tradeContextBuilder;
 
-    private final AggregateExecutionService aggregateExecutionService;
+    private final StatComputeService statComputeService;
 
 
     /* ---------------- GET ALL ---------------- */
@@ -51,14 +51,7 @@ public class StatServiceImpl implements StatService {
                 pageName
         );
 
-        aggregateExecutionService.executeAggregate(
-                List.of(stat),
-                StatConfig::getId,
-                (id, statConfig) -> statConfig.getFormula(),
-                (id, statConfig) -> null,
-                (id, value) -> stat.setValue(value),
-                tradeContextBuilder.buildContext()
-        );
+        statComputeService.computeStat(stat);
 
         return stat;
     }
