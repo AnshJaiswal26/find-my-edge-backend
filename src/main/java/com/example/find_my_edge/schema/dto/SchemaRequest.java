@@ -15,9 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SchemaResponseDto {
+public class SchemaRequest {
 
-    private String id;
     private String label;
 
     /* TYPE */
@@ -27,11 +26,12 @@ public class SchemaResponseDto {
     /* COMPUTATION */
     private ComputeMode mode;
     private AstConfig ast;
+
     private String formula;
     private String idFormula;
+
     private List<String> dependencies;
 
-    /* SOURCE */
     private SchemaSource source;
     private SchemaRole role;
 

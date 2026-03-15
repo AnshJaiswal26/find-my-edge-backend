@@ -28,10 +28,11 @@ public class TradeMetricServiceImpl implements TradeMetricService {
         List<String> order = schemaService.getOrder(ViewType.TABLE);
 
         TradeMetricTableData tradeMetricTableData = new TradeMetricTableData();
+
         tradeMetricTableData.setColumnWidths(page.getColumnWidths());
+        tradeMetricTableData.setHighlightedRows(page.getHighlightedRows());
 
         tradeMetricTableData.setColumnsOrder(order);
-
 
         return tradeMetricTableData;
     }

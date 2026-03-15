@@ -3,12 +3,13 @@ package com.example.find_my_edge.workspace.features.impl;
 import com.example.find_my_edge.analytics.compute.ChartComputeService;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ChartResult;
-import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.workspace.builder.ChartBuilder;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
-import com.example.find_my_edge.workspace.dto.ChartRequestDto;
+import com.example.find_my_edge.workspace.dto.ChartLayoutDto;
+import com.example.find_my_edge.workspace.dto.ChartRequest;
+import com.example.find_my_edge.workspace.dto.ChartResponse;
+import com.example.find_my_edge.workspace.enums.ChartCategory;
 import com.example.find_my_edge.workspace.enums.ChartMode;
 import com.example.find_my_edge.workspace.exception.chart.ChartNotFoundException;
 import com.example.find_my_edge.workspace.exception.chart.InvalidChartConfigException;
@@ -33,20 +34,33 @@ public class ChartServiceImpl implements ChartService {
     private final TradeContextBuilder contextBuilder;
 
     @Override
-    public ChartConfig create(String pageName, ChartRequestDto dto) {
+    public ChartResponse create(String pageName, ChartRequest dto) {
+
+        if (dto.getChartType() == null) {
+            throw new InvalidChartConfigException("Chart type is required");
+        }
+
+        if (dto.getSeries() == null || dto.getSeries().isEmpty()) {
+            throw new InvalidChartConfigException("Chart must contain at least one series");
+        }
 
         ChartConfig config = chartBuilder.buildChart(
                 dto.getChartType(),
                 dto.getLayout(),
                 dto.getXMetric(),
-                dto.getSeriesById(),
-                dto.getSeriesOrder()
+                dto.getSeries()
         );
 
         validateChart(config);
 
+        ChartResult chartResult = null;
+
+        if (config.getCategory() == ChartCategory.GROUP) {
+            chartComputeService.computeSingleAggregateChart(config, contextBuilder.buildContext());
+        }
+
         if (config.getMode() == ChartMode.GROUP_AGGREGATE) {
-            ChartResult chartResult =
+            chartResult =
                     chartComputeService.computeGroupAggregateChart(config, contextBuilder.buildContext());
         }
 
@@ -63,7 +77,7 @@ public class ChartServiceImpl implements ChartService {
                 }, pageName
         );
 
-        return config;
+        return new ChartResponse(config, chartResult);
     }
 
     @Override
@@ -104,48 +118,34 @@ public class ChartServiceImpl implements ChartService {
                     }
 
                     page.getCharts().remove(chartId);
+                    page.getChartOrder().remove(chartId);
+
+                    page.getGridLayout().remove(chartId);
                 }, pageName
         );
     }
 
     @Override
-    public Map<String, Object> updateLayout(
+    public ChartLayoutDto updateLayout(
             String pageName,
             String chartId,
-            Map<String, Object> layout
+            ChartLayoutDto dto
     ) {
-        if (layout == null) {
+        if (dto.getLayout() == null) {
             throw new IllegalArgumentException("Layout cannot be null");
         }
 
         workspaceService.getPageAndModify(
                 page -> {
                     ChartConfig chart = getChartOrThrow(page, chartId);
-                    chart.setLayout(layout);
+
+                    chart.setLayout(dto.getLayout());
+                    chart.setSeriesById(dto.getSeriesById());
+
                 }, pageName
         );
 
-        return layout;
-    }
-
-    @Override
-    public Map<String, SeriesConfig> updateSeriesConfig(
-            String pageName,
-            String chartId,
-            Map<String, SeriesConfig> seriesById
-    ) {
-        if (seriesById == null) {
-            throw new IllegalArgumentException("Series config cannot be null");
-        }
-
-        workspaceService.getPageAndModify(
-                page -> {
-                    ChartConfig chart = getChartOrThrow(page, chartId);
-                    chart.setSeriesById(seriesById);
-                }, pageName
-        );
-
-        return seriesById;
+        return dto;
     }
 
     private ChartConfig getChartOrThrow(PageConfig page, String chartId) {

@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class ChartRequestDto {
+public class ChartRequest {
     private ChartType chartType;
     private Map<String, Object> layout;
 
     @JsonProperty("xMetric")
     private XMetric xMetric;
 
-    private Map<String, SeriesConfig> seriesById;
-    private List<String> seriesOrder;
+    private List<SeriesConfig> series;
 }

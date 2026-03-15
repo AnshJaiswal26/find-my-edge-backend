@@ -27,7 +27,6 @@ public class AggregateExecutor {
             @NonNull Function<String, SchemaType> getSchemaType
     ) {
 
-
         DefaultEvaluationContext ctx = new DefaultEvaluationContext();
 
         ctx.setGetTradeValue(getTradeValue);

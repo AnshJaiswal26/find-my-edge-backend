@@ -1,13 +1,14 @@
 package com.example.find_my_edge.workspace.features;
 
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
-import com.example.find_my_edge.workspace.dto.ChartRequestDto;
+import com.example.find_my_edge.workspace.dto.ChartLayoutDto;
+import com.example.find_my_edge.workspace.dto.ChartRequest;
+import com.example.find_my_edge.workspace.dto.ChartResponse;
 
 import java.util.Map;
 
 public interface ChartService {
-    ChartConfig create(String page, ChartRequestDto dto);
+    ChartResponse create(String page, ChartRequest dto);
 
     ChartConfig getById(String page, String chartId);
 
@@ -17,7 +18,5 @@ public interface ChartService {
 
     void delete(String page, String chartId);
 
-    Map<String, Object> updateLayout(String page, String chartId, Map<String, Object> layout);
-
-    Map<String, SeriesConfig> updateSeriesConfig(String page, String chartId, Map<String, SeriesConfig> seriesConfig);
+    ChartLayoutDto updateLayout(String page, String chartId, ChartLayoutDto dto);
 }

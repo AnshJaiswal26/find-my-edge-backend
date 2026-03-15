@@ -29,12 +29,12 @@ public class SchemaController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<SchemaUpdateResponseDto>> createSchema(@RequestBody SchemaRequestDto request) {
+    public ResponseEntity<ApiResponse<SchemaUpdateResponse>> createSchema(@RequestBody SchemaRequest request) {
         SchemaUpdate schemaUpdate =
                 orchestratorService.createSchemaAndRecompute(schemaDTOMapper.toSchema(request));
 
         return buildResponse(
-                new SchemaUpdateResponseDto(
+                new SchemaUpdateResponse(
                         schemaDTOMapper.toResponse(schemaUpdate.getSchema()),
                         schemaUpdate.getRecomputeResult()
                 ), "Schema created successfully"
@@ -43,9 +43,9 @@ public class SchemaController extends BaseController {
 
     /* ---------------- UPDATE ---------------- */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<SchemaUpdateResponseDto>> updateSchema(
+    public ResponseEntity<ApiResponse<SchemaUpdateResponse>> updateSchema(
             @PathVariable String id,
-            @RequestBody SchemaRequestDto request
+            @RequestBody SchemaRequest request
     ) {
         SchemaUpdate update =
                 orchestratorService.updateSchemaAndRecompute(
@@ -54,7 +54,7 @@ public class SchemaController extends BaseController {
                 );
 
         return buildResponse(
-                new SchemaUpdateResponseDto(
+                new SchemaUpdateResponse(
                         schemaDTOMapper.toResponse(update.getSchema()),
                         update.getRecomputeResult()
                 ), "Schema updated successfully"
@@ -63,14 +63,14 @@ public class SchemaController extends BaseController {
 
     /* ---------------- GET ALL ---------------- */
     @GetMapping
-    public ResponseEntity<ApiResponse<SchemaResponseDtoBundle>> getAllSchemas() {
+    public ResponseEntity<ApiResponse<SchemaBundleResponse>> getAllSchemas() {
         SchemaBundle all = schemaService.getAll();
         return buildResponse(schemaDTOMapper.toSchemaDTOBundle(all), "Schemas fetched successfully");
     }
 
     /* ---------------- GET BY ID ---------------- */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SchemaResponseDto>> getSchemaById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<SchemaResponse>> getSchemaById(@PathVariable String id) {
         Schema schema = schemaService.getById(id);
         return buildResponse(schemaDTOMapper.toResponse(schema), "Schema fetched successfully");
     }
@@ -85,7 +85,7 @@ public class SchemaController extends BaseController {
 
     @PutMapping("/order")
     public ResponseEntity<ApiResponse<List<String>>> updateOrder(
-            @RequestBody SchemaOrderRequestDto dto
+            @RequestBody SchemaOrderRequest dto
     ) {
 
         List<String> newOrder = schemaService.updateOrder(dto.getOrder(), dto.getViewType());

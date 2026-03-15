@@ -1,7 +1,6 @@
 package com.example.find_my_edge.workspace.config.page;
 
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.ChartLayoutConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +20,7 @@ public class PageConfig {
     // Charts
 
     @Builder.Default
-    private Map<String, ChartLayoutConfig> chartGridLayout = new HashMap<>();
+    private Map<String, PageGridLayoutConfig> gridLayout = new HashMap<>();
     @Builder.Default
     private Map<String, ChartConfig> charts = new HashMap<>();
     @Builder.Default

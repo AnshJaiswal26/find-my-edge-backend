@@ -10,7 +10,7 @@ import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.bootstrap.dto.BootstrapResponse;
 import com.example.find_my_edge.common.util.JsonUtil;
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
+import com.example.find_my_edge.schema.dto.SchemaResponse;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.mapper.SchemaMapper;
 import com.example.find_my_edge.schema.model.Schema;
@@ -111,7 +111,7 @@ public class GroupTesting {
 
         Map<String, Map<String, Object>> raw = call.getTradesById();
         Map<String, Map<String, Object>> computed = call.getDerivedByTradeId();
-        Map<String, SchemaResponseDto> schemasById = call.getSchemasById();
+        Map<String, SchemaResponse> schemasById = call.getSchemasById();
 
         ChartConfig chartConfig = chartRegistry.getCharts().get("bar-chart-1");
 

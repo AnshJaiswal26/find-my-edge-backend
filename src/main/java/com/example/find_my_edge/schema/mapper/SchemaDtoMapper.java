@@ -1,8 +1,8 @@
 package com.example.find_my_edge.schema.mapper;
 
-import com.example.find_my_edge.schema.dto.SchemaRequestDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
-import com.example.find_my_edge.schema.dto.SchemaResponseDtoBundle;
+import com.example.find_my_edge.schema.dto.SchemaRequest;
+import com.example.find_my_edge.schema.dto.SchemaResponse;
+import com.example.find_my_edge.schema.dto.SchemaBundleResponse;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
 import com.example.find_my_edge.common.config.uiconfigs.ColorRuleConfig;
 import com.example.find_my_edge.common.config.uiconfigs.DisplayConfig;
@@ -22,7 +22,7 @@ public class SchemaDtoMapper {
     private final JsonUtil jsonUtil;
 
     /* ---------------- REQUEST → DOMAIN ---------------- */
-    public Schema toSchema(SchemaRequestDto dto) {
+    public Schema toSchema(SchemaRequest dto) {
 
         if (dto == null) return null;
 
@@ -52,11 +52,11 @@ public class SchemaDtoMapper {
 
     /* ---------------- DOMAIN → RESPONSE ---------------- */
 
-    public SchemaResponseDto toResponse(Schema schema) {
+    public SchemaResponse toResponse(Schema schema) {
 
         if (schema == null) return null;
 
-        SchemaResponseDto dto = new SchemaResponseDto();
+        SchemaResponse dto = new SchemaResponse();
 
         dto.setId(schema.getId());
         dto.setLabel(schema.getLabel());
@@ -85,25 +85,25 @@ public class SchemaDtoMapper {
 
     /* ---------------- BUNDLE ---------------- */
 
-    public SchemaResponseDtoBundle toSchemaDTOBundle(SchemaBundle bundle) {
+    public SchemaBundleResponse toSchemaDTOBundle(SchemaBundle bundle) {
 
-        Map<String, SchemaResponseDto> byId = new HashMap<>();
+        Map<String, SchemaResponse> byId = new HashMap<>();
 
         for (Schema schema : bundle.getSchemas()) {
-            SchemaResponseDto dto = toResponse(schema);
+            SchemaResponse dto = toResponse(schema);
             byId.put(dto.getId(), dto);
         }
 
-        List<SchemaResponseDto> ordered = new ArrayList<>();
+        List<SchemaResponse> ordered = new ArrayList<>();
 
         for (String id : bundle.getSchemasOrder()) {
-            SchemaResponseDto dto = byId.get(id);
+            SchemaResponse dto = byId.get(id);
             if (dto != null) {
                 ordered.add(dto);
             }
         }
 
-        SchemaResponseDtoBundle result = new SchemaResponseDtoBundle();
+        SchemaBundleResponse result = new SchemaBundleResponse();
         result.setSchemas(ordered);
         result.setSchemasById(byId);
         result.setSchemasOrder(bundle.getSchemasOrder());

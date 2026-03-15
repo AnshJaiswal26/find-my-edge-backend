@@ -3,8 +3,9 @@ package com.example.find_my_edge.workspace.controller;
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.dto.ApiResponse;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
-import com.example.find_my_edge.workspace.dto.ChartRequestDto;
+import com.example.find_my_edge.workspace.dto.ChartLayoutDto;
+import com.example.find_my_edge.workspace.dto.ChartRequest;
+import com.example.find_my_edge.workspace.dto.ChartResponse;
 import com.example.find_my_edge.workspace.features.ChartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,11 @@ public class ChartController extends BaseController {
 
     /* ---------------- CREATE ---------------- */
     @PostMapping
-    public ResponseEntity<ApiResponse<ChartConfig>> create(
+    public ResponseEntity<ApiResponse<ChartResponse>> create(
             @PathVariable String pageName,
-            @RequestBody ChartRequestDto dto
+            @RequestBody ChartRequest dto
     ) {
-        ChartConfig created = chartService.create(pageName, dto);
+        ChartResponse created = chartService.create(pageName, dto);
         return buildResponse(created, "Chart created successfully");
     }
 
@@ -74,24 +75,11 @@ public class ChartController extends BaseController {
     public ResponseEntity<ApiResponse<Object>> updateLayout(
             @PathVariable String pageName,
             @PathVariable String chartId,
-            @RequestBody Map<String, Object> layout
+            @RequestBody ChartLayoutDto dto
     ) {
-        Map<String, Object> updatedLayout =
-                chartService.updateLayout(pageName, chartId, layout);
+        ChartLayoutDto updatedLayout =
+                chartService.updateLayout(pageName, chartId, dto);
 
         return buildResponse(updatedLayout, "Chart layout updated successfully");
-    }
-
-    /* ---------------- UPDATE SERIES ---------------- */
-    @PatchMapping("/{chartId}/series")
-    public ResponseEntity<ApiResponse<Object>> updateSeries(
-            @PathVariable String pageName,
-            @PathVariable String chartId,
-            @RequestBody Map<String, SeriesConfig> seriesConfig
-    ) {
-        Map<String, SeriesConfig> updatedSeries =
-                chartService.updateSeriesConfig(pageName, chartId, seriesConfig);
-
-        return buildResponse(updatedSeries, "Chart series updated successfully");
     }
 }

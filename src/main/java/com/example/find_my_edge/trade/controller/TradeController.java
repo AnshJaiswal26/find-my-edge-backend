@@ -1,7 +1,7 @@
 package com.example.find_my_edge.trade.controller;
 
 import com.example.find_my_edge.analytics.model.RecomputeResult;
-import com.example.find_my_edge.trade.dto.TradeValueUpdateRequestDto;
+import com.example.find_my_edge.trade.dto.TradeValueUpdateRequest;
 import com.example.find_my_edge.trade.mapper.TradeDtoMapper;
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.dto.ApiResponse;
@@ -91,7 +91,7 @@ public class TradeController extends BaseController {
     @PatchMapping("/{id}/value")
     public ResponseEntity<ApiResponse<RecomputeResult>> updateTradeValue(
             @PathVariable String id,
-            @RequestBody TradeValueUpdateRequestDto dto
+            @RequestBody TradeValueUpdateRequest dto
     ) {
 
         RecomputeResult recomputeResult =

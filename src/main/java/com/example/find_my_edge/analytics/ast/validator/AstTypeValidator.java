@@ -178,7 +178,7 @@ public class AstTypeValidator {
             return;
         }
 
-        System.out.println(actual.name());
+//        System.out.println(actual.name());
         // Direct match
         if (!expected.toString().equalsIgnoreCase(actual.name())) {
             throw new AstTypeValidationException(

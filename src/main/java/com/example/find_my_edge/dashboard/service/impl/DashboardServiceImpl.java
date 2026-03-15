@@ -8,7 +8,7 @@ import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.dashboard.model.DashboardData;
 import com.example.find_my_edge.dashboard.service.DashboardService;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
-import com.example.find_my_edge.workspace.config.chart.ChartLayoutConfig;
+import com.example.find_my_edge.workspace.config.page.PageGridLayoutConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
 import com.example.find_my_edge.workspace.config.stat.StatConfig;
 import com.example.find_my_edge.workspace.enums.PageType;
@@ -48,7 +48,7 @@ public class DashboardServiceImpl implements DashboardService {
         Map<String, StatConfig> statsById = page.getStatsById();
         List<String> statsOrder = page.getStatsOrder();
 
-        Map<String, ChartLayoutConfig> chartGridLayout = page.getChartGridLayout();
+        Map<String, PageGridLayoutConfig> gridLayout = page.getGridLayout();
 
         statComputeService.computeStats(statsById, computationContext);
 
@@ -56,7 +56,7 @@ public class DashboardServiceImpl implements DashboardService {
                 chartComputeService.computeCharts(charts, computationContext);
 
         return DashboardData.builder()
-                            .chartGridLayout(chartGridLayout)
+                            .gridLayout(gridLayout)
                             .charts(charts)
                             .groupAggregateChartResult(resultMap)
                             .chartOrder(chartOrder)

@@ -1,11 +1,13 @@
-package com.example.find_my_edge.workspace.config.chart;
+package com.example.find_my_edge.workspace.config.page;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class ChartLayoutConfig {
+@NoArgsConstructor
+public class PageGridLayoutConfig {
     private int x;
     private int y;
     private int w;

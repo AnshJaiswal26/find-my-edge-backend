@@ -25,8 +25,7 @@ public class ChartBuilder {
             ChartType type,
             Map<String, Object> layoutOverrides,
             XMetric xMetric,
-            Map<String, SeriesConfig> seriesById,
-            List<String> seriesOrder
+            List<SeriesConfig> seriesConfigs
     ) {
 
         String layoutKey = getLayoutKey(type);
@@ -34,8 +33,26 @@ public class ChartBuilder {
         Map<String, Object> layout = new HashMap<>(layoutRegistry.get(layoutKey));
         layout.putAll(layoutOverrides);
 
+        String chartId = UUID.randomUUID().toString();
+
+        Map<String, SeriesConfig> seriesById = new HashMap<>();
+        List<String> seriesOrder = new ArrayList<>();
+
+        seriesConfigs.forEach(s -> {
+            String uuid = UUID.randomUUID().toString();
+
+            s.setChartId(chartId);
+            s.setId(uuid);
+            s.setColor("var(--info)");
+            s.setMarkerColor("var(--info)");
+            s.setAreaColor("var(--info)");
+
+            seriesById.put(uuid, s);
+            seriesOrder.add(uuid);
+        });
+
         return ChartConfig.builder()
-                          .id(UUID.randomUUID().toString())
+                          .id(chartId)
                           .type(type)
                           .category(resolveCategory(type))
                           .mode(resolveMode(type))

@@ -9,4 +9,5 @@ import java.util.Map;
 public class TradeMetricTableData {
     private List<String> columnsOrder;
     private Map<String, Integer> columnWidths;
+    private Map<String, Boolean> highlightedRows;
 }

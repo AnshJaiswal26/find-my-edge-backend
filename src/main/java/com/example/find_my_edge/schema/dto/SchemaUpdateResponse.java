@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class SchemaUpdateResponseDto {
-    private SchemaResponseDto schema;
+public class SchemaUpdateResponse {
+    private SchemaResponse schema;
     private RecomputeResult recomputeResult;
 }

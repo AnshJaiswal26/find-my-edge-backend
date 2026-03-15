@@ -8,32 +8,31 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/pages/{pageName}")
+@RequestMapping("api/pages/{pageName}/table")
 @RequiredArgsConstructor
 public class TableController extends BaseController {
 
     private final TableService tableService;
 
-    @PostMapping("table/columnWidth/{columnId}")
-    public ResponseEntity<ApiResponse<Integer>> updateColumnWidth(
-            @PathVariable String columnId, @PathVariable String pageName, @RequestBody Integer width
+    @PatchMapping("/columns/{columnId}/width")
+    public ResponseEntity<ApiResponse<Object>> updateColumnWidth(
+            @PathVariable String pageName,
+            @PathVariable String columnId,
+            @RequestBody Integer width
     ) {
-        System.out.println(columnId + pageName + width);
         tableService.updateColumnWidth(pageName, columnId, width);
-        return buildResponse(
-                null,
-                "Column width updated successfully"
-        );
+
+        return buildResponse(null, "Column width updated successfully");
     }
 
-    @PostMapping("table/highlightRow/{rowId}")
-    public ResponseEntity<ApiResponse<Integer>> highlightRow(
-            @PathVariable String rowId, @PathVariable String pageName, @RequestBody Boolean highlight
+    @PatchMapping("/rows/{rowId}/highlight")
+    public ResponseEntity<ApiResponse<Object>> highlightRow(
+            @PathVariable String pageName,
+            @PathVariable String rowId,
+            @RequestBody Boolean highlight
     ) {
         tableService.updateHighLightedRow(pageName, rowId, highlight);
-        return buildResponse(
-                null,
-                "Highlight row updated successfully"
-        );
+
+        return buildResponse(null, "Highlight row updated successfully");
     }
 }

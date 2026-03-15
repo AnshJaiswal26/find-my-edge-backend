@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SchemaOrderRequestDto {
+public class SchemaOrderRequest {
 
     private ViewType viewType;
 

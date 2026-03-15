@@ -4,7 +4,7 @@ import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.bootstrap.dto.BootstrapResponse;
 import com.example.find_my_edge.bootstrap.service.BootstrapService;
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
+import com.example.find_my_edge.schema.dto.SchemaResponse;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class BootstrapServiceImpl implements BootstrapService {
         List<String> schemaOrder = ctx.getSchemaOrder();
         Map<String, Schema> schemas = ctx.getSchemasById();
 
-        Map<String, SchemaResponseDto> schemasById =
+        Map<String, SchemaResponse> schemasById =
                 schemas.entrySet()
                        .stream()
                        .collect(Collectors.toMap(

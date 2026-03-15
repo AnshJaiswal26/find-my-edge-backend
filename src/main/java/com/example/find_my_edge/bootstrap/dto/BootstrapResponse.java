@@ -1,6 +1,6 @@
 package com.example.find_my_edge.bootstrap.dto;
 
-import com.example.find_my_edge.schema.dto.SchemaResponseDto;
+import com.example.find_my_edge.schema.dto.SchemaResponse;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 @Builder
 public class BootstrapResponse {
 
-    private Map<String, SchemaResponseDto> schemasById;
+    private Map<String, SchemaResponse> schemasById;
 
     private List<String> schemasOrder;
 
