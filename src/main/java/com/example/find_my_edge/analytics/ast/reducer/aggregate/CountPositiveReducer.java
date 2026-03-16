@@ -58,8 +58,8 @@ public class CountPositiveReducer implements Reducer {
         State s = (State) stateObj;
         Object valueObj = args[0];
 
-        if (valueObj instanceof Number) {
-            double v = ((Number) valueObj).doubleValue();
+        if (valueObj instanceof Number num) {
+            double v = num.doubleValue();
             if (v > 0) {
                 s.count++;
             }

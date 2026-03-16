@@ -38,18 +38,21 @@ public class SchemaOrchestratorServiceImpl implements SchemaOrchestratorService 
 
         Schema saved = schemaService.update(schemaId, schema);
 
-        boolean formulaChanged = !Objects.equals(schema.getIdFormula(), saved.getFormula());
 
         RecomputeResult recomputeResult = null;
 
-        if (formulaChanged) {
-            recomputeResult =
-                    recomputeService.recomputeOnDefinitionChange(
-                            PageType.DASHBOARD.key(),
-                            schemaId
-                    );
+        if (saved.isComputed()) {
+            boolean formulaChanged = !Objects.equals(schema.getIdFormula(), saved.getIdFormula());
+
+            if (formulaChanged) {
+                recomputeResult =
+                        recomputeService.recomputeOnDefinitionChange(
+                                PageType.DASHBOARD.key(),
+                                schemaId
+                        );
+            }
         }
 
-        return new SchemaUpdate(schema, recomputeResult);
+        return new SchemaUpdate(saved, recomputeResult);
     }
 }

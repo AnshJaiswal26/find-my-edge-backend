@@ -50,8 +50,8 @@ public class DaysFunction implements Reducer {
         AstNode valueExpr = fn.getArgs().getFirst();
 
         Object value = evaluator.evaluate(valueExpr, ctx);
-        if (value == null) return null;
+        if (!(value instanceof Number num)) return null;
 
-        return ((Number) value).doubleValue() * SECONDS_IN_DAY;
+        return num.doubleValue() * SECONDS_IN_DAY;
     }
 }

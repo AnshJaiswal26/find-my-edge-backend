@@ -65,12 +65,12 @@ public class PercentOfReducer implements Reducer {
         Object partObj = args[0];
         Object totalObj = args[1];
 
-        if (partObj != null) {
-            state.part += ((Number) partObj).doubleValue();
+        if (partObj instanceof Number num) {
+            state.part += num.doubleValue();
         }
 
-        if (totalObj != null) {
-            state.total += ((Number) totalObj).doubleValue();
+        if (totalObj instanceof Number num) {
+            state.total += num.doubleValue();
         }
 
         return true; // process all rows

@@ -65,9 +65,9 @@ public class WinRateReducer implements Reducer {
 
         Object pnlObj = args[0]; // injected via key
 
-        if (pnlObj == null) return true;
+        if (!(pnlObj instanceof Number num)) return true;
 
-        double pnl = ((Number) pnlObj).doubleValue();
+        double pnl = num.doubleValue();
 
         state.total++;
 

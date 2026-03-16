@@ -71,9 +71,10 @@ public class PayoffRatioReducer implements Reducer {
         State state = (State) stateObj;
 
         Object pnlObj = args[0];
-        if (pnlObj == null) return true;
 
-        double pnl = ((Number) pnlObj).doubleValue();
+        if (!(pnlObj instanceof Number num)) return true;
+
+        double pnl = num.doubleValue();
 
         if (pnl > 0) {
             state.winSum += pnl;

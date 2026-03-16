@@ -54,10 +54,10 @@ public class CountIfReducer implements Reducer {
         if (stateObj == null || args == null || args.length < 1) return true;
 
         State s = (State) stateObj;
-        Object valueObj = args[0];
+        Object condObj = args[0];
 
         // JS logic: v === 1
-        if (valueObj != null && Boolean.TRUE.equals(valueObj)) {
+        if (Boolean.TRUE.equals(condObj)) {
             s.count++;
         }
 

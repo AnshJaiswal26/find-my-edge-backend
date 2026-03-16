@@ -59,7 +59,7 @@ public class StreakReducer implements Reducer {
         State s = (State) stateObj;
         Object condObj = args[0];
 
-        if (condObj instanceof Boolean && (Boolean) condObj) {
+        if (condObj instanceof Boolean cond && Boolean.TRUE.equals(cond)) {
             s.current++;
             if (s.current > s.max) {
                 s.max = s.current;

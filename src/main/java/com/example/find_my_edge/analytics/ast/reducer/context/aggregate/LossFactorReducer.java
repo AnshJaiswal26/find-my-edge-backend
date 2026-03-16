@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
         semanticReturn = "number",
         signature = "LOSS_FACTOR()",
         description = "Gross loss divided by gross profit",
-        modes={FunctionMode.AGGREGATE}
+        modes = {FunctionMode.AGGREGATE}
 )
 @Component
 public class LossFactorReducer implements Reducer {
@@ -31,7 +31,6 @@ public class LossFactorReducer implements Reducer {
     }
 
 
-
     @Override
     public FunctionType getType() {
         return FunctionType.AGGREGATE;
@@ -46,7 +45,6 @@ public class LossFactorReducer implements Reducer {
     public String getName() {
         return "LOSS_FACTOR";
     }
-
 
 
     @Override
@@ -69,9 +67,9 @@ public class LossFactorReducer implements Reducer {
 
         Object pnlObj = args[0];
 
-        if (pnlObj == null) return true;
+        if (!(pnlObj instanceof Number num)) return true;
 
-        double pnl = ((Number) pnlObj).doubleValue();
+        double pnl = num.doubleValue();
 
         if (pnl > 0) {
             state.grossProfit += pnl;

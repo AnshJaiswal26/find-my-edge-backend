@@ -67,10 +67,10 @@ public class RateNReducer implements Reducer {
         if (stateObj == null || args == null || args.length == 0) return true;
 
         State state = (State) stateObj;
-        Object valueObj = args[0];
+        Object condObj = args[0];
 
-        if (valueObj != null) {
-            boolean condition = (Boolean) valueObj;
+        if (condObj instanceof Boolean b) {
+            boolean condition = b;
 
             double value = condition ? 1.0 : 0.0;
 

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ChartCategory {
-    SERIES,
-    GROUP;
+    CARTESIAN,
+    PARTITION,
+    RADIAL_AXIS,
+    FINANCIAL;
 
     @JsonValue
     public String toJson() {

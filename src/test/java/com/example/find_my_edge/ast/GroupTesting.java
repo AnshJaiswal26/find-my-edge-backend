@@ -63,7 +63,7 @@ public class GroupTesting {
     @Test
     public void grouping() throws Exception {
 
-        BootstrapResponse call = authTestClient.getCall(
+        BootstrapResponse call = authTestClient.doCall(
                 "annu@gmail.com",
                 "annu@123",
                 "/api/app/init",
@@ -100,7 +100,7 @@ public class GroupTesting {
     @Test
     public void groupingAgg() throws Exception {
 
-        BootstrapResponse call = authTestClient.getCall(
+        BootstrapResponse call = authTestClient.doCall(
                 "annu@gmail.com",
                 "annu@123",
                 "/api/app/init",

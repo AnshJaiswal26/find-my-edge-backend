@@ -2,7 +2,6 @@ package com.example.find_my_edge.analytics.engine.group;
 
 import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
-import com.example.find_my_edge.trade.model.Trade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,7 @@ public class GroupBuilder {
     private final GroupCompiler compiler;
 
     public List<Group> buildGroups(
-            List<String> tradeOrder,
+            List<String> ids,
             GroupConfig groupSpec,
             BiFunction<String, String, Object> getValue,
             boolean includeTradeIds
@@ -33,9 +32,9 @@ public class GroupBuilder {
 
         Map<String, Group> map = new LinkedHashMap<>();
 
-        for (String tradeId : tradeOrder) {
+        for (String id : ids) {
 
-            Object raw = getKeyFn.apply(tradeId);
+            Object raw = getKeyFn.apply(id);
             String key = GroupKeyUtil.getGroupKey(raw);
 
             Group group = map.computeIfAbsent(
@@ -43,12 +42,12 @@ public class GroupBuilder {
                                    .groupId(key)
                                    .key(key)
                                    .meta(raw)
-                                   .tradeIds(new ArrayList<>())
+                                   .ids(new ArrayList<>())
                                    .build()
             );
 
             if (includeTradeIds) {
-                group.getTradeIds().add(tradeId);
+                group.getIds().add(id);
             }
         }
 

@@ -59,8 +59,8 @@ public class SumReducer implements Reducer {
 
         Object valueObj = args[0];
 
-        if (valueObj != null) {
-            s.sum += ((Number) valueObj).doubleValue();
+        if (valueObj instanceof Number num) {
+            s.sum += num.doubleValue();
         }
 
         return true;

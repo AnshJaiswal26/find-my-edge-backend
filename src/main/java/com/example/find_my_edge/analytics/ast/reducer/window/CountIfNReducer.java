@@ -55,7 +55,7 @@ public class CountIfNReducer implements Reducer {
         Object conditionObj = args[0];
 
         // convert boolean → 1 or 0
-        double value = conditionObj != null && Boolean.TRUE.equals(conditionObj) ? 1.0 : 0.0;
+        double value = Boolean.TRUE.equals(conditionObj) ? 1.0 : 0.0;
 
         return sumN.step(state, new Object[]{value});
     }

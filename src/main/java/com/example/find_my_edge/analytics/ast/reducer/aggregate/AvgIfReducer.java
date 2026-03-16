@@ -66,8 +66,8 @@ public class AvgIfReducer implements Reducer {
         Object valueObj = args[0];
         Object condObj = args[1];
 
-        if (valueObj != null && condObj != null && Boolean.TRUE.equals(condObj)) {
-            double value = ((Number) valueObj).doubleValue();
+        if (valueObj instanceof Number num && Boolean.TRUE.equals(condObj)) {
+            double value = num.doubleValue();
             state.sum += value;
             state.count++;
         }

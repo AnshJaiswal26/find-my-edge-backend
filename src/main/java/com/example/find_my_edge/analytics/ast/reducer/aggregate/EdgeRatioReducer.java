@@ -66,12 +66,12 @@ public class EdgeRatioReducer implements Reducer {
         Object winObj = args[0];
         Object lossObj = args[1];
 
-        if (winObj != null) {
-            state.win += ((Number) winObj).doubleValue();
+        if (winObj instanceof Number num) {
+            state.win += num.doubleValue();
         }
 
-        if (lossObj != null) {
-            state.loss += ((Number) lossObj).doubleValue();
+        if (lossObj instanceof Number num) {
+            state.loss += num.doubleValue();
         }
 
         return true; // process all rows

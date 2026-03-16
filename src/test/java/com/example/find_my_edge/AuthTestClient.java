@@ -44,7 +44,7 @@ public class AuthTestClient {
         return response.getAccessToken();
     }
 
-    public <T> T getCall(String email, String password, String path, Class<T> clazz) throws Exception {
+    public <T> T doCall(String email, String password, String path, Class<T> clazz) throws Exception {
         String accessToken = login(email, password);
 
         MvcResult result =

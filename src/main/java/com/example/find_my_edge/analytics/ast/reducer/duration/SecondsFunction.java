@@ -48,8 +48,8 @@ public class SecondsFunction implements Reducer {
         AstNode valueExpr = fn.getArgs().getFirst();
 
         Object value = evaluator.evaluate(valueExpr, ctx);
-        if (value == null) return null;
+        if (!(value instanceof Number num)) return null;
 
-        return ((Number) value).doubleValue(); // already seconds
+        return num.doubleValue(); // already seconds
     }
 }

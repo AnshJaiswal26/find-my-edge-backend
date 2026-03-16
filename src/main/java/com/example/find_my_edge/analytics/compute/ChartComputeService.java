@@ -8,7 +8,6 @@ import com.example.find_my_edge.analytics.execution.GroupSeriesExecutionService;
 import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.execution.AggregateExecutionService;
-import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.enums.ChartCategory;
@@ -54,7 +53,7 @@ public class ChartComputeService {
                         (group, series) -> {
 
                             TradeDataset dataset =
-                                    new GroupTradeDataset(ctx, group.getTradeIds());
+                                    new GroupTradeDataset(ctx, group.getIds());
 
                             return aggregateComputeEngine.computedAggregate(
                                     useAst ? series.getAst() : null,
@@ -105,7 +104,7 @@ public class ChartComputeService {
                 ChartResult result = computeGroupAggregateChart(chart, ctx);
                 resultMap.put(chart.getId(), result);
 
-            } else if(chart.getCategory() == ChartCategory.GROUP) {
+            } else if(chart.getCategory() == ChartCategory.PARTITION) {
                 computeSingleAggregateChart(chart, ctx);
             }
         }

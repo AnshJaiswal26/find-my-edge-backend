@@ -57,12 +57,12 @@ public class ChartRegistry {
 
     private List<ChartConfig> buildDefaultCharts() {
         return List.of(
+                pieChart(),
+                radialBarChart(),
                 barChart(),
                 barChart1(),
                 lineChart(),
-                lineChart1(),
-                pieChart(),
-                radialBarChart()
+                lineChart1()
         );
     }
 
@@ -147,7 +147,7 @@ public class ChartRegistry {
                 .builder()
                 .id(chartId)
                 .type(ChartType.BAR)
-                .category(ChartCategory.SERIES)
+                .category(ChartCategory.CARTESIAN)
                 .mode(ChartMode.SERIES)
                 .source(Source.SYSTEM)
                 .layout(layout)
@@ -225,7 +225,7 @@ public class ChartRegistry {
                 .builder()
                 .id(chartId)
                 .type(ChartType.BAR)
-                .category(ChartCategory.SERIES)
+                .category(ChartCategory.CARTESIAN)
                 .mode(ChartMode.SERIES)
                 .source(Source.SYSTEM)
                 .layout(layout)
@@ -285,7 +285,7 @@ public class ChartRegistry {
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.LINE)
-                          .category(ChartCategory.SERIES)
+                          .category(ChartCategory.CARTESIAN)
                           .mode(ChartMode.SERIES)
                           .source(Source.SYSTEM)
                           .layout(layout)
@@ -329,7 +329,7 @@ public class ChartRegistry {
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.LINE)
-                          .category(ChartCategory.SERIES)
+                          .category(ChartCategory.CARTESIAN)
                           .mode(ChartMode.SERIES)
                           .source(Source.SYSTEM)
                           .layout(layout)
@@ -378,7 +378,7 @@ public class ChartRegistry {
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.DONUT)
-                          .category(ChartCategory.GROUP)
+                          .category(ChartCategory.PARTITION)
                           .source(Source.SYSTEM)
                           .layout(layout)
                           .seriesOrder(List.of(series1Id, series2Id))
@@ -425,7 +425,7 @@ public class ChartRegistry {
         return ChartConfig.builder()
                           .id(chartId)
                           .type(ChartType.RADIAL_BAR)
-                          .category(ChartCategory.GROUP)
+                          .category(ChartCategory.PARTITION)
                           .source(Source.SYSTEM)
                           .layout(layout)
                           .seriesOrder(List.of(series1Id, series2Id))

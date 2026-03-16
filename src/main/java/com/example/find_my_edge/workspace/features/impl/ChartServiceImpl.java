@@ -35,18 +35,11 @@ public class ChartServiceImpl implements ChartService {
 
     @Override
     public ChartResponse create(String pageName, ChartRequest dto) {
-
-        if (dto.getChartType() == null) {
-            throw new InvalidChartConfigException("Chart type is required");
-        }
-
-        if (dto.getSeries() == null || dto.getSeries().isEmpty()) {
-            throw new InvalidChartConfigException("Chart must contain at least one series");
-        }
-
         ChartConfig config = chartBuilder.buildChart(
                 dto.getChartType(),
                 dto.getLayout(),
+                dto.getGroupSpec(),
+                dto.getMode(),
                 dto.getXMetric(),
                 dto.getSeries()
         );
@@ -55,7 +48,7 @@ public class ChartServiceImpl implements ChartService {
 
         ChartResult chartResult = null;
 
-        if (config.getCategory() == ChartCategory.GROUP) {
+        if (config.getCategory() == ChartCategory.PARTITION) {
             chartComputeService.computeSingleAggregateChart(config, contextBuilder.buildContext());
         }
 
@@ -148,21 +141,30 @@ public class ChartServiceImpl implements ChartService {
         return dto;
     }
 
+    private void validateChart(ChartConfig config) {
+
+        if (config == null) {
+            throw new InvalidChartConfigException("ChartConfig cannot be null");
+        }
+
+        if (config.getId() == null || config.getId().isBlank()) {
+            throw new InvalidChartConfigException("Chart id cannot be null or blank");
+        }
+
+        if (config.getMode() == null && config.getCategory() == ChartCategory.CARTESIAN) {
+            throw new InvalidChartConfigException("Chart mode is required for cartesian charts");
+        }
+
+        if (config.getSeriesOrder() == null || config.getSeriesOrder().isEmpty()) {
+            throw new InvalidChartConfigException("Chart must contain at least one series");
+        }
+    }
+
     private ChartConfig getChartOrThrow(PageConfig page, String chartId) {
         ChartConfig chart = page.getCharts().get(chartId);
         if (chart == null) {
             throw new ChartNotFoundException(chartId);
         }
         return chart;
-    }
-
-    private void validateChart(ChartConfig dto) {
-        if (dto == null) {
-            throw new InvalidChartConfigException("ChartConfig cannot be null");
-        }
-
-        if (dto.getId() == null || dto.getId().isBlank()) {
-            throw new InvalidChartConfigException("Chart id cannot be null or blank");
-        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.find_my_edge.workspace.builder;
 
+import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.config.SortConfig;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SelectionConfig;
@@ -9,6 +10,7 @@ import com.example.find_my_edge.workspace.enums.ChartCategory;
 import com.example.find_my_edge.workspace.enums.ChartMode;
 import com.example.find_my_edge.workspace.enums.ChartType;
 import com.example.find_my_edge.workspace.enums.Source;
+import com.example.find_my_edge.workspace.exception.chart.InvalidChartConfigException;
 import com.example.find_my_edge.workspace.registry.LayoutRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -24,9 +26,15 @@ public class ChartBuilder {
     public ChartConfig buildChart(
             ChartType type,
             Map<String, Object> layoutOverrides,
+            GroupConfig groupSpec,
+            ChartMode mode,
             XMetric xMetric,
             List<SeriesConfig> seriesConfigs
     ) {
+
+        if (type == null) {
+            throw new InvalidChartConfigException("Chart type is required");
+        }
 
         String layoutKey = getLayoutKey(type);
 
@@ -55,8 +63,9 @@ public class ChartBuilder {
                           .id(chartId)
                           .type(type)
                           .category(resolveCategory(type))
-                          .mode(resolveMode(type))
+                          .mode(mode)
                           .source(Source.USER)
+                          .group(groupSpec)
                           .layout(layout)
                           .xMetric(requiresXMetric(type) ? xMetric : null)
                           .seriesOrder(seriesOrder)
@@ -80,15 +89,8 @@ public class ChartBuilder {
 
     private ChartCategory resolveCategory(ChartType type) {
         return switch (type) {
-            case BAR, LINE -> ChartCategory.SERIES;
-            default -> ChartCategory.GROUP;
-        };
-    }
-
-    private ChartMode resolveMode(ChartType type) {
-        return switch (type) {
-            case BAR, LINE -> ChartMode.SERIES;
-            default -> null;
+            case BAR, LINE -> ChartCategory.CARTESIAN;
+            default -> ChartCategory.PARTITION;
         };
     }
 

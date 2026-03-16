@@ -59,9 +59,9 @@ public class MaxDrawdownReducer implements Reducer {
         State s = (State) stateObj;
         Object valueObj = args[0];
 
-        if (!(valueObj instanceof Number)) return true;
+        if (!(valueObj instanceof Number num)) return true;
 
-        double value = ((Number) valueObj).doubleValue();
+        double value = num.doubleValue();
 
         // accumulate equity (like cumulative PnL)
         s.equity += value;

@@ -60,8 +60,11 @@ public class SumIfReducer implements Reducer {
         Object valueObj = args[0];
         Object condObj = args[1];
 
-        if (valueObj instanceof Number && condObj instanceof Boolean && Boolean.TRUE.equals(valueObj)) {
-            s.sum += ((Number) valueObj).doubleValue();
+        if (valueObj instanceof Number num &&
+            condObj instanceof Boolean &&
+            Boolean.TRUE.equals(condObj)) {
+
+            s.sum += num.doubleValue();
         }
 
         return true;

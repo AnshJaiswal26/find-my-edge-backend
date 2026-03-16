@@ -100,6 +100,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Transactional
     public Schema update(String schemaId, Schema schema) {
 //        System.out.println(schema);
+        schema.setId(schemaId);
         schema.validateForWrite();
 
         UUID userId = currentUserService.getUserId();

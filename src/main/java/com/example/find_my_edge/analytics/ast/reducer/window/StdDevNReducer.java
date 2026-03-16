@@ -70,8 +70,8 @@ public class StdDevNReducer implements Reducer {
         State state = (State) stateObj;
         Object valueObj = args[0];
 
-        if (valueObj != null) {
-            double value = ((Number) valueObj).doubleValue();
+        if (valueObj instanceof Number num) {
+            double value = num.doubleValue();
 
             state.seen++;
 

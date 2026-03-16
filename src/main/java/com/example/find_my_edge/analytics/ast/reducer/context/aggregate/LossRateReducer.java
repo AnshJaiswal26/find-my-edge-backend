@@ -66,9 +66,9 @@ public class LossRateReducer implements Reducer {
 
         Object pnlObj = args[0];
 
-        if (pnlObj == null) return true;
+        if (!(pnlObj instanceof Number num)) return true;
 
-        double pnl = ((Number) pnlObj).doubleValue();
+        double pnl = num.doubleValue();
 
         state.total++;
 

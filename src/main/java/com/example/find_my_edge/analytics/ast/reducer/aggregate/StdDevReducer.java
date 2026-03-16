@@ -60,9 +60,9 @@ public class StdDevReducer implements Reducer {
         State s = (State) stateObj;
         Object valueObj = args[0];
 
-        if (!(valueObj instanceof Number)) return true;
+        if (!(valueObj instanceof Number num)) return true;
 
-        double x = ((Number) valueObj).doubleValue();
+        double x = num.doubleValue();
 
         // Welford's algorithm
         s.n++;

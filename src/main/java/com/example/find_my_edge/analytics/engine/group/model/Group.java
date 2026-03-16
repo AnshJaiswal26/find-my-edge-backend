@@ -17,5 +17,5 @@ public class Group {
     private String key;
     private Double value;
     private Object meta;
-    private List<String> tradeIds;
+    private List<String> ids;
 }

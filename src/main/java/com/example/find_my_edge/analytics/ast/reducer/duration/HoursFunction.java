@@ -47,11 +47,11 @@ public class HoursFunction implements Reducer {
     @Override
     public Object execute(AstNode fn, EvaluationContext ctx, AstEvaluator evaluator) {
 
-        AstNode valueExpr = fn.getArgs().get(0);
+        AstNode valueExpr = fn.getArgs().getFirst();
 
         Object value = evaluator.evaluate(valueExpr, ctx);
-        if (value == null) return null;
+        if (!(value instanceof Number num)) return null;
 
-        return ((Number) value).doubleValue() * SECONDS_IN_HOUR;
+        return num.doubleValue() * SECONDS_IN_HOUR;
     }
 }
