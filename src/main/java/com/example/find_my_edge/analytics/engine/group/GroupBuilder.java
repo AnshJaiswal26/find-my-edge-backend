@@ -2,13 +2,11 @@ package com.example.find_my_edge.analytics.engine.group;
 
 import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
+import com.example.find_my_edge.analytics.engine.group.model.GroupCollection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -18,14 +16,14 @@ public class GroupBuilder {
 
     private final GroupCompiler compiler;
 
-    public List<Group> buildGroups(
+    public GroupCollection buildGroups(
             List<String> ids,
             GroupConfig groupSpec,
-            BiFunction<String, String, Object> getValue,
-            boolean includeTradeIds
+            BiFunction<String, String, Object> getValue
     ) {
 
-        if (groupSpec == null) return null;
+        if (groupSpec == null)
+            return new GroupCollection(Collections.emptyList(), Collections.emptyMap());
 
         Function<String, Object> getKeyFn =
                 compiler.compile(groupSpec, getValue);
@@ -45,24 +43,31 @@ public class GroupBuilder {
                                    .ids(new ArrayList<>())
                                    .build()
             );
-
-            if (includeTradeIds) {
-                group.getIds().add(id);
-            }
+            group.getIds().add(id);
         }
 
-        return map.values().stream()
-                  .sorted((a, b) -> {
-                      Double aNum = a.getValue();
-                      Double bNum = b.getValue();
+        List<Group> list =
+                map.values().stream()
+                   .sorted((a, b) -> {
+                       Double aNum = a.getValue();
+                       Double bNum = b.getValue();
 
-                      if (aNum != null && bNum != null) {
-                          return Double.compare(aNum, bNum);
-                      }
+                       if (aNum != null && bNum != null) {
+                           return Double.compare(aNum, bNum);
+                       }
 
-                      return a.getKey().compareTo(b.getKey());
-                  })
-                  .toList();
+                       return a.getKey().compareTo(b.getKey());
+                   })
+                   .toList();
+        List<String> groupId = new ArrayList<>();
+        Map<String, Group> groupMap = new HashMap<>();
+
+        list.forEach(g -> {
+            groupId.add(g.getGroupId());
+            groupMap.put(g.getGroupId(), g);
+        });
+
+        return new GroupCollection(groupId, groupMap);
     }
 
 }

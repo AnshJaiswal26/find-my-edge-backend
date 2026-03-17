@@ -11,6 +11,8 @@ import java.util.Map;
 @Builder
 public class ChartResult {
 
-    private List<Group> groups;
+    private List<String> groupsOrder;
+    private Map<String, Group> groupsById;
+
     private Map<String, Map<String, Double>> series;
 }

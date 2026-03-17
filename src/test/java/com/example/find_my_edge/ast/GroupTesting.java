@@ -6,6 +6,7 @@ import com.example.find_my_edge.analytics.config.GroupConfig;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
 import com.example.find_my_edge.analytics.engine.group.GroupBuilder;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
+import com.example.find_my_edge.analytics.engine.group.model.GroupCollection;
 import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.bootstrap.dto.BootstrapResponse;
@@ -74,7 +75,7 @@ public class GroupTesting {
         Map<String, Map<String, Object>> computed = call.getDerivedByTradeId();
         List<String> tradeOrder = call.getTradesOrder();
 
-        List<Group> groups = groupBuilder.buildGroups(
+        GroupCollection groups = groupBuilder.buildGroups(
                 tradeOrder,
                 GroupConfig.builder()
                            .type("dateBucket")
@@ -88,8 +89,7 @@ public class GroupTesting {
                         return computed.get(tradeId).get(key);
                     }
                     return value;
-                },
-                true
+                }
         );
 
         String json = jsonUtil.pretty(groups);
@@ -122,10 +122,16 @@ public class GroupTesting {
                                         .build());
 
         Map<String, SeriesConfig> seriesById = chartConfig.getSeriesById();
-        List<SeriesConfig> series = chartConfig.getSeriesOrder().stream().map(seriesById::get).toList();
 
-        series.getFirst().setAst(function("SUM", binary(field("pnl"), "-", field("charges"))));
-        series.getLast().setAst(function("SUM", field("entryPrice")));
+        String first = chartConfig.getSeriesOrder().getFirst();
+
+        seriesById.get(first)
+                  .setAst(function("SUM", field("pnl")));
+
+        String last = chartConfig.getSeriesOrder().getLast();
+
+        seriesById.get(last)
+                  .setAst(function("SUM", field("entryPrice")));
 
         ChartResult chartResult =
                 chartComputeService.computeGroupAggregateChart(

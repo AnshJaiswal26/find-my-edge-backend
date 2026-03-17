@@ -4,6 +4,7 @@ import com.example.find_my_edge.analytics.engine.aggregate.AggregateComputeEngin
 import com.example.find_my_edge.analytics.engine.dataSet.GroupTradeDataset;
 import com.example.find_my_edge.analytics.engine.dataSet.TradeDataset;
 import com.example.find_my_edge.analytics.engine.group.model.Group;
+import com.example.find_my_edge.analytics.engine.group.model.GroupCollection;
 import com.example.find_my_edge.analytics.execution.GroupSeriesExecutionService;
 import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.analytics.model.ComputationContext;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -36,21 +38,22 @@ public class ChartComputeService {
             ComputationContext ctx
     ) {
 
-        List<Group> groups =
-                groupComputeService.buildGroups(ctx, chartConfig.getGroup(), false);
+        GroupCollection groupCollection =
+                groupComputeService.buildGroups(ctx, chartConfig.getGroup());
 
         boolean useAst = chartConfig.getSource() == Source.SYSTEM;
 
         Map<String, Map<String, Double>> matrix =
                 groupSeriesExecutionService.execute(
-
-                        groups,
+                        groupCollection.getGroupIds(),
                         chartConfig.getSeriesById().values(),
 
-                        Group::getGroupId,
+                        Function.identity(),
                         SeriesConfig::getId,
 
-                        (group, series) -> {
+                        (groupId, series) -> {
+
+                            Group group = groupCollection.getGroupsById().get(groupId);
 
                             TradeDataset dataset =
                                     new GroupTradeDataset(ctx, group.getIds());
@@ -64,9 +67,9 @@ public class ChartComputeService {
                         }
                 );
 
-
         return ChartResult.builder()
-                          .groups(groups)
+                          .groupsOrder(groupCollection.getGroupIds())
+                          .groupsById(groupCollection.getGroupsById())
                           .series(matrix)
                           .build();
     }
@@ -104,7 +107,7 @@ public class ChartComputeService {
                 ChartResult result = computeGroupAggregateChart(chart, ctx);
                 resultMap.put(chart.getId(), result);
 
-            } else if(chart.getCategory() == ChartCategory.PARTITION) {
+            } else if (chart.getCategory() == ChartCategory.PARTITION) {
                 computeSingleAggregateChart(chart, ctx);
             }
         }

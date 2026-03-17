@@ -1,7 +1,10 @@
 package com.example.find_my_edge.workspace.features.impl;
 
 import com.example.find_my_edge.analytics.compute.ChartComputeService;
+import com.example.find_my_edge.analytics.compute.GroupComputeService;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
+import com.example.find_my_edge.analytics.engine.group.model.Group;
+import com.example.find_my_edge.analytics.engine.group.model.GroupCollection;
 import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.workspace.builder.ChartBuilder;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
@@ -31,6 +34,8 @@ public class ChartServiceImpl implements ChartService {
 
     private final ChartComputeService chartComputeService;
 
+    private final GroupComputeService groupComputeService;
+
     private final TradeContextBuilder contextBuilder;
 
     @Override
@@ -49,12 +54,29 @@ public class ChartServiceImpl implements ChartService {
         ChartResult chartResult = null;
 
         if (config.getCategory() == ChartCategory.PARTITION) {
-            chartComputeService.computeSingleAggregateChart(config, contextBuilder.buildContext());
+            chartComputeService.computeSingleAggregateChart(
+                    config,
+                    contextBuilder.buildContext()
+            );
         }
 
         if (config.getMode() == ChartMode.GROUP_AGGREGATE) {
             chartResult =
-                    chartComputeService.computeGroupAggregateChart(config, contextBuilder.buildContext());
+                    chartComputeService.computeGroupAggregateChart(
+                            config,
+                            contextBuilder.buildContext()
+                    );
+        }
+
+        if (config.getMode() == ChartMode.GROUP_SELECT) {
+            GroupCollection collection = groupComputeService.buildGroups(
+                    contextBuilder.buildContext(),
+                    config.getGroup()
+            );
+            chartResult = ChartResult.builder()
+                                     .groupsById(collection.getGroupsById())
+                                     .groupsById(collection.getGroupsById())
+                                     .build();
         }
 
         workspaceService.getPageAndModify(

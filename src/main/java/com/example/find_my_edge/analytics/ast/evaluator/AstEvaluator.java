@@ -4,22 +4,17 @@ import com.example.find_my_edge.analytics.ast.context.EvaluationContext;
 import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.function.FunctionHandler;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AstEvaluator {
 
     private final BinaryHandler binaryHandler;
     private final UnaryHandler unaryHandler;
     private final FunctionHandler functionHandler;
 
-    public AstEvaluator(BinaryHandler binaryHandler,
-            UnaryHandler unaryHandler,
-            FunctionHandler functionHandler) {
-        this.binaryHandler = binaryHandler;
-        this.unaryHandler = unaryHandler;
-        this.functionHandler = functionHandler;
-    }
 
     public Object evaluate(AstNode ast, EvaluationContext ctx) {
         if (ast == null) return null;

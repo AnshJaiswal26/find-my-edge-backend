@@ -4,12 +4,14 @@ import com.example.find_my_edge.analytics.ast.enums.ValueType;
 import com.example.find_my_edge.analytics.ast.exception.AstTypeValidationException;
 import com.example.find_my_edge.analytics.ast.function.FunctionDefinition;
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
+import com.example.find_my_edge.analytics.ast.function.annotation.ArgType;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.common.enums.FieldType;
 import com.example.find_my_edge.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,7 @@ public class AstSemanticValidator {
             case IDENTIFIER -> {
                 Schema schema = schemasById.get(node.getField());
                 return schema != null
-                       ? mapSemanticType(schema.getType())
+                       ? ValueType.valueOf(schema.getSemanticType().toString())
                        : ValueType.ANY;
             }
 
@@ -122,11 +124,11 @@ public class AstSemanticValidator {
                 }
 
                 List<AstNode> args = node.getArgs();
-                Object[] expectedArgs = def.getMeta().argTypes();
+                ArgType[] semanticArgs = def.getMeta().semanticArgs();
 
-                for (int i = 0; i < expectedArgs.length; i++) {
+                for (int i = 0; i < semanticArgs.length; i++) {
 
-                    Object expected = expectedArgs[i];
+                    List<String> expected = Arrays.stream(semanticArgs[i].value()).toList();
                     ValueType actual = resolve(args.get(i), schemasById);
 
                     validateArgumentType(fn, i, expected, actual);
@@ -134,7 +136,7 @@ public class AstSemanticValidator {
 
                 /* ---------- RETURN TYPE ---------- */
 
-                String returnType = def.getMeta().returnType();
+                String returnType = def.getMeta().semanticReturn();
 
                 if ("same".equalsIgnoreCase(returnType)) {
                     return resolve(args.getFirst(), schemasById);
@@ -178,19 +180,6 @@ public class AstSemanticValidator {
             throw error("Function " + fn + " argument " + (index + 1) +
                         " must be " + expected + ", got " + actual);
         }
-    }
-
-    private ValueType mapSemanticType(FieldType type) {
-        return switch (type) {
-            case FieldType.NUMBER -> ValueType.NUMBER;
-            case FieldType.TEXT, FieldType.SELECT -> ValueType.STRING;
-            case FieldType.BOOLEAN -> ValueType.BOOLEAN;
-            case FieldType.DATE -> ValueType.DATE;
-            case FieldType.TIME -> ValueType.TIME;
-            case FieldType.DATETIME -> ValueType.DATETIME;
-            case FieldType.DURATION -> ValueType.DURATION;
-            default -> ValueType.ANY;
-        };
     }
 
     private AstTypeValidationException error(String msg) {

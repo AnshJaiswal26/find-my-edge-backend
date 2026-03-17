@@ -9,6 +9,7 @@ import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
 
+
 @FunctionMeta(
         argTypes = {"number"},
         semanticArgs = {

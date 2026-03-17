@@ -328,7 +328,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Transactional
     public List<String> updateOrder(List<String> order, ViewType viewType) {
 
-        System.out.println("updateOrder() method called");
+//        System.out.println("updateOrder() method called");
 
         UUID userId = currentUserService.getUserId();
 
@@ -382,9 +382,9 @@ public class SchemaServiceImpl implements SchemaService {
         // 6. Save using correct util
         entity.setOrder(jsonUtil.toJsonList(cleanedOrder));
 
-        System.out.println("Before save: " + entity);
+//        System.out.println("Before save: " + entity);
         schemaOrderRepository.save(entity);
-        System.out.println("After save");
+//        System.out.println("After save");
 
         return cleanedOrder;
     }

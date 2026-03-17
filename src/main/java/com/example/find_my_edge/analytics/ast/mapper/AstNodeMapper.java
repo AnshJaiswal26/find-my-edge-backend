@@ -4,9 +4,9 @@ import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.exception.AstParseException;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.common.config.uiconfigs.AstConfig;
+import java.util.Collections;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AstNodeMapper {
 
@@ -45,10 +45,10 @@ public class AstNodeMapper {
     }
 
     private static List<AstNode> mapArgs(List<AstConfig> args) {
-        if (args == null) return null;
+        if (args == null) return Collections.emptyList();
 
         return args.stream()
                    .map(AstNodeMapper::toNode)
-                   .collect(Collectors.toList());
+                   .toList();
     }
 }

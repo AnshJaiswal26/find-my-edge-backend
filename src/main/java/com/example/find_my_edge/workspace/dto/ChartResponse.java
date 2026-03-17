@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChartResponse {
     ChartConfig chart;
-    ChartResult chartResult;
+    ChartResult result;
 }
