@@ -8,6 +8,7 @@ import com.example.find_my_edge.workspace.dto.ChartRequest;
 import com.example.find_my_edge.workspace.dto.ChartResponse;
 import com.example.find_my_edge.workspace.features.ChartService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class ChartController extends BaseController {
             @RequestBody ChartRequest dto
     ) {
         ChartResponse created = chartService.create(pageName, dto);
-        return buildResponse(created, "Chart created successfully");
+        return buildResponse(created, "Chart created successfully", HttpStatus.CREATED);
     }
 
     /* ---------------- GET BY ID ---------------- */
@@ -62,12 +63,12 @@ public class ChartController extends BaseController {
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{chartId}")
-    public ResponseEntity<ApiResponse<Object>> delete(
+    public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable String pageName,
             @PathVariable String chartId
     ) {
         chartService.delete(pageName, chartId);
-        return buildResponse(null, "Chart deleted successfully");
+        return buildNoContentResponse("Chart deleted successfully");
     }
 
     /* ---------------- UPDATE LAYOUT ---------------- */

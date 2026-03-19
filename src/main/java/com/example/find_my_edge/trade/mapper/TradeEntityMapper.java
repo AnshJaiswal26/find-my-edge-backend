@@ -2,78 +2,29 @@ package com.example.find_my_edge.trade.mapper;
 
 import com.example.find_my_edge.trade.entity.TradeEntity;
 import com.example.find_my_edge.trade.model.Trade;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
-public class TradeEntityMapper {
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.ERROR
+)
+public interface TradeEntityMapper {
 
-    /* ---------------- MODEL → ENTITY ---------------- */
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "values", expression = "java(copyMap(model.getValues()))")
+    TradeEntity toEntity(Trade model);
 
-    public TradeEntity toEntity(Trade model) {
-        if (model == null) return null;
+    @Mapping(target = "values", expression = "java(copyMap(entity.getValues()))")
+    Trade toDomain(TradeEntity entity);
 
-        TradeEntity entity = new TradeEntity();
-
-        entity.setId(model.getId()); // for update
-
-        // Extract structured fields from values
-
-        entity.setExternalId(model.getExternalId());
-
-        entity.setDate(model.getDate());
-
-        entity.setEntryTime(model.getEntryTime());
-
-        entity.setExitTime(model.getExitTime());
-
-        entity.setSymbol(model.getSymbol());
-
-        entity.setDirection(model.getDirection());
-
-        entity.setCharges(model.getCharges());
-
-        entity.setEntryPrice(model.getEntryPrice());
-        entity.setExitPrice(model.getExitPrice());
-
-        entity.setQty(model.getQty());
-
-        Map<String, Object> values =
-                model.getValues() != null
-                ? new HashMap<>(model.getValues())
-                : new HashMap<>();
-
-        // Keep full values JSON (including structured fields if you want)
-        entity.setValues(values);
-
-        return entity;
-    }
-
-    /* ---------------- ENTITY → MODEL ---------------- */
-
-    public Trade toDomain(TradeEntity entity) {
-        if (entity == null) return null;
-
-        Map<String, Object> values =
-                entity.getValues() != null
-                ? new HashMap<>(entity.getValues())
-                : new HashMap<>();
-
-        return Trade.builder()
-                    .id(entity.getId())
-                    .externalId(entity.getExternalId())
-                    .date(entity.getDate())
-                    .entryTime(entity.getEntryTime())
-                    .exitTime(entity.getExitTime())
-                    .entryPrice(entity.getEntryPrice())
-                    .exitPrice(entity.getExitPrice())
-                    .qty(entity.getQty())
-                    .charges(entity.getCharges())
-                    .symbol(entity.getSymbol())
-                    .direction(entity.getDirection())
-                    .values(values)
-                    .build();
+    default Map<String, Object> copyMap(Map<String, Object> source) {
+        return source != null ? new HashMap<>(source) : new HashMap<>();
     }
 }

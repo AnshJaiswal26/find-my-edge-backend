@@ -11,6 +11,7 @@ import com.example.find_my_edge.trade.service.TradeOrchestratorService;
 import com.example.find_my_edge.trade.service.TradeService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,7 @@ public class TradeController extends BaseController {
                                         .map(tradeDtoMapper::toResponse)
                                         .toList();
 
-        return buildResponse(response, "Trades fetched successfully");
+        return buildResponse(response, "Trades fetched successfully", HttpStatus.CREATED);
     }
 
     /* ---------------- GET BY ID ---------------- */
@@ -110,11 +111,11 @@ public class TradeController extends BaseController {
     /* ---------------- DELETE ---------------- */
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Object>> deleteTrade(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deleteTrade(@PathVariable String id) {
 
         tradeService.delete(id);
 
-        return buildResponse(null, "Trade deleted successfully");
+        return buildNoContentResponse("Trade deleted successfully");
     }
 
 

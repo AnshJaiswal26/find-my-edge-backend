@@ -198,9 +198,7 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     public void deleteAll() {
-
         UUID userId = currentUserService.getUserId();
-
         tradeRepository.deleteByUserId(userId);
     }
 
@@ -214,7 +212,7 @@ public class TradeServiceImpl implements TradeService {
 
         for (Trade trade : trades) {
 
-            String externalId = trade.getExternalId(); // YOUR LINE
+            String externalId = trade.getExternalId();
 
             TradeEntity existing = tradeRepository
                     .findByUserIdAndExternalId(userId, externalId)

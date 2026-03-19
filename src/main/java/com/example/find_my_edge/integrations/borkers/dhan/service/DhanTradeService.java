@@ -1,7 +1,7 @@
 package com.example.find_my_edge.integrations.borkers.dhan.service;
 
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
-import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeResponseDto;
+import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanTradeResponse;
 import com.example.find_my_edge.integrations.borkers.common.exception.NoTradesFoundException;
 import com.example.find_my_edge.integrations.borkers.common.exception.TradeFetchFailedException;
 import com.example.find_my_edge.integrations.borkers.common.model.ProcessedTrade;
@@ -33,7 +33,7 @@ public class DhanTradeService {
         String url = config.getBaseUrl() +
                      "/v2/trades/" + validatedFrom + "/" + validatedTo + "/" + page;
 
-        List<DhanTradeResponseDto> trades =
+        List<DhanTradeResponse> trades =
                 restClient.get()
                           .uri(url)
                           .headers(headers -> {
@@ -47,7 +47,7 @@ public class DhanTradeService {
                                       throw new TradeFetchFailedException("Dhan API failed");
                                   }
                           )
-                          .body(new ParameterizedTypeReference<List<DhanTradeResponseDto>>() {
+                          .body(new ParameterizedTypeReference<List<DhanTradeResponse>>() {
                           });
 
         if (trades == null || trades.isEmpty()
@@ -58,11 +58,11 @@ public class DhanTradeService {
         return processTrades(trades);
     }
 
-    public List<ProcessedTrade> processTrades(List<DhanTradeResponseDto> trades) {
+    public List<ProcessedTrade> processTrades(List<DhanTradeResponse> trades) {
 
-        Map<String, List<DhanTradeResponseDto>> grouped =
+        Map<String, List<DhanTradeResponse>> grouped =
                 trades.stream().filter(trade -> trade.getInstrument().equals("OPTIDX"))
-                      .collect(Collectors.groupingBy(DhanTradeResponseDto::getOrderId));
+                      .collect(Collectors.groupingBy(DhanTradeResponse::getOrderId));
 
         if (grouped.isEmpty()) {
             return Collections.emptyList();
@@ -70,19 +70,19 @@ public class DhanTradeService {
 
         List<ProcessedTrade> result = new ArrayList<>();
 
-        for (Map.Entry<String, List<DhanTradeResponseDto>> entry : grouped.entrySet()) {
+        for (Map.Entry<String, List<DhanTradeResponse>> entry : grouped.entrySet()) {
 
-            List<DhanTradeResponseDto> group = entry.getValue();
+            List<DhanTradeResponse> group = entry.getValue();
 
-            DhanTradeResponseDto buy = null;
-            DhanTradeResponseDto sell = null;
+            DhanTradeResponse buy = null;
+            DhanTradeResponse sell = null;
 
             double buyCharges = 0;
             double sellCharges = 0;
 
             String date = "";
 
-            for (DhanTradeResponseDto t : group) {
+            for (DhanTradeResponse t : group) {
                 if ("BUY".equalsIgnoreCase(t.getTransactionType())) {
 
                     date = t.getExchangeTime().split("T")[0];

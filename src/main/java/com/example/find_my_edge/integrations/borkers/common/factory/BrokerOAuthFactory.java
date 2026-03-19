@@ -1,5 +1,6 @@
 package com.example.find_my_edge.integrations.borkers.common.factory;
 
+import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import com.example.find_my_edge.integrations.borkers.common.exception.BrokerNotAvailableException;
 import com.example.find_my_edge.integrations.borkers.common.service.BrokerOAuthService;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 @Service
 public class BrokerOAuthFactory {
 
-    private final Map<String, BrokerOAuthService> services;
+    private final Map<Broker, BrokerOAuthService> services;
 
     public BrokerOAuthFactory(List<BrokerOAuthService> services) {
         this.services =
@@ -22,11 +23,11 @@ public class BrokerOAuthFactory {
                         ));
     }
 
-    public BrokerOAuthService get(String broker) {
+    public BrokerOAuthService get(Broker broker) {
         BrokerOAuthService brokerOAuthService = services.get(broker);
 
         if(brokerOAuthService == null){
-            throw new BrokerNotAvailableException("Broker not available: "+ broker);
+            throw new BrokerNotAvailableException("Broker not available: "+ broker.getName());
         }
         return brokerOAuthService;
     }

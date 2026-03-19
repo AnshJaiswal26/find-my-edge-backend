@@ -1,5 +1,6 @@
 package com.example.find_my_edge.trade.broker;
 
+import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.stream.Collectors;
 @Component
 public class BrokerTradeFetcherFactory {
 
-    private final Map<String, BrokerTradeFetcher> fetcherMap;
+    private final Map<Broker, BrokerTradeFetcher> fetcherMap;
 
     public BrokerTradeFetcherFactory(List<BrokerTradeFetcher> fetchers) {
         this.fetcherMap = fetchers.stream()
@@ -19,7 +20,7 @@ public class BrokerTradeFetcherFactory {
                                   ));
     }
 
-    public BrokerTradeFetcher get(String name) {
-        return fetcherMap.get(name);
+    public BrokerTradeFetcher get(Broker broker) {
+        return fetcherMap.get(broker);
     }
 }

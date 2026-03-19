@@ -30,8 +30,6 @@ public class BrokerTokenEntity {
 
     private Instant expiry;
 
-    private Instant lastFetchedAt;
-
     private Instant connectedAt;
 
     @Enumerated(EnumType.STRING)

@@ -131,10 +131,41 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public void removeSchemaReferences(String schemaId) {
-        getPageAndModify(
-                page -> page.getColumnWidths().remove(schemaId),
-                PageType.TRADE_METRIC.key()
-        );
+        getPageAndModify(page -> {
+
+            page.getColumnWidths().remove(schemaId);
+
+            page.getStatsById().entrySet().removeIf(entry -> {
+                String id = entry.getKey();
+                var stat = entry.getValue();
+
+                if (stat.getDependencies().contains(schemaId)) {
+                    page.getStatsOrder().remove(id);
+                    return true;
+                }
+                return false;
+            });
+
+            page.getCharts().entrySet().removeIf(chartEntry -> {
+                var chart = chartEntry.getValue();
+
+                // remove series safely
+                chart.getSeriesById().entrySet().removeIf(seriesEntry -> {
+                    var v = seriesEntry.getValue();
+
+                    if (v.getDependencies() != null &&
+                        v.getDependencies().contains(schemaId)) {
+
+                        chart.getSeriesOrder().remove(seriesEntry.getKey());
+                        return true;
+                    }
+                    return false;
+                });
+
+                return chart.getSeriesOrder().isEmpty();
+            });
+
+        }, PageType.TRADE_METRIC.key());
     }
 
     @Override

@@ -5,8 +5,8 @@ import com.example.find_my_edge.integrations.borkers.common.entity.BrokerTokenEn
 import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import com.example.find_my_edge.integrations.borkers.dhan.config.DhanConfig;
 import com.example.find_my_edge.integrations.borkers.common.dto.ConnectionStatusResponseDto;
-import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanAccessTokenResponseDto;
-import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanConsentResponseDto;
+import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanAccessTokenResponse;
+import com.example.find_my_edge.integrations.borkers.dhan.dto.DhanConsentResponse;
 import com.example.find_my_edge.integrations.borkers.common.exception.FailedToConnectException;
 import com.example.find_my_edge.integrations.borkers.common.exception.TokenExpiredException;
 import com.example.find_my_edge.integrations.borkers.common.exception.UserNotConnectedException;
@@ -41,19 +41,19 @@ public class DhanOAuthService implements BrokerOAuthService {
     }
 
     @Override
-    public String getBrokerName() {
-        return Broker.DHAN.name().toLowerCase();
+    public Broker getBrokerName() {
+        return Broker.DHAN;
     }
 
     @Override
     public String generateConsentUrl() {
 
-        DhanConsentResponseDto response =
+        DhanConsentResponse response =
                 restClient.get()
                           .uri(config.getAuthUrl() + "/app/generate-consent?client_id=" + config.getClientId())
                           .headers(this::setHeaders)
                           .retrieve()
-                          .body(DhanConsentResponseDto.class);
+                          .body(DhanConsentResponse.class);
 
 
         if (response == null || response.getConsentAppId() == null) {
@@ -70,12 +70,12 @@ public class DhanOAuthService implements BrokerOAuthService {
     @Override
     public void handleCallback(String tokenId, UUID userId) {
 
-        DhanAccessTokenResponseDto response =
+        DhanAccessTokenResponse response =
                 restClient.get()
                           .uri(config.getAuthUrl() + "/app/consumeApp-consent?tokenId=" + tokenId)
                           .headers(this::setHeaders)
                           .retrieve()
-                          .body(DhanAccessTokenResponseDto.class);
+                          .body(DhanAccessTokenResponse.class);
 
         if (response == null || response.getAccessToken() == null) {
             throw new FailedToConnectException("Failed to fetch access token from Dhan");
@@ -205,26 +205,6 @@ public class DhanOAuthService implements BrokerOAuthService {
                 .message("User Disconnected from dhan")
                 .build();
 
-    }
-
-    @Override
-    public Instant getLastFetchedAt() {
-        UUID userId = currentUserService.getUserId();
-
-        return repo.findByUserIdAndBroker(userId, Broker.DHAN)
-                   .map(BrokerTokenEntity::getLastFetchedAt)
-                   .orElse(null);
-    }
-
-    @Override
-    public void updateLastFetchedAt(Instant instant, UUID userId) {
-
-        BrokerTokenEntity token =
-                repo.findByUserIdAndBroker(userId, Broker.DHAN)
-                    .orElseThrow(() -> new UserNotConnectedException(Broker.DHAN.name()));
-
-        token.setLastFetchedAt(instant);
-        repo.save(token);
     }
 
     @Override

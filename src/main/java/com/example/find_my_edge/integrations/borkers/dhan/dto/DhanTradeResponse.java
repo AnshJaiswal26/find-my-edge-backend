@@ -3,7 +3,7 @@ package com.example.find_my_edge.integrations.borkers.dhan.dto;
 import lombok.Data;
 
 @Data
-public class DhanTradeResponseDto {
+public class DhanTradeResponse {
 
     private String orderId;
     private String exchangeOrderId;

@@ -1,6 +1,7 @@
 package com.example.find_my_edge.trade.entity;
 
 import com.example.find_my_edge.trade.converter.MapToJsonConverter;
+import com.example.find_my_edge.trade_setup.entity.TradeSetupEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,10 +18,14 @@ public class TradeEntity {
     @Id
     private String id;
 
+    @ManyToOne
+    @JoinColumn(name = "trade_setup_id")
+    private TradeSetupEntity tradeSetup;
+
     private UUID userId;
     private String externalId;
 
-    // 🔥 structured fields
+    // structured fields
     private Long date;
     private Integer entryTime;
     private Integer exitTime;
@@ -35,7 +40,7 @@ public class TradeEntity {
 
     private Integer qty;
 
-    // 🔥 dynamic fields
+    // dynamic fields
     @Column(name = "field_value", columnDefinition = "JSON")
     @Convert(converter = MapToJsonConverter.class)
     private Map<String, Object> values = new HashMap<>();

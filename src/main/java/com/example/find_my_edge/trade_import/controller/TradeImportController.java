@@ -8,6 +8,7 @@ import com.example.find_my_edge.trade_import.service.TradeImportService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class TradeImportController extends BaseController {
 
         List<ImportedTradeResponseDto> all = tradeImportService.getAll();
 
-        return buildResponse(all, "Imported Trades fetched successfully");
+        return buildResponse(all, "Imported Trades fetched successfully", HttpStatus.CREATED);
     }
 
     /* ---------------- CREATE ---------------- */
@@ -61,13 +62,13 @@ public class TradeImportController extends BaseController {
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{importId}")
-    public ResponseEntity<ApiResponse<Object>> deleteImportedTrade(
+    public ResponseEntity<ApiResponse<Void>> deleteImportedTrade(
             @PathVariable Long importId
     ) {
 
         tradeImportService.delete(importId);
 
-        return buildResponse(null, "Imported Trade deleted successfully");
+        return buildNoContentResponse("Imported Trade deleted successfully");
     }
 
 }

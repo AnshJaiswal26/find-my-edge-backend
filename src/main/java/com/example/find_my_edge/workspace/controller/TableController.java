@@ -15,24 +15,24 @@ public class TableController extends BaseController {
     private final TableService tableService;
 
     @PatchMapping("/columns/{columnId}/width")
-    public ResponseEntity<ApiResponse<Object>> updateColumnWidth(
+    public ResponseEntity<ApiResponse<Integer>> updateColumnWidth(
             @PathVariable String pageName,
             @PathVariable String columnId,
             @RequestBody Integer width
     ) {
         tableService.updateColumnWidth(pageName, columnId, width);
 
-        return buildResponse(null, "Column width updated successfully");
+        return buildResponse(width, "Column width updated successfully");
     }
 
     @PatchMapping("/rows/{rowId}/highlight")
-    public ResponseEntity<ApiResponse<Object>> highlightRow(
+    public ResponseEntity<ApiResponse<Boolean>> highlightRow(
             @PathVariable String pageName,
             @PathVariable String rowId,
             @RequestBody Boolean highlight
     ) {
         tableService.updateHighLightedRow(pageName, rowId, highlight);
 
-        return buildResponse(null, "Highlight row updated successfully");
+        return buildResponse(highlight, "Highlight row updated successfully");
     }
 }

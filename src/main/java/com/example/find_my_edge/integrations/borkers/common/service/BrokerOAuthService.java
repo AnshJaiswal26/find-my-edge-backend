@@ -2,13 +2,13 @@ package com.example.find_my_edge.integrations.borkers.common.service;
 
 import com.example.find_my_edge.integrations.borkers.common.dto.ConnectionStatusResponseDto;
 import com.example.find_my_edge.integrations.borkers.common.entity.BrokerTokenEntity;
+import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 
-import java.time.Instant;
 import java.util.UUID;
 
 public interface BrokerOAuthService {
 
-    String getBrokerName();
+    Broker getBrokerName();
 
     String generateConsentUrl();
 
@@ -19,10 +19,6 @@ public interface BrokerOAuthService {
     ConnectionStatusResponseDto getConnectionStatus();
 
     ConnectionStatusResponseDto disconnect();
-
-    Instant getLastFetchedAt();
-
-    void updateLastFetchedAt(Instant instant, UUID userId);
 
     String getValidToken();
 }

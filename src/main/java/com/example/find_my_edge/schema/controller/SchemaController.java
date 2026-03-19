@@ -12,6 +12,7 @@ import com.example.find_my_edge.schema.service.SchemaService;
 import com.example.find_my_edge.schema.service.impl.SchemaOrchestratorService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,9 @@ public class SchemaController extends BaseController {
                 new SchemaUpdateResponse(
                         schemaDTOMapper.toResponse(schemaUpdate.getSchema()),
                         schemaUpdate.getRecomputeResult()
-                ), "Schema created successfully"
+                ),
+                "Schema created successfully",
+                HttpStatus.CREATED
         );
     }
 
@@ -77,9 +80,9 @@ public class SchemaController extends BaseController {
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Object>> deleteSchema(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deleteSchema(@PathVariable String id) {
         schemaService.delete(id);
-        return buildResponse(null, "Schema deleted successfully");
+        return buildNoContentResponse("Schema deleted successfully");
     }
 
 

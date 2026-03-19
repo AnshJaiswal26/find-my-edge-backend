@@ -3,7 +3,6 @@ package com.example.find_my_edge.workspace.features.impl;
 import com.example.find_my_edge.analytics.compute.ChartComputeService;
 import com.example.find_my_edge.analytics.compute.GroupComputeService;
 import com.example.find_my_edge.analytics.engine.context.TradeContextBuilder;
-import com.example.find_my_edge.analytics.engine.group.model.Group;
 import com.example.find_my_edge.analytics.engine.group.model.GroupCollection;
 import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.workspace.builder.ChartBuilder;

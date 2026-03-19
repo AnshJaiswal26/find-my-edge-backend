@@ -3,6 +3,7 @@ package com.example.find_my_edge.integrations.borkers.common.controller;
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.common.config.FrontendConfig;
 import com.example.find_my_edge.integrations.borkers.common.dto.ConnectionStatusResponseDto;
+import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import com.example.find_my_edge.integrations.borkers.common.factory.BrokerOAuthFactory;
 import com.example.find_my_edge.integrations.borkers.common.service.BrokerOAuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,7 +33,7 @@ public class BrokerOAuthController {
 
     @GetMapping("/{broker}/connect")
     public ResponseEntity<Map<String, String>> connect(
-            @PathVariable String broker,
+            @PathVariable Broker broker,
             HttpServletResponse response
     ) {
 
@@ -56,7 +57,7 @@ public class BrokerOAuthController {
 
     @GetMapping("/{broker}/callback")
     public ResponseEntity<String> callback(
-            @PathVariable String broker,
+            @PathVariable Broker broker,
             @RequestParam("tokenId") String tokenId,
             @CookieValue("oauth_user") String userId
     ) {
@@ -76,7 +77,7 @@ public class BrokerOAuthController {
 
 
     @GetMapping("/{broker}/status")
-    public ResponseEntity<ConnectionStatusResponseDto> status(@PathVariable String broker) {
+    public ResponseEntity<ConnectionStatusResponseDto> status(@PathVariable Broker broker) {
 
         BrokerOAuthService brokerOAuthService = brokerOAuthFactory.get(broker);
 
@@ -86,7 +87,7 @@ public class BrokerOAuthController {
     }
 
     @DeleteMapping("/{broker}/disconnect")
-    public ResponseEntity<ConnectionStatusResponseDto> disconnect(@PathVariable String broker) {
+    public ResponseEntity<ConnectionStatusResponseDto> disconnect(@PathVariable Broker broker) {
 
         BrokerOAuthService brokerOAuthService = brokerOAuthFactory.get(broker);
 

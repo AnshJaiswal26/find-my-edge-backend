@@ -1,10 +1,8 @@
 package com.example.find_my_edge.trade.broker.dhan;
 
-import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import com.example.find_my_edge.integrations.borkers.common.exception.NoTradesFoundException;
 import com.example.find_my_edge.integrations.borkers.common.model.ProcessedTrade;
-import com.example.find_my_edge.integrations.borkers.dhan.service.DhanOAuthService;
 import com.example.find_my_edge.integrations.borkers.dhan.service.DhanTradeService;
 import com.example.find_my_edge.trade.broker.BrokerTradeFetcher;
 import com.example.find_my_edge.trade.mapper.ProcessedTradeMapper;
@@ -18,22 +16,18 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class DhanTradeFetcher implements BrokerTradeFetcher {
 
-    private final CurrentUserService currentUserService;
-
-    private final DhanOAuthService dhanOAuthService;
     private final DhanTradeService dhanTradeService;
 
     private final ProcessedTradeMapper processedTradeMapper;
 
     @Override
-    public String getName() {
-        return Broker.DHAN.name().toLowerCase();
+    public Broker getName() {
+        return Broker.DHAN;
     }
 
     private List<ProcessedTrade> fetchAllPages(LocalDate fromDate, LocalDate toDate) {
@@ -63,26 +57,16 @@ public class DhanTradeFetcher implements BrokerTradeFetcher {
     @Override
     public List<Trade> fetchAllTrades() {
 
-        UUID userId = currentUserService.getUserId();
-
         LocalDate fromDate = LocalDate.of(2000, 1, 1);
         LocalDate toDate = LocalDate.now();
 
         List<ProcessedTrade> raw = fetchAllPages(fromDate, toDate);
 
-        List<Trade> trades = mapAndSort(raw);
-
-        updateLastFetched(userId);
-
-        return trades;
+        return mapToTrades(raw);
     }
 
     @Override
-    public List<Trade> fetchIncrementalTrades() {
-
-        UUID userId = currentUserService.getUserId();
-
-        Instant lastFetchedAt = dhanOAuthService.getLastFetchedAt();
+    public List<Trade> fetchIncrementalTrades(Instant lastFetchedAt) {
 
         ZoneId zone = ZoneId.systemDefault();
 
@@ -95,11 +79,7 @@ public class DhanTradeFetcher implements BrokerTradeFetcher {
 
         List<ProcessedTrade> raw = fetchAllPages(fromDate, toDate);
 
-        List<Trade> trades = mapAndSort(raw);
-
-        updateLastFetched(userId);
-
-        return trades;
+        return mapToTrades(raw);
     }
 
     @Override
@@ -107,20 +87,11 @@ public class DhanTradeFetcher implements BrokerTradeFetcher {
 
         List<ProcessedTrade> raw = fetchAllPages(fromDate, toDate);
 
-        return mapAndSort(raw);
+        return mapToTrades(raw);
     }
 
-    private void updateLastFetched(UUID userId) {
-        dhanOAuthService.updateLastFetchedAt(
-                LocalDate.now()
-                         .plusDays(1)
-                         .atStartOfDay(ZoneId.of("Asia/Kolkata"))
-                         .toInstant(),
-                userId
-        );
-    }
 
-    private List<Trade> mapAndSort(List<ProcessedTrade> trades) {
+    private List<Trade> mapToTrades(List<ProcessedTrade> trades) {
         return trades.stream()
                      .map(processedTradeMapper::mapToTrade)
                      .toList();

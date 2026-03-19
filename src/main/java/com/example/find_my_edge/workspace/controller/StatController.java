@@ -6,6 +6,7 @@ import com.example.find_my_edge.workspace.config.stat.StatConfig;
 import com.example.find_my_edge.workspace.features.StatService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class StatController extends BaseController {
             @RequestBody StatConfig stat
     ) {
         StatConfig saved = statService.create(pageName, stat);
-        return buildResponse(saved, "Stat created successfully");
+        return buildResponse(saved, "Stat created successfully", HttpStatus.CREATED);
     }
 
     /* ---------------- GET ALL ---------------- */
@@ -50,12 +51,12 @@ public class StatController extends BaseController {
 
     /* ---------------- DELETE ---------------- */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Object>> deleteStat(
+    public ResponseEntity<ApiResponse<Void>> deleteStat(
             @PathVariable String pageName,
             @PathVariable String id
     ) {
         statService.delete(pageName, id);
-        return buildResponse(null, "Stat deleted successfully");
+        return buildNoContentResponse("Stat deleted successfully");
     }
 
     /* ---------------- UPDATE ORDER ---------------- */
