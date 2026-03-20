@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum FieldType {
-    NUMBER, DURATION, DATE, TIME, DATETIME, TEXT, SELECT, BOOLEAN;
+    NUMBER, DURATION, DATE, TIME, DATETIME, TEXT, SELECT, LIST, BOOLEAN;
 
     @JsonValue
     public String toJson() {

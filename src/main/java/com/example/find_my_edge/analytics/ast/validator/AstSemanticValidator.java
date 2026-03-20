@@ -35,17 +35,19 @@ public class AstSemanticValidator {
                 Object value = node.getValue();
 
                 if (value instanceof Number) return ValueType.NUMBER;
-                if (value instanceof String) return ValueType.STRING;
 
-                return ValueType.ANY;
+                return ValueType.STRING;
             }
 
             /* ------------------ IDENTIFIER ------------------ */
             case IDENTIFIER -> {
                 Schema schema = schemasById.get(node.getField());
-                return schema != null
-                       ? ValueType.valueOf(schema.getSemanticType().toString())
-                       : ValueType.ANY;
+
+                if (schema == null) {
+                    throw error("Unknown field " + node.getField());
+                }
+
+                return ValueType.valueOf(schema.getSemanticType().toString());
             }
 
             /* ------------------ UNARY ------------------ */

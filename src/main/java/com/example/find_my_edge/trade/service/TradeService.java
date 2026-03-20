@@ -13,6 +13,8 @@ public interface TradeService {
 
     Trade updateValue(String tradeId, String field, Object value);
 
+    Trade updateTradeSetup(String tradeId, String setupId);
+
     Trade getById(String id);
 
     TradeBundle getTradeBundle();
@@ -26,4 +28,6 @@ public interface TradeService {
     void deleteAll();
 
     void upsertTrades(List<Trade> trades);
+
+    void removeSchemaReferences(String id);
 }

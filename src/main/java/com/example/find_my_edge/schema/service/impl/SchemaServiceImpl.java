@@ -24,6 +24,7 @@ import com.example.find_my_edge.schema.repository.SchemaRepository;
 import com.example.find_my_edge.schema.service.SchemaOverrideService;
 import com.example.find_my_edge.schema.service.SchemaService;
 
+import com.example.find_my_edge.trade.service.TradeService;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,8 @@ public class SchemaServiceImpl implements SchemaService {
     private final SchemaDtoMapper dtoMapper;
     private final SchemaMapper mapper;
     private final JsonUtil jsonUtil;
+
+    private final TradeService tradeService;
 
     /* ---------------- CREATE ---------------- */
     @Override
@@ -279,6 +282,7 @@ public class SchemaServiceImpl implements SchemaService {
         schemaRepository.delete(schema);
 
         workspaceService.removeSchemaReferences(id);
+        tradeService.removeSchemaReferences(id);
 
         updateOrderOnDelete(userId, id);
     }

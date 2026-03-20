@@ -1,4 +1,4 @@
-package com.example.find_my_edge.trade.converter;
+package com.example.find_my_edge.common.converter;
 
 import com.example.find_my_edge.common.exceptions.JsonConversionException;
 import com.fasterxml.jackson.core.type.TypeReference;

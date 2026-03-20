@@ -1,6 +1,6 @@
 package com.example.find_my_edge.trade.entity;
 
-import com.example.find_my_edge.trade.converter.MapToJsonConverter;
+import com.example.find_my_edge.common.converter.MapToJsonConverter;
 import com.example.find_my_edge.trade_setup.entity.TradeSetupEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,8 +18,11 @@ public class TradeEntity {
     @Id
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "trade_setup_id")
+    @Column(name = "trade_setup_id", insertable = false, updatable = false)
+    private String tradeSetupId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "trade_setup_id", nullable = true)
     private TradeSetupEntity tradeSetup;
 
     private UUID userId;

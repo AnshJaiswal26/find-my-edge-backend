@@ -17,7 +17,7 @@ public interface TradeRepository extends JpaRepository<TradeEntity, String> {
 
     List<TradeEntity> findAllByUserIdOrderByDateAscEntryTimeAsc(UUID userId);
 
-    void deleteByUserId(UUID userId);
+    void deleteAllByUserId(UUID userId);
 
     Optional<TradeEntity> findByUserIdAndExternalId(UUID userId, String externalId);
 }

@@ -16,8 +16,17 @@ public class TradeSetupResponse {
     private String id;
     private String name;
     private String imageUrl;
+    private String imagePublicId;
+
+    private Double targetProfitMin;
+    private Double targetProfitMax;
 
     private Double riskReward;
+    private Double riskPercent;
+    private Double riskAmount;
+
+    private String entryCandle;
+    private String exitCandle;
 
     private List<String> indicatorsUsed;
 

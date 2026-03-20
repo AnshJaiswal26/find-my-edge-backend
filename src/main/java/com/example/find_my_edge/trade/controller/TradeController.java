@@ -1,6 +1,7 @@
 package com.example.find_my_edge.trade.controller;
 
 import com.example.find_my_edge.analytics.model.RecomputeResult;
+import com.example.find_my_edge.trade.dto.TradeSetupUpdateRequest;
 import com.example.find_my_edge.trade.dto.TradeValueUpdateRequest;
 import com.example.find_my_edge.trade.mapper.TradeDtoMapper;
 import com.example.find_my_edge.common.controller.BaseController;
@@ -105,6 +106,20 @@ public class TradeController extends BaseController {
         return buildResponse(
                 recomputeResult,
                 "Trade updated successfully"
+        );
+    }
+
+    @PatchMapping("/{id}/setup")
+    public ResponseEntity<ApiResponse<TradeDto>> updateTradeSetup(
+            @PathVariable String id,
+            @RequestBody TradeSetupUpdateRequest dto
+    ) {
+
+        Trade updated = tradeService.updateTradeSetup(id, dto.getTradeSetupId());
+
+        return buildResponse(
+                tradeDtoMapper.toResponse(updated),
+                "Trade setup updated successfully"
         );
     }
 

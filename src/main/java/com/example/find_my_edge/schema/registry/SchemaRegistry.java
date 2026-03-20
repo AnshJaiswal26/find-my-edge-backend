@@ -110,6 +110,17 @@ public class SchemaRegistry {
                       ))
                       .build(),
 
+                Schema.builder()
+                      .id("setup")
+                      .label("Strategy")
+                      .type(FieldType.SELECT)
+                      .semanticType(SemanticType.STRING)
+                      .source(SchemaSource.SYSTEM)
+                      .role(SchemaRole.SYSTEM_OPTIONAL)
+                      .options(new ArrayList<>())
+                      .display(display("badge", null))
+                      .build(),
+
                 systemField(
                         "entryPrice",
                         "Entry Price",

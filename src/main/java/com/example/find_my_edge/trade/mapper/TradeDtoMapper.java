@@ -14,17 +14,14 @@ import java.util.Map;
 public interface TradeDtoMapper {
 
     /* ---------------- DTO → MODEL ---------------- */
-
     @Mapping(target = "values", expression = "java(copyMap(dto.getValues()))")
     Trade toModel(TradeDto dto);
 
     /* ---------------- MODEL → DTO ---------------- */
-
     @Mapping(target = "values", expression = "java(copyMap(model.getValues()))")
     TradeDto toResponse(Trade model);
 
     /* ---------------- COMMON ---------------- */
-
     default Map<String, Object> copyMap(Map<String, Object> source) {
         return source != null ? new HashMap<>(source) : new HashMap<>();
     }

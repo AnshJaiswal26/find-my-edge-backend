@@ -18,6 +18,8 @@ public class Trade {
 
     private String externalId;
 
+    private String tradeSetupId;
+
     private Long date;
 
     private Integer entryTime;

@@ -10,10 +10,12 @@ import com.example.find_my_edge.trade.model.TradeBundle;
 import com.example.find_my_edge.trade.repository.TradeRepository;
 import com.example.find_my_edge.trade.service.TradeService;
 
+import com.example.find_my_edge.trade_setup.entity.TradeSetupEntity;
+import com.example.find_my_edge.trade_setup.service.TradeSetupService;
 import com.example.find_my_edge.workspace.service.WorkspaceService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -30,6 +32,8 @@ public class TradeServiceImpl implements TradeService {
 
     private final WorkspaceService workspaceService;
 
+    private final TradeSetupService tradeSetupService;
+
 
     private static final Map<String, BiConsumer<TradeEntity, Object>> STATIC_FIELD_UPDATERS = Map.of(
             "date", (t, v) -> t.setDate(((Number) v).longValue()),
@@ -45,18 +49,23 @@ public class TradeServiceImpl implements TradeService {
 
 
     /* ---------------- CREATE ---------------- */
-
     @Override
     public Trade create(Trade trade) {
 
         if (trade.getId() == null) {
             throw new TradeIdNullException("Trade must have an id");
         }
-
         UUID userId = currentUserService.getUserId();
+
         long now = Instant.now().toEpochMilli();
 
         TradeEntity entity = mapper.toEntity(trade);
+
+        if (trade.getTradeSetupId() != null) {
+            TradeSetupEntity tradeSetup =
+                    tradeSetupService.getOwnedReferenceOrThrow(trade.getTradeSetupId());
+            entity.setTradeSetup(tradeSetup);
+        }
 
         entity.setId(trade.getId());
         entity.setUserId(userId);
@@ -65,7 +74,7 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity saved = tradeRepository.save(entity);
 
-        return mapper.toDomain(saved);
+        return mapper.toModel(saved);
     }
 
     @Override
@@ -78,6 +87,13 @@ public class TradeServiceImpl implements TradeService {
 
         for (Trade trade : trades) {
             TradeEntity entity = mapper.toEntity(trade);
+
+            if (trade.getTradeSetupId() != null) {
+                TradeSetupEntity tradeSetup =
+                        tradeSetupService.getOwnedReferenceOrThrow(trade.getTradeSetupId());
+                entity.setTradeSetup(tradeSetup);
+            }
+
             entity.setId(UUID.randomUUID().toString());
             entity.setUserId(userId);
             entity.setCreatedAt(now);
@@ -90,7 +106,6 @@ public class TradeServiceImpl implements TradeService {
     }
 
     /* ---------------- UPDATE ---------------- */
-
     @Override
     public Trade update(String id, Trade trade) {
 
@@ -109,7 +124,7 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity saved = tradeRepository.save(updated);
 
-        return mapper.toDomain(saved);
+        return mapper.toModel(saved);
     }
 
     @Override
@@ -133,12 +148,37 @@ public class TradeServiceImpl implements TradeService {
 
         TradeEntity saved = tradeRepository.save(entity);
 
-        return mapper.toDomain(saved);
+        return mapper.toModel(saved);
+    }
+
+    @Override
+    public Trade updateTradeSetup(String tradeId, String setupId) {
+
+        UUID userId = currentUserService.getUserId();
+
+        TradeEntity trade = tradeRepository
+                .findByIdAndUserId(tradeId, userId)
+                .orElseThrow(() -> new TradeNotFoundException(tradeId));
+
+        // Handle REMOVE case
+        if (setupId == null) {
+            trade.setTradeSetup(null);
+        } else {
+            TradeSetupEntity setup =
+                    tradeSetupService.getOwnedReferenceOrThrow(setupId);
+
+            trade.setTradeSetup(setup);
+        }
+
+        trade.setUpdatedAt(Instant.now().toEpochMilli());
+
+        TradeEntity saved = tradeRepository.save(trade);
+
+        return mapper.toModel(saved);
     }
 
     /* ---------------- GET BY ID ---------------- */
-
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Trade getById(String id) {
 
@@ -148,11 +188,11 @@ public class TradeServiceImpl implements TradeService {
                 .findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new TradeNotFoundException(id));
 
-        return mapper.toDomain(entity);
+        return mapper.toModel(entity);
     }
 
     /* ---------------- GET ALL ---------------- */
-
+    @Transactional(readOnly = true)
     @Override
     public TradeBundle getTradeBundle() {
 
@@ -169,6 +209,7 @@ public class TradeServiceImpl implements TradeService {
         return new TradeBundle(tradeOrder, tradesById);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Trade> getAll() {
 
@@ -177,11 +218,10 @@ public class TradeServiceImpl implements TradeService {
         List<TradeEntity> tradeEntities =
                 tradeRepository.findAllByUserIdOrderByDateAscEntryTimeAsc(userId);
 
-        return tradeEntities.stream().map(mapper::toDomain).toList();
+        return tradeEntities.stream().map(mapper::toModel).toList();
     }
 
     /* ---------------- DELETE ---------------- */
-
     @Override
     public void delete(String id) {
 
@@ -195,11 +235,10 @@ public class TradeServiceImpl implements TradeService {
         workspaceService.removeTradeReferences(id);
     }
 
-
     @Override
     public void deleteAll() {
         UUID userId = currentUserService.getUserId();
-        tradeRepository.deleteByUserId(userId);
+        tradeRepository.deleteAllByUserId(userId);
     }
 
     @Override
@@ -241,5 +280,25 @@ public class TradeServiceImpl implements TradeService {
         }
 
         tradeRepository.saveAll(entities);
+    }
+
+    @Override
+    public void removeSchemaReferences(String id) {
+
+        UUID userId = currentUserService.getUserId();
+
+        List<TradeEntity> trades = tradeRepository.findAllByUserId(userId);
+
+        long now = Instant.now().toEpochMilli();
+
+        for (TradeEntity trade : trades) {
+            Map<String, Object> values = trade.getValues();
+
+            if (values != null && values.remove(id) != null) {
+                trade.setUpdatedAt(now);
+            }
+        }
+
+        tradeRepository.saveAll(trades);
     }
 }

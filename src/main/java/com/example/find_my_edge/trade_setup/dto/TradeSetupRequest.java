@@ -3,22 +3,17 @@ package com.example.find_my_edge.trade_setup.dto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
+
 
 @Data
 public class TradeSetupRequest {
 
     private String name;
     private String imageUrl;
+    private String imagePublicId;
 
-    private Double targetProfitMin;
-    private Double targetProfitMax;
+    private List<String> fieldOrder;
 
-    private Double riskReward;
-    private Double riskPercent;
-    private Double riskAmount;
-
-    private String entryCandle;
-    private String exitCandle;
-
-    private List<String> indicatorsUsed;
+    private Map<String , SetupFieldRequest> fieldsById;
 }

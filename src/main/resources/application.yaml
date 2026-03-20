@@ -30,4 +30,9 @@ frontend:
 
 
 jwt:
-  secret: mysupersecretkeymysupersecretkeymysupersecretkey
+  secret: ${SECRET_KEY:mysupersecretkeymysupersecretkeymysupersecretkey}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dr8wgjp8a}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
