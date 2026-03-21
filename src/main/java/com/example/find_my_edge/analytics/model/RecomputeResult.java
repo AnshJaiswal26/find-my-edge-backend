@@ -1,12 +1,14 @@
 package com.example.find_my_edge.analytics.model;
 
+import com.example.find_my_edge.trade_setup.model.EvaluationResult;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class RecomputeResult {
 
     private Map<String, Double> statValues;
@@ -16,4 +18,6 @@ public class RecomputeResult {
     private Map<String, ChartResult> groupSeriesAggregateResult;
 
     private Map<String, Map<String, Object>> tradeUpdates;
+
+    private Map<String, Map<String, EvaluationResult>> setupResults;
 }

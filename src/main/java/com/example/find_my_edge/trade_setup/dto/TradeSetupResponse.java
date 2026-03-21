@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -18,17 +19,7 @@ public class TradeSetupResponse {
     private String imageUrl;
     private String imagePublicId;
 
-    private Double targetProfitMin;
-    private Double targetProfitMax;
+    private List<String> fieldOrder;
 
-    private Double riskReward;
-    private Double riskPercent;
-    private Double riskAmount;
-
-    private String entryCandle;
-    private String exitCandle;
-
-    private List<String> indicatorsUsed;
-
-    private int totalTrades;
+    private Map<String , SetupFieldRequest> fieldsById;
 }

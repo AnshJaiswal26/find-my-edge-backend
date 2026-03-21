@@ -1,6 +1,8 @@
 package com.example.find_my_edge.bootstrap.dto;
 
 import com.example.find_my_edge.schema.dto.SchemaResponse;
+import com.example.find_my_edge.trade_setup.dto.TradeSetupResponse;
+import com.example.find_my_edge.trade_setup.model.EvaluationResult;
 import lombok.Builder;
 import lombok.Data;
 
@@ -20,4 +22,8 @@ public class BootstrapResponse {
     private Map<String, Map<String, Object>> derivedByTradeId;
 
     private List<String> tradesOrder;
+
+    private List<TradeSetupResponse> tradeSetups;
+
+    Map<String, Map<String, EvaluationResult>> setupScoreResult;
 }

@@ -7,6 +7,11 @@ import com.example.find_my_edge.bootstrap.service.BootstrapService;
 import com.example.find_my_edge.schema.dto.SchemaResponse;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
+import com.example.find_my_edge.trade_setup.mapper.TradeSetupDtoMapper;
+import com.example.find_my_edge.trade_setup.model.EvaluationResult;
+import com.example.find_my_edge.trade_setup.model.TradeSetup;
+import com.example.find_my_edge.trade_setup.service.TradeSetupService;
+import com.example.find_my_edge.trade_setup.service.impl.SetupScoreComputeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +26,12 @@ public class BootstrapServiceImpl implements BootstrapService {
     private final SchemaDtoMapper schemaDtoMapper;
 
     private final TradeContextBuilder tradeContextBuilder;
+
+    private final TradeSetupService tradeSetupService;
+
+    private final TradeSetupDtoMapper tradeSetupDtoMapper;
+
+    private final SetupScoreComputeService setupScoreComputeService;
 
 
     @Override
@@ -43,10 +54,17 @@ public class BootstrapServiceImpl implements BootstrapService {
         Map<String, Map<String, Object>> raw = ctx.getRaw();
         Map<String, Map<String, Object>> computed = ctx.getComputed();
 
+        List<TradeSetup> tradeSetups = tradeSetupService.getAll();
+
+        Map<String, Map<String, EvaluationResult>> setupScoreResult =
+                setupScoreComputeService.computeAllScores(tradeSetups, ctx);
+
         return BootstrapResponse.builder()
                                 .schemasById(schemasById)
                                 .schemasOrder(schemaOrder)
                                 .tradesById(raw)
+                                .tradeSetups(tradeSetups.stream().map(tradeSetupDtoMapper::toResponse).toList())
+                                .setupScoreResult(setupScoreResult)
                                 .derivedByTradeId(computed)
                                 .tradesOrder(tradesOrder)
                                 .build();

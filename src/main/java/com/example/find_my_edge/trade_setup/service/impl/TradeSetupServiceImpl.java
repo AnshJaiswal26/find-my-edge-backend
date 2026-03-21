@@ -4,7 +4,7 @@ import com.example.find_my_edge.common.auth.service.CurrentUserService;
 import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.common.storage.service.ImageStorageService;
 import com.example.find_my_edge.common.util.JsonUtil;
-import com.example.find_my_edge.schema.service.SchemaService;
+import com.example.find_my_edge.schema.repository.SchemaRepository;
 import com.example.find_my_edge.trade_setup.dto.TradeSetupRequest;
 import com.example.find_my_edge.trade_setup.entity.SetupFieldEntity;
 import com.example.find_my_edge.trade_setup.entity.TradeSetupEntity;
@@ -39,7 +39,7 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
     private final TradeSetupModelEntityMapper setupModelEntityMapper;
 
-    private final SchemaService schemaService;
+    private final SchemaRepository schemaRepository;
 
     private final JsonUtil jsonUtil;
 
@@ -222,9 +222,8 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         if (field.getMappedSchemaId() == null) return;
 
-        SemanticType schemaType = schemaService
-                .getById(field.getMappedSchemaId())
-                .getSemanticType();
+        SemanticType schemaType =
+                schemaRepository.findSemanticTypeById(field.getMappedSchemaId());
 
         if (field.getSemanticType() != schemaType) {
             throw new SemanticTypeMismatchException(

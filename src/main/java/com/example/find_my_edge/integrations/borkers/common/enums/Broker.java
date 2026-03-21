@@ -9,12 +9,12 @@ public enum Broker {
     ANGEL_ONE;
 
     @JsonValue
-    public String toJson(Broker broker) {
-        return broker.toString().toLowerCase();
+    public String toJson() {
+        return this.toString().toLowerCase();
     }
 
     @JsonCreator
-    public Broker fromJson(String value) {
+    public static Broker fromJson(String value) {
         return Broker.valueOf(value.toUpperCase());
     }
 

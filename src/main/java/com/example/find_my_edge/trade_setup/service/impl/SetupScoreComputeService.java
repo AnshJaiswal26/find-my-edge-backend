@@ -1,12 +1,9 @@
 package com.example.find_my_edge.trade_setup.service.impl;
 
-import com.example.find_my_edge.analytics.ast.enums.ValueType;
 import com.example.find_my_edge.analytics.config.FilterConfig;
 import com.example.find_my_edge.analytics.engine.filter.FilterOperation;
 import com.example.find_my_edge.analytics.engine.filter.FilterOperationRegistry;
 import com.example.find_my_edge.analytics.model.ComputationContext;
-import com.example.find_my_edge.common.enums.SemanticType;
-import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.trade_setup.enums.Tag;
 import com.example.find_my_edge.trade_setup.model.EvaluationResult;
 import com.example.find_my_edge.trade_setup.model.FieldMatch;
@@ -30,34 +27,57 @@ public class SetupScoreComputeService {
 
     private final FilterOperationRegistry filterOperationRegistry;
 
-    public Map<String, Map<String, Object>> computeAffectedScores(
+    public Map<String, Map<String, EvaluationResult>> computeAllScores(
+            List<TradeSetup> setups,
+            ComputationContext ctx
+    ) {
+
+        Map<String, Map<String, EvaluationResult>> updates = new HashMap<>();
+
+        for (TradeSetup setup : setups) {
+            computeScore(ctx, setup, updates);
+        }
+
+        return updates;
+
+    }
+
+    public Map<String, Map<String, EvaluationResult>> computeAffectedScores(
             Set<String> affectedSchemas,
             ComputationContext ctx
     ) {
 
         List<TradeSetup> setups = tradeSetupService.getAll();
 
-        Map<String, Map<String, Object>> updates = new HashMap<>();
+        Map<String, Map<String, EvaluationResult>> updates = new HashMap<>();
 
         for (TradeSetup setup : setups) {
 
             if (!isAffected(setup, affectedSchemas)) continue;
 
-            for (String tradeId : ctx.getTradeOrder()) {
-
-                Map<String, Object> computed = ctx.getComputed().get(tradeId);
-                Map<String, Object> raw = ctx.getRaw().get(tradeId);
-
-
-                EvaluationResult result = evaluate(setup, raw, computed);
-
-                updates
-                        .computeIfAbsent(tradeId, k -> new HashMap<>())
-                        .put("setup_" + setup.getId(), result);
-            }
+            computeScore(ctx, setup, updates);
         }
 
         return updates;
+    }
+
+    private void computeScore(
+            ComputationContext ctx,
+            TradeSetup setup,
+            Map<String, Map<String, EvaluationResult>> updates) {
+
+        for (String tradeId : ctx.getTradeOrder()) {
+
+            Map<String, Object> computed = ctx.getComputed().get(tradeId);
+            Map<String, Object> raw = ctx.getRaw().get(tradeId);
+
+
+            EvaluationResult result = evaluate(setup, raw, computed);
+
+            updates
+                    .computeIfAbsent(tradeId, k -> new HashMap<>())
+                    .put(setup.getId(), result);
+        }
     }
 
     private EvaluationResult evaluate(
@@ -130,9 +150,11 @@ public class SetupScoreComputeService {
 
         return new EvaluationResult(
                 round(finalScore),
+                tagForScore(finalScore),
                 fieldMatches
         );
     }
+
 
     private boolean isPositive(Tag tag) {
         return tag == Tag.GOOD ||
@@ -165,12 +187,12 @@ public class SetupScoreComputeService {
     }
 
     private Tag tagForScore(double score) {
-        if (score >= 80) return Tag.EXCELLENT;
-        else if (score >= 60) return Tag.VERY_GOOD;
-        else if (score >= 40) return Tag.GOOD;
-        else if (score >= 20) return Tag.NEUTRAL;
-        else if (score >= 0) return Tag.BAD;
-        else if (score >= -20) return Tag.VERY_BAD;
+        if (score >= 90) return Tag.EXCELLENT;
+        else if (score >= 80) return Tag.VERY_GOOD;
+        else if (score >= 60) return Tag.GOOD;
+        else if (score >= 40) return Tag.NEUTRAL;
+        else if (score >= 20) return Tag.BAD;
+        else if (score >= 10) return Tag.VERY_BAD;
         else return Tag.WORST;
     }
 

@@ -9,6 +9,8 @@ import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.RecomputeResult;
 import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.schema.model.Schema;
+import com.example.find_my_edge.trade_setup.model.EvaluationResult;
+import com.example.find_my_edge.trade_setup.service.impl.SetupScoreComputeService;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
@@ -34,6 +36,8 @@ public class RecomputeServiceImpl implements RecomputeService {
 
     private final DependencyResolver dependencyResolver;
 
+    private final SetupScoreComputeService setupScoreComputeService;
+
     @Override
     public RecomputeResult recomputeOnSchemaCreation(String schemaId) {
         ComputationContext ctx = tradeContextBuilder.buildContext();
@@ -50,7 +54,10 @@ public class RecomputeServiceImpl implements RecomputeService {
                                 )
                         );
 
-        return new RecomputeResult(null, null, null, trades);
+
+        return RecomputeResult.builder()
+                              .tradeUpdates(trades)
+                              .build();
     }
 
     @Override
@@ -72,7 +79,6 @@ public class RecomputeServiceImpl implements RecomputeService {
         );
 
         RecomputeResult recomputeResult = recomputeChartsAndStats(pageName, affectedSchemas, ctx);
-
 
         /*
          * ---------------- BUILD TRADE UPDATES ----------------
@@ -188,7 +194,15 @@ public class RecomputeServiceImpl implements RecomputeService {
                                               ))
                         ));
 
-        return new RecomputeResult(statValues, seriesValues, resultMap, null);
+        Map<String, Map<String, EvaluationResult>> setupResults =
+                setupScoreComputeService.computeAffectedScores(affectedSchemas, ctx);
+
+        return RecomputeResult.builder()
+                              .statValues(statValues)
+                              .seriesValues(seriesValues)
+                              .groupSeriesAggregateResult(resultMap)
+                              .setupResults(setupResults)
+                              .build();
     }
 
     private void updateAffectedTrades(

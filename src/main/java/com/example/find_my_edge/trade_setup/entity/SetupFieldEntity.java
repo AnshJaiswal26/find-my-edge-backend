@@ -21,10 +21,13 @@ public class SetupFieldEntity {
 
     private String mappedSchemaId;
 
+    @Column(name = "condition_type")
     private String condition; // <= , >=, ==..., for categorical: "text contains", "text starts with"...
 
+    @Column(name = "from_value")
     private Double from;
 
+    @Column(name = "to_value")
     private Double to;
 
     private String expected; // 100, 200, 300...,  or for categorical: "A", "B", "C"...

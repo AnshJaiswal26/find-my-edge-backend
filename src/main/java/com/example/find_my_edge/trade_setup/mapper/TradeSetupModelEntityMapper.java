@@ -7,6 +7,7 @@ import com.example.find_my_edge.trade_setup.model.SetupField;
 import com.example.find_my_edge.trade_setup.model.TradeSetup;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +18,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public abstract class TradeSetupModelEntityMapper {
 
-    protected final JsonUtil jsonUtil;
+    protected JsonUtil jsonUtil;
+
+    @Autowired
+    public void setJsonUtil(JsonUtil jsonUtil) {
+        this.jsonUtil = jsonUtil;
+    }
 
     /* ================= MODEL → ENTITY ================= */
 
@@ -29,7 +35,7 @@ public abstract class TradeSetupModelEntityMapper {
 
     /* ================= ENTITY → MODEL ================= */
 
-    @Mapping(target = "fieldOrder", expression = "java(jsonUtil.fromJsonList(entity.getFieldOrder()), String.class)")
+    @Mapping(target = "fieldOrder", expression = "java(jsonUtil.fromJsonList(entity.getFieldOrder(), String.class))")
     @Mapping(target = "fieldsById", expression = "java(mapFieldsToMap(entity.getFields()))")
     public abstract TradeSetup toModel(TradeSetupEntity entity);
 

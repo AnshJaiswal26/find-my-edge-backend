@@ -23,6 +23,7 @@ public class TradeSetupEntity {
     private String imagePublicId;
 
     @OneToMany(mappedBy = "tradeSetup")
+    @OrderBy("date ASC, entryTime ASC")
     private List<TradeEntity> trades;
 
     @Column(columnDefinition = "JSON")

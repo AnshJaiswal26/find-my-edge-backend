@@ -15,5 +15,5 @@ public class TradeSetupRequest {
 
     private List<String> fieldOrder;
 
-    private Map<String , SetupFieldRequest> fieldsById;
+    private Map<String, SetupFieldRequest> fieldsById;
 }
