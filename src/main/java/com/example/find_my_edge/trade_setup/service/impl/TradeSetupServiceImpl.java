@@ -1,14 +1,11 @@
 package com.example.find_my_edge.trade_setup.service.impl;
 
 import com.example.find_my_edge.common.auth.service.CurrentUserService;
-import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.common.storage.service.ImageStorageService;
 import com.example.find_my_edge.common.util.JsonUtil;
-import com.example.find_my_edge.schema.repository.SchemaRepository;
 import com.example.find_my_edge.trade_setup.dto.TradeSetupRequest;
 import com.example.find_my_edge.trade_setup.entity.SetupFieldEntity;
 import com.example.find_my_edge.trade_setup.entity.TradeSetupEntity;
-import com.example.find_my_edge.trade_setup.exception.SemanticTypeMismatchException;
 import com.example.find_my_edge.trade_setup.exception.TradeSetupFieldNotFoundException;
 import com.example.find_my_edge.trade_setup.exception.TradeSetupNotFoundException;
 import com.example.find_my_edge.trade_setup.exception.TradeSetupOrderMismatchException;
@@ -39,8 +36,6 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
     private final TradeSetupModelEntityMapper setupModelEntityMapper;
 
-    private final SchemaRepository schemaRepository;
-
     private final JsonUtil jsonUtil;
 
     /* ---------------- CREATE ---------------- */
@@ -49,8 +44,7 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         TradeSetup model = tradeSetupDtoMapper.toModel(dto);
 
-        TradeSetupEntity entity =
-                setupModelEntityMapper.toEntity(model, new TradeSetupEntity());
+        TradeSetupEntity entity = setupModelEntityMapper.toEntity(model, new TradeSetupEntity());
 
         UUID userId = currentUserService.getUserId();
         entity.setUserId(userId);
@@ -65,10 +59,7 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         UUID userId = currentUserService.getUserId();
 
-        return repo.findByUserId(userId)
-                   .stream()
-                   .map(setupModelEntityMapper::toModel)
-                   .toList();
+        return repo.findByUserId(userId).stream().map(setupModelEntityMapper::toModel).toList();
     }
 
     /* ---------------- GET BY ID ---------------- */
@@ -90,7 +81,15 @@ public class TradeSetupServiceImpl implements TradeSetupService {
         // partial update (safe)
         if (dto.getName() != null) setup.setName(dto.getName());
         if (dto.getImageUrl() != null) setup.setImageUrl(dto.getImageUrl());
-        if (dto.getImagePublicId() != null) setup.setImagePublicId(dto.getImagePublicId());
+        if (dto.getImagePublicId() != null) {
+
+            if (!dto.getImagePublicId().equals(setup.getImagePublicId())) {
+                imageStorageService.delete(setup.getImagePublicId());
+            }
+
+            setup.setImagePublicId(dto.getImagePublicId());
+
+        }
 
         return setupModelEntityMapper.toModel(repo.save(setup));
     }
@@ -129,13 +128,10 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         UUID userId = currentUserService.getUserId();
 
-        TradeSetupEntity setupEntity =
-                repo.findByIdAndUserId(setupId, userId)
-                    .orElseThrow(TradeSetupNotFoundException::new);
+        TradeSetupEntity setupEntity = repo.findByIdAndUserId(setupId, userId).orElseThrow(TradeSetupNotFoundException::new);
 
         if (setupEntity.getFields().size() != newFieldOrder.size()) {
-            throw new TradeSetupOrderMismatchException(
-                    "Field order size does not match the number of fields in the setup");
+            throw new TradeSetupOrderMismatchException("Field order size does not match the number of fields in the setup");
         }
 
         setupEntity.setFieldOrder(jsonUtil.toJsonList(newFieldOrder));
@@ -148,14 +144,12 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         UUID userId = currentUserService.getUserId();
 
-        return repo.findByIdAndUserId(setupId, userId)
-                   .orElseThrow(TradeSetupNotFoundException::new);
+        return repo.findByIdAndUserId(setupId, userId).orElseThrow(TradeSetupNotFoundException::new);
     }
 
     // ================= FIELD MANAGEMENT =================
     @Override
-    public List<SetupField> addField(String setupId, SetupField model) {
-        validateSemanticType(model);
+    public SetupField addField(String setupId, SetupField model) {
 
         TradeSetupEntity setup = getSetupOrThrow(setupId);
 
@@ -165,38 +159,23 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         setup.getFields().add(field);
 
-        TradeSetupEntity saved = repo.save(setup);
+        repo.save(setup);
 
-        return saved.getFields()
-                    .stream()
-                    .map(setupModelEntityMapper::toModel)
-                    .toList();
+        return setupModelEntityMapper.toModel(field);
     }
 
     @Override
-    public TradeSetup updateField(
-            String setupId,
-            String fieldId,
-            SetupField model
-    ) {
+    public TradeSetup updateField(String setupId, String fieldId, SetupField model) {
 
         TradeSetupEntity setup = getSetupOrThrow(setupId);
 
-        SetupFieldEntity existingField = setup.getFields()
-                                              .stream()
-                                              .filter(f -> f.getId().equals(fieldId))
-                                              .findFirst()
-                                              .orElseThrow(() -> new TradeSetupFieldNotFoundException("Field not found"));
+        SetupFieldEntity existingField = setup.getFields().stream().filter(f -> f.getId().equals(fieldId)).findFirst().orElseThrow(() -> new TradeSetupFieldNotFoundException("Field not found"));
 
         SetupField merged = setupModelEntityMapper.toModel(existingField);
 
-        if (model.getLabel() != null) merged.setLabel(model.getLabel());
         if (model.getMappedSchemaId() != null) merged.setMappedSchemaId(model.getMappedSchemaId());
         if (model.getCondition() != null) merged.setCondition(model.getCondition());
         if (model.getExpected() != null) merged.setExpected(model.getExpected());
-        if (model.getSemanticType() != null) merged.setSemanticType(model.getSemanticType());
-
-        validateSemanticType(merged);
 
         setupModelEntityMapper.updateEntityFromModel(model, existingField);
 
@@ -208,29 +187,13 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         TradeSetupEntity setup = getSetupOrThrow(setupId);
 
-        boolean removed = setup.getFields()
-                               .removeIf(f -> f.getId().equals(fieldId));
+        boolean removed = setup.getFields().removeIf(f -> f.getId().equals(fieldId));
 
         if (!removed) {
             throw new TradeSetupFieldNotFoundException("Field not found");
         }
 
         repo.save(setup);
-    }
-
-    private void validateSemanticType(SetupField field) {
-
-        if (field.getMappedSchemaId() == null) return;
-
-        SemanticType schemaType =
-                schemaRepository.findSemanticTypeById(field.getMappedSchemaId());
-
-        if (field.getSemanticType() != schemaType) {
-            throw new SemanticTypeMismatchException(
-                    "Semantic type mismatch: field=" + field.getSemanticType()
-                    + ", mapped key=" + schemaType
-            );
-        }
     }
 
 }

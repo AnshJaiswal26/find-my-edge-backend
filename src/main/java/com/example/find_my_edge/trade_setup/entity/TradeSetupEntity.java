@@ -1,13 +1,15 @@
 package com.example.find_my_edge.trade_setup.entity;
 
-import com.example.find_my_edge.common.converter.MapToJsonConverter;
 import com.example.find_my_edge.trade.entity.TradeEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
+@Table(name = "trade_setups")
 @Data
 public class TradeSetupEntity {
 

@@ -9,8 +9,6 @@ public class SetupFieldResponse {
 
     private String id;
 
-    private String label;
-
     private String mappedSchemaId;
 
     private String condition; // <= , >=, ==..., for categorical: "text contains", "text starts with"...
@@ -20,8 +18,6 @@ public class SetupFieldResponse {
     private Double to;
 
     private Object expected; // 100, 200, 300...,  or for categorical: "A", "B", "C"...
-
-    private SemanticType semanticType;
 
     private Tag tag;
 }

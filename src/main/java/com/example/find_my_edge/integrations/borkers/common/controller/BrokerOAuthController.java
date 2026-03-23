@@ -71,7 +71,7 @@ public class BrokerOAuthController {
         // Redirect to frontend success page
         return ResponseEntity
                 .status(HttpStatus.FOUND)
-                .location(URI.create(url + "/integrations/success/" + broker))
+                .location(URI.create(url + "/integrations/success/" + broker.toJson()))
                 .build();
     }
 

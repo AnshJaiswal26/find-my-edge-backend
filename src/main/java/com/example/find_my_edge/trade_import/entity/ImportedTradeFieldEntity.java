@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "imported_trade_fields")
 @Data
 @Builder
 @NoArgsConstructor

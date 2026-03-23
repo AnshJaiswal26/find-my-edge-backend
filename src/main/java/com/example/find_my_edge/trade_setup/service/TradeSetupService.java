@@ -1,6 +1,5 @@
 package com.example.find_my_edge.trade_setup.service;
 
-import com.example.find_my_edge.trade_setup.dto.SetupFieldRequest;
 import com.example.find_my_edge.trade_setup.dto.TradeSetupRequest;
 import com.example.find_my_edge.trade_setup.entity.TradeSetupEntity;
 import com.example.find_my_edge.trade_setup.model.SetupField;
@@ -24,7 +23,7 @@ public interface TradeSetupService {
     void updateFieldOrder(String setupId, List<String> newFieldOrder);
 
     // ================= FIELD MANAGEMENT =================
-    List<SetupField> addField(String setupId, SetupField model);
+    SetupField addField(String setupId, SetupField model);
 
     TradeSetup updateField(
             String setupId,

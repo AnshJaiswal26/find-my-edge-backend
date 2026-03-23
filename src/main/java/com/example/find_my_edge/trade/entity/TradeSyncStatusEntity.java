@@ -10,11 +10,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Table(name = "trade_sync_status")
 @Data
 public class TradeSyncStatusEntity {
 
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private UUID userId;

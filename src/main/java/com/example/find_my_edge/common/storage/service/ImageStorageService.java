@@ -27,7 +27,7 @@ public class ImageStorageService {
             String secureUrl = uploadResult.get("secure_url").toString();
             String publicId = uploadResult.get("public_id").toString();
 
-           return new ImageUploadResponse(secureUrl, publicId);
+            return new ImageUploadResponse(secureUrl, publicId);
 
         } catch (IOException e) {
             throw new ImageUploadFailedException("Image upload failed");

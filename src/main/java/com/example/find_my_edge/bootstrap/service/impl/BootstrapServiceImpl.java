@@ -7,6 +7,7 @@ import com.example.find_my_edge.bootstrap.service.BootstrapService;
 import com.example.find_my_edge.schema.dto.SchemaResponse;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
+import com.example.find_my_edge.trade_setup.dto.TradeSetupResponse;
 import com.example.find_my_edge.trade_setup.mapper.TradeSetupDtoMapper;
 import com.example.find_my_edge.trade_setup.model.EvaluationResult;
 import com.example.find_my_edge.trade_setup.model.TradeSetup;
@@ -15,6 +16,7 @@ import com.example.find_my_edge.trade_setup.service.impl.SetupScoreComputeServic
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +33,7 @@ public class BootstrapServiceImpl implements BootstrapService {
 
     private final TradeSetupDtoMapper tradeSetupDtoMapper;
 
-    private final SetupScoreComputeService setupScoreComputeService;
+//    private final SetupScoreComputeService setupScoreComputeService;
 
 
     @Override
@@ -56,15 +58,28 @@ public class BootstrapServiceImpl implements BootstrapService {
 
         List<TradeSetup> tradeSetups = tradeSetupService.getAll();
 
-        Map<String, Map<String, EvaluationResult>> setupScoreResult =
-                setupScoreComputeService.computeAllScores(tradeSetups, ctx);
+//        Map<String, Map<String, EvaluationResult>> setupScoreResult =
+//                setupScoreComputeService.computeAllScores(tradeSetups, ctx);
+
+        List<String> setupOrders = new ArrayList<>();
+        Map<String, TradeSetupResponse> setupsById =
+                tradeSetups
+                        .stream()
+                        .collect(Collectors.toMap(
+                                         s -> {
+                                             setupOrders.add(s.getId());
+                                             return s.getId();
+                                         }, tradeSetupDtoMapper::toResponse
+                                 )
+                        );
 
         return BootstrapResponse.builder()
                                 .schemasById(schemasById)
                                 .schemasOrder(schemaOrder)
                                 .tradesById(raw)
-                                .tradeSetups(tradeSetups.stream().map(tradeSetupDtoMapper::toResponse).toList())
-                                .setupScoreResult(setupScoreResult)
+                                .tradeSetupsOrder(setupOrders)
+                                .tradeSetupsById(setupsById)
+//                                .setupScoreResult(setupScoreResult)
                                 .derivedByTradeId(computed)
                                 .tradesOrder(tradesOrder)
                                 .build();

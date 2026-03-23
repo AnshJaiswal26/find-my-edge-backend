@@ -1,11 +1,11 @@
 package com.example.find_my_edge.trade_setup.entity;
 
-import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.trade_setup.enums.Tag;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
+@Table(name = "setup_fields")
 @Data
 public class SetupFieldEntity {
 
@@ -16,8 +16,6 @@ public class SetupFieldEntity {
     @ManyToOne
     @JoinColumn(name = "trade_setup_id")
     private TradeSetupEntity tradeSetup;
-
-    private String label;
 
     private String mappedSchemaId;
 
@@ -31,9 +29,6 @@ public class SetupFieldEntity {
     private Double to;
 
     private String expected; // 100, 200, 300...,  or for categorical: "A", "B", "C"...
-
-    @Enumerated(EnumType.STRING)
-    private SemanticType semanticType;
 
     @Enumerated(EnumType.STRING)
     private Tag tag;

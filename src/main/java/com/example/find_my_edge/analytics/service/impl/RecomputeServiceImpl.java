@@ -9,8 +9,6 @@ import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.RecomputeResult;
 import com.example.find_my_edge.analytics.service.RecomputeService;
 import com.example.find_my_edge.schema.model.Schema;
-import com.example.find_my_edge.trade_setup.model.EvaluationResult;
-import com.example.find_my_edge.trade_setup.service.impl.SetupScoreComputeService;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
 import com.example.find_my_edge.workspace.config.page.PageConfig;
@@ -19,7 +17,10 @@ import com.example.find_my_edge.workspace.service.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +37,7 @@ public class RecomputeServiceImpl implements RecomputeService {
 
     private final DependencyResolver dependencyResolver;
 
-    private final SetupScoreComputeService setupScoreComputeService;
+//    private final SetupScoreComputeService setupScoreComputeService;
 
     @Override
     public RecomputeResult recomputeOnSchemaCreation(String schemaId) {
@@ -194,14 +195,14 @@ public class RecomputeServiceImpl implements RecomputeService {
                                               ))
                         ));
 
-        Map<String, Map<String, EvaluationResult>> setupResults =
-                setupScoreComputeService.computeAffectedScores(affectedSchemas, ctx);
+//        Map<String, Map<String, EvaluationResult>> setupResults =
+//                setupScoreComputeService.computeAffectedScores(affectedSchemas, ctx);
 
         return RecomputeResult.builder()
                               .statValues(statValues)
                               .seriesValues(seriesValues)
                               .groupSeriesAggregateResult(resultMap)
-                              .setupResults(setupResults)
+//                              .setupResults(setupResults)
                               .build();
     }
 

@@ -4,14 +4,18 @@ import com.example.find_my_edge.integrations.borkers.common.enums.Broker;
 import com.example.find_my_edge.integrations.borkers.common.enums.ConnectionStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"userId", "broker"})
-})
+@Table(
+        name = "broker_tokens",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"userId", "broker"})
+        }
+)
 public class BrokerTokenEntity {
 
     @Id

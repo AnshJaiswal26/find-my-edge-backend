@@ -23,7 +23,9 @@ public class BootstrapResponse {
 
     private List<String> tradesOrder;
 
-    private List<TradeSetupResponse> tradeSetups;
+    private List<String> tradeSetupsOrder;
+
+    private Map<String, TradeSetupResponse> tradeSetupsById;
 
     Map<String, Map<String, EvaluationResult>> setupScoreResult;
 }

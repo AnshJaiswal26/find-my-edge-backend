@@ -1,13 +1,10 @@
 package com.example.find_my_edge.trade_setup.dto;
 
-import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.trade_setup.enums.Tag;
 import lombok.Data;
 
 @Data
 public class SetupFieldRequest {
-
-    private String label;
 
     private String mappedSchemaId;
 
@@ -18,8 +15,6 @@ public class SetupFieldRequest {
     private Double to;
 
     private Object expected; // 100, 200, 300...,  or for categorical: "A", "B", "C"...
-
-    private SemanticType semanticType;
 
     private Tag tag;
 

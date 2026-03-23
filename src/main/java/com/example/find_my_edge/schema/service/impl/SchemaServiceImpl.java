@@ -56,7 +56,6 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- CREATE ---------------- */
     @Override
-    @Transactional
     public Schema create(Schema schema) {
 
         schema.validateForWrite();
@@ -100,7 +99,6 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- UPDATE ---------------- */
     @Override
-    @Transactional
     public Schema update(String schemaId, Schema schema) {
 //        System.out.println(schema);
         schema.setId(schemaId);
@@ -151,7 +149,8 @@ public class SchemaServiceImpl implements SchemaService {
         if (role == SchemaRole.USER_DEFINED) {
 
             if (source == SchemaSource.COMPUTED) {
-                applyComputedUserUpdate(existing, incoming);
+                applyUserUpdate(existing, incoming);
+                validateAst(existing);
             } else {
                 applyUserUpdate(existing, incoming);
             }
@@ -168,20 +167,11 @@ public class SchemaServiceImpl implements SchemaService {
         existing.setDisplayJson(incoming.getDisplayJson());
         existing.setColorRulesJson(incoming.getColorRulesJson());
         existing.setHidden(incoming.getHidden());
+
+        existing.setOptionsJson(incoming.getOptionsJson());
     }
 
-    private void applyComputedUserUpdate(SchemaEntity existing, SchemaEntity incoming) {
-
-        existing.setLabel(incoming.getLabel());
-        existing.setFormula(incoming.getFormula());
-        existing.setIdFormula(incoming.getIdFormula());
-        existing.setDependencies(incoming.getDependencies());
-
-        existing.setDisplayJson(incoming.getDisplayJson());
-        existing.setColorRulesJson(incoming.getColorRulesJson());
-        existing.setHidden(incoming.getHidden());
-
-        //  CRITICAL: AST validation here (not outside)
+    private void validateAst(SchemaEntity existing) {
         if (existing.getIdFormula() != null && !existing.getIdFormula().isBlank()) {
 
             AstResult astResult = astPipeline.buildAst(existing.getIdFormula());
@@ -254,7 +244,6 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- DELETE ---------------- */
     @Override
-    @Transactional
     public void delete(String id) {
 
         UUID userId = currentUserService.getUserId();
@@ -329,7 +318,6 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    @Transactional
     public List<String> updateOrder(List<String> order, ViewType viewType) {
 
 //        System.out.println("updateOrder() method called");

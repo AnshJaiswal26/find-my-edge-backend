@@ -6,13 +6,8 @@ import com.example.find_my_edge.common.storage.dto.ImageUploadResponse;
 import com.example.find_my_edge.common.storage.service.ImageStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/images")
@@ -28,5 +23,14 @@ public class ImageController extends BaseController {
         ImageUploadResponse upload = imageStorageService.upload(file);
 
         return buildResponse(upload, "Image uploaded successfully");
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> delete(
+            @RequestParam("publicId") String publicId
+    ) {
+        imageStorageService.delete(publicId);
+
+        return ResponseEntity.noContent().build();
     }
 }

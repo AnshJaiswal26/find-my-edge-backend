@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Entity
-@Table(name = "imported_trade")
+@Table(name = "imported_trades")
 public class ImportedTradeEntity {
 
     @Id

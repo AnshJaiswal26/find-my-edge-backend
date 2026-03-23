@@ -2,19 +2,20 @@ package com.example.find_my_edge.trade_setup.controller;
 
 import com.example.find_my_edge.common.controller.BaseController;
 import com.example.find_my_edge.common.dto.ApiResponse;
-import com.example.find_my_edge.trade_setup.dto.SetupFieldRequest;
-import com.example.find_my_edge.trade_setup.dto.SetupFieldResponse;
-import com.example.find_my_edge.trade_setup.dto.TradeSetupRequest;
-import com.example.find_my_edge.trade_setup.dto.TradeSetupResponse;
+import com.example.find_my_edge.trade_setup.dto.*;
 import com.example.find_my_edge.trade_setup.mapper.TradeSetupDtoMapper;
 import com.example.find_my_edge.trade_setup.model.SetupField;
+import com.example.find_my_edge.trade_setup.model.TradeSetup;
 import com.example.find_my_edge.trade_setup.service.impl.TradeSetupServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/trade-setups")
@@ -38,12 +39,24 @@ public class TradeSetupController extends BaseController {
 
     /* -------- GET ALL -------- */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TradeSetupResponse>>> getAll() {
-        List<TradeSetupResponse> setups = service.getAll()
-                                                 .stream()
-                                                 .map(mapper::toResponse).toList();
+    public ResponseEntity<ApiResponse<TradeSetupCollectionResponse>> getAll() {
 
-        return buildResponse(setups, "Trade setups retrieved successfully");
+        List<String> setupOrders = new ArrayList<>();
+        Map<String, TradeSetupResponse> setups =
+                service.getAll()
+                       .stream()
+                       .collect(Collectors.toMap(
+                                        s -> {
+                                            setupOrders.add(s.getId());
+                                            return s.getId();
+                                        }, mapper::toResponse
+                                )
+                       );
+
+        return buildResponse(
+                new TradeSetupCollectionResponse(setups, setupOrders),
+                "Trade setups retrieved successfully"
+        );
     }
 
     /* -------- GET BY ID -------- */
@@ -73,19 +86,16 @@ public class TradeSetupController extends BaseController {
     }
 
     @PostMapping("/{setupId}/fields")
-    public ResponseEntity<ApiResponse<List<SetupFieldResponse>>> addField(
+    public ResponseEntity<ApiResponse<SetupFieldResponse>> addField(
             @PathVariable String setupId,
             @RequestBody SetupFieldRequest request
     ) {
 
         SetupField model = mapper.toModel(request);
 
-        List<SetupFieldResponse> response = service.addField(setupId, model)
-                                                   .stream()
-                                                   .map(mapper::toResponse)
-                                                   .toList();
+        SetupField field = service.addField(setupId, model);
 
-        return buildResponse(response, "Field added successfully");
+        return buildResponse(mapper.toResponse(field), "Field added successfully");
     }
 
     @PutMapping("/{setupId}/fields/{fieldId}")
