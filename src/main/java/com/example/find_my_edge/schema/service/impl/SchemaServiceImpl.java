@@ -65,9 +65,7 @@ public class SchemaServiceImpl implements SchemaService {
         SchemaEntity entity = mapper.toEntity(schema);
 
         if (schemaRepository.existsByUserIdAndLabel(userId, entity.getLabel())) {
-            throw new SchemaDependencyException(
-                    "Schema with label '" + entity.getLabel() + "' already exists"
-            );
+            throw new SchemaDependencyException("Schema with label '" + entity.getLabel() + "' already exists");
         }
 
         // SET SOURCE + ROLE (CRITICAL)
@@ -106,14 +104,11 @@ public class SchemaServiceImpl implements SchemaService {
 
         UUID userId = currentUserService.getUserId();
 
-        SchemaEntity existing = schemaRepository
-                .findByIdAndUserId(schemaId, userId)
-                .orElse(null);
+        SchemaEntity existing = schemaRepository.findByIdAndUserId(schemaId, userId).orElse(null);
 
         if (schemaRegistry.exists(schemaId)) {
 
-            SchemaOverrideEntity schemaOverrideEntity =
-                    overrideService.getOrExisting(schemaId, userId);
+            SchemaOverrideEntity schemaOverrideEntity = overrideService.getOrExisting(schemaId, userId);
 
             schemaOverrideEntity.setHidden(schema.getHidden());
             schemaOverrideEntity.setColorRulesJson(jsonUtil.toJsonList(schema.getColorRules()));
@@ -193,9 +188,7 @@ public class SchemaServiceImpl implements SchemaService {
             dtoMapper.toResponse(override);
         }
 
-        SchemaEntity entity = schemaRepository
-                .findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new SchemaNotFoundException(id));
+        SchemaEntity entity = schemaRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new SchemaNotFoundException(id));
 
         return mapper.toModel(entity);
     }
@@ -211,8 +204,7 @@ public class SchemaServiceImpl implements SchemaService {
 
         List<Schema> registeredSchemas = schemaRegistry.getAll();
 
-        List<Schema> mergedSystems =
-                overrideService.applyOverrides(registeredSchemas, userId);
+        List<Schema> mergedSystems = overrideService.applyOverrides(registeredSchemas, userId);
 
         for (Schema schema : mergedSystems) {
             result.add(schema);
@@ -235,11 +227,7 @@ public class SchemaServiceImpl implements SchemaService {
             order.addAll(userSchemas.stream().map(SchemaEntity::getId).toList());
         }
 
-        return SchemaBundle.builder()
-                           .schemas(result)
-                           .schemasById(byId)
-                           .schemasOrder(order)
-                           .build();
+        return SchemaBundle.builder().schemas(result).schemasById(byId).schemasOrder(order).build();
     }
 
     /* ---------------- DELETE ---------------- */
@@ -248,24 +236,16 @@ public class SchemaServiceImpl implements SchemaService {
 
         UUID userId = currentUserService.getUserId();
 
-        SchemaEntity schema = schemaRepository
-                .findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new SchemaNotFoundException(id));
+        SchemaEntity schema = schemaRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new SchemaNotFoundException(id));
 
         if (schema.getRole() != SchemaRole.USER_DEFINED) {
-            throw new SchemaOperationNotAllowedException(
-                    "This schema cannot be deleted. You can hide it instead."
-            );
+            throw new SchemaOperationNotAllowedException("This schema cannot be deleted. You can hide it instead.");
         }
 
-        List<String> dependents =
-                schemaRepository.findDependentSchemaLabels(userId, id);
+        List<String> dependents = schemaRepository.findDependentSchemaLabels(userId, id);
 
         if (!dependents.isEmpty()) {
-            throw new SchemaDependencyException(
-                    "Cannot delete '" + schema.getLabel() +
-                    "' used by: " + String.join(", ", dependents)
-            );
+            throw new SchemaDependencyException("Cannot delete '" + schema.getLabel() + "' used by: " + String.join(", ", dependents));
         }
 
         schemaRepository.delete(schema);
@@ -284,6 +264,10 @@ public class SchemaServiceImpl implements SchemaService {
         UUID userId = currentUserService.getUserId();
 
         List<String> defaultOrder = getUserOrder(userId, ViewType.DEFAULT);
+
+        if (defaultOrder.isEmpty()) {
+            defaultOrder = new ArrayList<>(schemaRegistry.getOrder());
+        }
 
         if (viewType == ViewType.DEFAULT) {
             return defaultOrder;
@@ -332,12 +316,7 @@ public class SchemaServiceImpl implements SchemaService {
         Set<String> validIds = new HashSet<>();
 
         // user schemas
-        validIds.addAll(
-                schemaRepository.findAllByUserId(userId)
-                                .stream()
-                                .map(SchemaEntity::getId)
-                                .toList()
-        );
+        validIds.addAll(schemaRepository.findAllByUserId(userId).stream().map(SchemaEntity::getId).toList());
 
         // system schemas
         validIds.addAll(schemaRegistry.getOrder());
@@ -345,9 +324,7 @@ public class SchemaServiceImpl implements SchemaService {
         //  2. Validate input
         for (String id : order) {
             if (!validIds.contains(id)) {
-                throw new SchemaOrderException(
-                        "Invalid schema id in order: " + id
-                );
+                throw new SchemaOrderException("Invalid schema id in order: " + id);
             }
         }
 
@@ -362,14 +339,12 @@ public class SchemaServiceImpl implements SchemaService {
         }
 
         // 5. Fetch or create entity
-        SchemaOrderEntity entity = schemaOrderRepository
-                .findByUserIdAndViewType(userId, viewType)
-                .orElseGet(() -> {
-                    SchemaOrderEntity e = new SchemaOrderEntity();
-                    e.setUserId(userId);
-                    e.setViewType(viewType);
-                    return e;
-                });
+        SchemaOrderEntity entity = schemaOrderRepository.findByUserIdAndViewType(userId, viewType).orElseGet(() -> {
+            SchemaOrderEntity e = new SchemaOrderEntity();
+            e.setUserId(userId);
+            e.setViewType(viewType);
+            return e;
+        });
 
         // 6. Save using correct util
         entity.setOrder(jsonUtil.toJsonList(cleanedOrder));
@@ -385,15 +360,13 @@ public class SchemaServiceImpl implements SchemaService {
 
     private void updateOrderOnCreate(UUID userId, String schemaId) {
 
-        SchemaOrderEntity entity = schemaOrderRepository
-                .findByUserIdAndViewType(userId, ViewType.DEFAULT)
-                .orElseGet(() -> {
-                    SchemaOrderEntity e = new SchemaOrderEntity();
-                    e.setUserId(userId);
-                    e.setViewType(ViewType.DEFAULT);
-                    e.setOrder(jsonUtil.toJson(new ArrayList<>()));
-                    return e;
-                });
+        SchemaOrderEntity entity = schemaOrderRepository.findByUserIdAndViewType(userId, ViewType.DEFAULT).orElseGet(() -> {
+            SchemaOrderEntity e = new SchemaOrderEntity();
+            e.setUserId(userId);
+            e.setViewType(ViewType.DEFAULT);
+            e.setOrder(jsonUtil.toJson(new ArrayList<>()));
+            return e;
+        });
 
         List<String> order = jsonUtil.fromJsonList(entity.getOrder(), String.class);
 
@@ -409,26 +382,21 @@ public class SchemaServiceImpl implements SchemaService {
 
     private void updateOrderOnDelete(UUID userId, String schemaId) {
 
-        List<SchemaOrderEntity> allByUserId =
-                schemaOrderRepository.findAllByUserId(userId);
+        List<SchemaOrderEntity> allByUserId = schemaOrderRepository.findAllByUserId(userId);
 
         if (allByUserId.isEmpty()) return;
 
-        List<SchemaOrderEntity> entityList =
-                allByUserId.stream().map(entity -> {
-                    List<String> order = jsonUtil.fromJsonList(entity.getOrder(), String.class);
-                    order.remove(schemaId);
-                    entity.setOrder(jsonUtil.toJson(order));
-                    return entity;
-                }).toList();
+        List<SchemaOrderEntity> entityList = allByUserId.stream().map(entity -> {
+            List<String> order = jsonUtil.fromJsonList(entity.getOrder(), String.class);
+            order.remove(schemaId);
+            entity.setOrder(jsonUtil.toJson(order));
+            return entity;
+        }).toList();
 
         schemaOrderRepository.saveAll(entityList);
     }
 
     private List<String> getUserOrder(UUID userId, ViewType viewType) {
-        return schemaOrderRepository.
-                findByUserIdAndViewType(userId, viewType)
-                .map(e -> jsonUtil.fromJsonList(e.getOrder(), String.class))
-                .orElse(new ArrayList<>());
+        return schemaOrderRepository.findByUserIdAndViewType(userId, viewType).map(e -> jsonUtil.fromJsonList(e.getOrder(), String.class)).orElse(new ArrayList<>());
     }
 }
