@@ -1,17 +1,16 @@
 package com.example.find_my_edge.analytics.ast.validator;
 
-import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.enums.ValueType;
 import com.example.find_my_edge.analytics.ast.exception.AstTypeValidationException;
+import com.example.find_my_edge.analytics.ast.function.FunctionDefinition;
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
 import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
-import com.example.find_my_edge.common.enums.FieldType;
 import com.example.find_my_edge.schema.model.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,184 +21,209 @@ public class AstTypeValidator {
 
     private final FunctionRegistry functionRegistry;
 
-    public void validate(AstNode ast, FunctionMode mode, Map<String, Schema> schemasById) {
-        getNodeType(ast, mode, schemasById);
+    public ValueType validate(AstNode node, FunctionMode mode, Map<String, Schema> schemasById) {
+        return resolve(node, mode, schemasById);
     }
 
-    private ValueType getNodeType(AstNode node, FunctionMode mode, Map<String, Schema> schemasById) {
-        if (node == null) return ValueType.ANY;
+    private ValueType resolve(AstNode node, FunctionMode mode, Map<String, Schema> schemasById) {
+        if (node == null) return null;
 
-        switch (node.getType()) {
+        return switch (node.getType()) {
 
-            case CONSTANT -> {
-                Object value = node.getValue();
+            case CONSTANT -> inferConstant(node.getValue());
 
-                if (value instanceof Number) return ValueType.NUMBER;
-                if (value instanceof String) return ValueType.STRING;
+            case IDENTIFIER -> resolveField(node, schemasById);
 
-                return ValueType.ANY;
+            case UNARY -> resolve(node.getArg(), mode, schemasById);
+
+            case BINARY -> validateBinary(node, mode, schemasById);
+
+            case FUNCTION -> validateFunction(node, mode, schemasById);
+
+            default -> throw new AstTypeValidationException("Unknown node " + node.getType());
+        };
+    }
+
+    private ValueType inferConstant(Object value) {
+        if (value instanceof Number) return ValueType.NUMBER;
+        if (value instanceof String) return ValueType.STRING;
+        if (value instanceof Boolean) return ValueType.BOOLEAN;
+
+        throw new AstTypeValidationException("Unsupported constant type");
+    }
+
+    private ValueType resolveField(AstNode node, Map<String, Schema> schemasById) {
+        Schema schema = schemasById.get(node.getField());
+
+        if (schema == null) {
+            throw new AstTypeValidationException("Unknown field: " + node.getField());
+        }
+
+        return ValueType.valueOf(schema.getSemanticType().toString());
+    }
+
+
+    private ValueType validateBinary(AstNode node, FunctionMode mode, Map<String, Schema> schemasById) {
+
+        ValueType left = resolve(node.getLeft(), mode, schemasById);
+        ValueType right = resolve(node.getRight(), mode, schemasById);
+        String op = node.getOp();
+
+        // DATE - DATE → DURATION
+        if ("-".equals(op) && left == right && isDateLike(left)) {
+            return ValueType.DURATION;
+        }
+
+        if (List.of("+", "-", "*", "/").contains(op)) {
+
+            if (left == ValueType.DURATION && right == ValueType.DURATION) {
+                if (List.of("+", "-").contains(op)) return ValueType.DURATION;
+                if ("/".equals(op)) return ValueType.NUMBER;
+                throw error("Invalid: duration " + op + " duration");
             }
 
-            case IDENTIFIER -> {
-                if (schemasById == null) return ValueType.ANY;
-
-                Schema schema = schemasById.get(node.getField());
-
-                if (schema == null) {
-                    throw new AstTypeValidationException("Unknown field reference: " + node.getField());
-                }
-
-                return mapSchemaType(schema.getType());
+            if (left == ValueType.DURATION && right == ValueType.NUMBER) {
+                if (List.of("*", "/").contains(op)) return ValueType.DURATION;
+                throw error("Invalid: duration " + op + " number");
             }
 
-            case UNARY -> {
-                ValueType t = getNodeType(node.getArg(), mode, schemasById);
+            if (left == ValueType.NUMBER && right == ValueType.DURATION) {
+                if ("*".equals(op)) return ValueType.DURATION;
+                throw error("Invalid: number " + op + " duration");
+            }
 
-                if ("-".equals(node.getOp()) && t != ValueType.NUMBER) {
-                    throw new AstTypeValidationException("Unary minus requires a number");
-                }
-
+            if (left == ValueType.NUMBER && right == ValueType.NUMBER) {
                 return ValueType.NUMBER;
             }
 
-            case BINARY -> {
-                ValueType left = getNodeType(node.getLeft(), mode, schemasById);
-                ValueType right = getNodeType(node.getRight(), mode, schemasById);
+            throw error("Invalid arithmetic: " + left + " " + op + " " + right);
+        }
 
-                String op = node.getOp();
-
-                if (List.of("+", "-", "*", "/").contains(op)) {
-                    if (left != ValueType.NUMBER || right != ValueType.NUMBER) {
-                        throw new AstTypeValidationException("Operator " + op + " requires numeric operands");
-                    }
-                    return ValueType.NUMBER;
-                }
-
-                if (List.of("==", "!=", ">", "<", ">=", "<=").contains(op)) {
-                    return ValueType.BOOLEAN;
-                }
-
-                if (List.of("AND", "OR").contains(op)) {
-                    if (left != ValueType.BOOLEAN || right != ValueType.BOOLEAN) {
-                        throw new AstTypeValidationException(op + " requires boolean operands");
-                    }
-                    return ValueType.BOOLEAN;
-                }
+        if (List.of(">", "<", ">=", "<=", "==", "!=").contains(op)) {
+            if (left != right) {
+                throw error("Comparison mismatch: " + left + " " + op + " " + right);
             }
+            return ValueType.BOOLEAN;
+        }
 
-            case FUNCTION -> {
-                String fn = node.getFn();
+        if (List.of("AND", "OR").contains(op)) {
+            if (left != ValueType.BOOLEAN || right != ValueType.BOOLEAN) {
+                throw error("Logical op requires boolean");
+            }
+            return ValueType.BOOLEAN;
+        }
 
-                var def = functionRegistry.get(fn);
-                if (def == null) {
-                    throw new AstTypeValidationException("Unknown function " + fn);
-                }
+        throw error("Unknown operator " + op);
+    }
 
-                // Mode validation
-                if (mode != null) {
-                    Set<String> allowed = functionRegistry.getAllowedFunctions(mode);
+    private ValueType validateFunction(AstNode node, FunctionMode mode, Map<String, Schema> schemasById) {
 
-                    if (allowed != null && !allowed.contains(fn)) {
-                        throw new AstTypeValidationException(
-                                "Function " + fn + " is not allowed in " + mode + " computation"
-                        );
-                    }
-                }
+        String fn = node.getFn();
+        FunctionDefinition def = functionRegistry.get(fn);
 
-                List<AstNode> args = node.getArgs();
-                List<String> argTypes = Arrays.stream(def.getMeta().argTypes()).toList(); // adapt based on your model
+        if (def == null) {
+            throw error("Unknown function " + fn);
+        }
 
-                for (int i = 0; i < argTypes.size(); i++) {
-                    String expected = argTypes.get(i);
+        // Mode validation
+        if (mode != null) {
+            Set<String> allowed = functionRegistry.getAllowedFunctions(mode);
 
-                    ValueType actual = getNodeType(args.get(i), mode, schemasById);
-
-                    validateArgumentType(fn, i, expected, actual, args.get(i), mode, schemasById);
-                }
-
-                return def.getMeta().returnType() != null
-                       ? ValueType.valueOf(def.getMeta().returnType().toUpperCase())
-                       : ValueType.ANY;
+            if (allowed != null && !allowed.contains(fn)) {
+                throw new AstTypeValidationException(
+                        "Function " + fn + " is not allowed in " + mode + " computation"
+                );
             }
         }
 
-        return ValueType.ANY;
+        List<AstNode> args = node.getArgs();
+        List<Object> expectedArgs = def.getMeta().args; // from JSON
+        Map<String, List<String>> generics = def.getMeta().generics;
+
+        Map<String, ValueType> typeEnv = new HashMap<>();
+
+        List<ValueType> actualTypes = args.stream()
+                                          .map(arg -> resolve(arg, mode, schemasById))
+                                          .toList();
+
+        for (int i = 0; i < expectedArgs.size(); i++) {
+            resolveExpected(expectedArgs.get(i), actualTypes.get(i), typeEnv, generics, fn, i);
+        }
+
+        String ret = def.getMeta().returnType;
+
+        if (ret == null) return null;
+
+        if (ret.startsWith("$")) {
+            if (!typeEnv.containsKey(ret)) {
+                throw error("Unresolved generic " + ret + " in " + fn);
+            }
+            return typeEnv.get(ret);
+        }
+
+        return ValueType.valueOf(ret.toUpperCase());
     }
 
-    private void validateArgumentType(
-            String fn,
-            int index,
+    private void resolveExpected(
             Object expected,
             ValueType actual,
-            AstNode argNode,
-            FunctionMode mode,
-            Map<String, Schema> schemasById
+            Map<String, ValueType> typeEnv,
+            Map<String, List<String>> generics,
+            String fn,
+            int index
     ) {
 
-        // ANY
-        if ("any".equals(expected)) return;
+        // GENERIC ($T)
+        if (expected instanceof String str && str.startsWith("$")) {
 
-        // key constraint (like { key: "number" })
-        if (expected instanceof Map<?, ?> map && map.containsKey("key")) {
+            List<String> constraint = generics != null ? generics.get(str) : null;
 
-            if (argNode.getType() != NodeType.IDENTIFIER) {
-                throw new AstTypeValidationException(
-                        "Function " + fn + " argument " + (index + 1) + " must be a field reference"
-                );
+            if (constraint != null &&
+                constraint.stream().noneMatch(t -> t.equalsIgnoreCase(actual.name()))) {
+
+                throw error("Function " + fn + " arg " + (index + 1) +
+                            ": " + actual + " not allowed for " + str);
             }
 
-            String expectedKeyType = map.get("key").toString();
+            if (!typeEnv.containsKey(str)) {
+                typeEnv.put(str, actual);
+                return;
+            }
 
-            ValueType keyType = getNodeType(argNode, mode, schemasById);
-
-            if (!"any".equals(expectedKeyType) &&
-                keyType != ValueType.valueOf(expectedKeyType.toUpperCase())) {
-
-                throw new AstTypeValidationException(
-                        "Function " + fn + " argument " + (index + 1) +
-                        " must reference a " + expectedKeyType + " field"
-                );
+            if (typeEnv.get(str) != actual) {
+                throw error("Function " + fn + " arg " + (index + 1) +
+                            ": expected " + typeEnv.get(str) + " but got " + actual);
             }
 
             return;
         }
 
-        // Union types
+        // UNION
         if (expected instanceof List<?> list) {
             boolean match = list.stream()
                                 .anyMatch(t -> t.toString().equalsIgnoreCase(actual.name()));
 
             if (!match) {
-                throw new AstTypeValidationException(
-                        "Function " + fn + " argument " + (index + 1) +
-                        " must be one of " + list
-                );
+                throw error("Function " + fn + " arg " + (index + 1) +
+                            ": expected " + list + " but got " + actual);
             }
             return;
         }
 
-//        System.out.println(actual.name());
-        // Direct match
+        // EXACT
         if (!expected.toString().equalsIgnoreCase(actual.name())) {
-            throw new AstTypeValidationException(
-                    "Function " + fn + " argument " + (index + 1) +
-                    " must be " + expected
-            );
+            throw error("Function " + fn + " arg " + (index + 1) +
+                        ": expected " + expected + " but got " + actual);
         }
     }
 
-    private ValueType mapSchemaType(FieldType type) {
-        return switch (type) {
-            case FieldType.NUMBER,
-                 FieldType.DURATION,
-                 FieldType.TIME,
-                 FieldType.DATE,
-                 FieldType.DATETIME -> ValueType.NUMBER;
+    private boolean isDateLike(ValueType type) {
+        return type == ValueType.DATE ||
+               type == ValueType.TIME ||
+               type == ValueType.DATETIME;
+    }
 
-            case FieldType.SELECT, FieldType.TEXT -> ValueType.STRING;
-
-            case FieldType.BOOLEAN -> ValueType.BOOLEAN;
-            default -> ValueType.ANY;
-        };
+    private AstTypeValidationException error(String msg) {
+        return new AstTypeValidationException("[Type Error] " + msg);
     }
 }

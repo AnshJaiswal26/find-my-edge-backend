@@ -15,6 +15,7 @@ import com.example.find_my_edge.schema.exception.SchemaOrderException;
 import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.model.SchemaUpdate;
 import com.example.find_my_edge.schema.registry.SchemaRegistry;
 import com.example.find_my_edge.schema.entity.SchemaEntity;
 import com.example.find_my_edge.schema.entity.SchemaOrderEntity;
@@ -97,7 +98,7 @@ public class SchemaServiceImpl implements SchemaService {
 
     /* ---------------- UPDATE ---------------- */
     @Override
-    public Schema update(String schemaId, Schema schema) {
+    public SchemaUpdate update(String schemaId, Schema schema) {
 //        System.out.println(schema);
         schema.setId(schemaId);
         schema.validateForWrite();
@@ -118,7 +119,11 @@ public class SchemaServiceImpl implements SchemaService {
 
             Schema baseSchema = schemaRegistry.get(schemaId);
 
-            return overrideService.applySingleOverride(baseSchema, schemaOverrideEntity);
+            return new SchemaUpdate(
+                    overrideService.applySingleOverride(baseSchema, schemaOverrideEntity),
+                    false,
+                    null
+            );
 
         } else if (existing == null) {
             throw new SchemaNotFoundException(schemaId);
@@ -128,11 +133,26 @@ public class SchemaServiceImpl implements SchemaService {
 
         incoming.setId(existing.getId());
 
+        String prevFormula = existing.getIdFormula();
+        SchemaSource prevSource = existing.getSource();
+
         applyUpdateStrategy(existing, incoming);
 
         SchemaEntity saved = schemaRepository.save(existing);
 
-        return mapper.toModel(saved);
+        String newFormula = saved.getIdFormula();
+
+        boolean formulaChanged = !Objects.equals(prevFormula, newFormula);
+
+        boolean becameComputed =
+                prevSource != SchemaSource.COMPUTED &&
+                saved.getSource() == SchemaSource.COMPUTED;
+
+        return new SchemaUpdate(
+                mapper.toModel(saved),
+                formulaChanged || becameComputed,
+                null
+        );
     }
 
     private void applyUpdateStrategy(SchemaEntity existing, SchemaEntity incoming) {

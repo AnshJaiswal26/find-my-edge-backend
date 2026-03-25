@@ -1,6 +1,6 @@
 package com.example.find_my_edge.analytics.ast.model;
 
-import com.example.find_my_edge.analytics.ast.enums.ValueType;
+import com.example.find_my_edge.common.enums.SemanticType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,5 +18,5 @@ public class AstResult {
 
     private AstNode astNode;
     private Set<String> dependencies;
-    private ValueType semanticType;
+    private SemanticType semanticType;
 }

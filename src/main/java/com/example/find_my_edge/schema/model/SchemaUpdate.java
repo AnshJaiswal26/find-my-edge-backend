@@ -9,5 +9,6 @@ import lombok.Data;
 public class SchemaUpdate {
 
     private Schema schema;
+    private Boolean isFormulaChanged;
     private RecomputeResult recomputeResult;
 }

@@ -76,6 +76,8 @@ public class DependencyResolver {
     ) {
         Set<String> affectedSchemas = new LinkedHashSet<>();
 
+        affectedSchemas.add(changedMetric);
+
         for (String schemaId : order) {
 
             HasDependencies schema = schemas.get(schemaId);

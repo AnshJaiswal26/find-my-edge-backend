@@ -1,50 +1,41 @@
 package com.example.find_my_edge.analytics.ast.function;
 
-import com.example.find_my_edge.analytics.ast.function.annotation.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.enums.FunctionMode;
 import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-
 @Component
 public class FunctionRegistry {
 
     private final Map<String, FunctionDefinition> registry = new HashMap<>();
+    private final Map<FunctionMode, Set<String>> allowedByMode;
 
-    private final Map<FunctionMode, Set<String>> allowedByMode = new HashMap<>();
+    public FunctionRegistry(
+            List<Reducer> reducers,
+            FunctionRegistryLoader loader
+    ) {
 
-    public FunctionRegistry(List<Reducer> reducers) {
+        Map<String, FunctionMeta> defs = loader.getDefs();
+        this.allowedByMode = loader.getAllowedByMode();
 
         for (Reducer reducer : reducers) {
 
-            FunctionMeta meta = reducer.getClass().getAnnotation(FunctionMeta.class);
+            String name = reducer.getName().toUpperCase();
 
-            if (meta == null) {
+            FunctionMeta def = defs.get(name);
+
+            if (def == null) {
                 throw new IllegalStateException(
-                        "Missing @FunctionMeta on " + reducer.getClass().getSimpleName()
+                        "Missing function definition in JSON for: " + name
                 );
             }
 
-            String name = reducer.getName().toUpperCase();
+            registry.put(name, new FunctionDefinition(name, reducer, def));
 
-            registry.put(name, new FunctionDefinition(name, reducer, meta));
-
-            for (FunctionMode mode : meta.modes()) {
-                allowedByMode
-                        .computeIfAbsent(mode, k -> new HashSet<>())
-                        .add(name);
-            }
         }
 
-        allowedByMode
-                .computeIfAbsent(FunctionMode.BASE, k -> new HashSet<>())
-                .add("COUNT_ALL");
-
-        allowedByMode
-                .computeIfAbsent(FunctionMode.WINDOW, k -> new HashSet<>())
-                .add("COUNT_ALL");
     }
 
     public FunctionDefinition get(String name) {

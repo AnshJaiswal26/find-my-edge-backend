@@ -3,6 +3,7 @@ package com.example.find_my_edge.schema.service;
 import com.example.find_my_edge.schema.enums.ViewType;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.schema.model.SchemaBundle;
+import com.example.find_my_edge.schema.model.SchemaUpdate;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface SchemaService {
 
     Schema create(Schema schema);
 
-    Schema update(String id, Schema schema);
+    SchemaUpdate update(String id, Schema schema);
 
     Schema getById(String id);
 

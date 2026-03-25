@@ -1,0 +1,645 @@
+{
+  "ABS": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "ABS(expr)",
+    "description": "Absolute value",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "ROUND": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "ROUND(expr, digits)",
+    "description": "Round to N decimal places",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "CLAMP": {
+    "args": [
+      "number",
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "CLAMP(expr, min, max)",
+    "description": "Clamp value to range",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "IF": {
+    "args": [
+      "boolean",
+      "$T",
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration",
+        "date",
+        "time",
+        "datetime",
+        "string",
+        "boolean"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "IF(cond, yes, no)",
+    "description": "Conditional expression",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "SUM_N": {
+    "signature": "SUM_N(expr, n)",
+    "description": "Rolling sum over N rows",
+    "args": [
+      "$T",
+      "number"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "AVG_N": {
+    "args": [
+      "$T",
+      "number"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "AVG_N(expr, n)",
+    "description": "Rolling average over N rows",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "COUNT_N": {
+    "args": [
+      [
+        "number",
+        "duration",
+        "date",
+        "time",
+        "datetime",
+        "string",
+        "boolean"
+      ],
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "COUNT_N(expr, n)",
+    "description": "Rolling count over N rows",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "MAX_N": {
+    "args": [
+      "$T",
+      "number"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "MAX_N(expr, n)",
+    "description": "Rolling max over N rows",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "MIN_N": {
+    "args": [
+      "$T",
+      "number"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "MIN_N(expr, n)",
+    "description": "Rolling min over N rows",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "COUNT_IF_N": {
+    "args": [
+      "boolean",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "COUNT_IF_N(condition, n)",
+    "description": "Count of rows in last N where condition is true",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "RATE_N": {
+    "args": [
+      "boolean",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "RATE_N(condition, n)",
+    "description": "Rate (percentage) of rows in last N where condition is true",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "STDDEV_N": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "STDDEV_N(expr, n)",
+    "description": "Rolling standard deviation",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "MAX_DRAWDOWN_N": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "MAX_DRAWDOWN_N(expr, n)",
+    "description": "Maximum drawdown over last N rows",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "VOLATILITY_N": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "VOLATILITY_N(expr, n)",
+    "description": "Standard deviation of returns over last N rows",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "SHARPE_N": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "SHARPE_N(expr, n)",
+    "description": "Sharpe ratio over last N rows (risk-free = 0)",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "EXPECTANCY_N": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "EXPECTANCY_N(expr, n)",
+    "description": "Trade expectancy (win rate × avg win − loss rate × avg loss)",
+    "type": "WINDOW",
+    "strategy": "ROLLING",
+    "executionMode": "AST"
+  },
+  "SUM": {
+    "args": [
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "SUM(expr)",
+    "description": "Sum of all non-null values",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "MAX": {
+    "args": [
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "MAX(expr)",
+    "description": "Largest value",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "MIN": {
+    "args": [
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "MIN(expr)",
+    "description": "Smallest value",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "COUNT": {
+    "args": [
+      "number",
+      "duration",
+      "date",
+      "time",
+      "datetime",
+      "string",
+      "boolean"
+    ],
+    "returnType": "number",
+    "signature": "COUNT(expr)",
+    "description": "Count of non-null values",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "COUNT_IF": {
+    "args": [
+      "boolean"
+    ],
+    "returnType": "number",
+    "signature": "COUNT_IF(condition)",
+    "description": "Count of rows where condition is true",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "COUNT_ALL": {
+    "args": [],
+    "returnType": "number",
+    "signature": "COUNT_ALL()",
+    "description": "Total number of records",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "COUNT_NEGATIVE": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "COUNT_NEGATIVE(expr)",
+    "description": "Count of values less than 0",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "COUNT_POSITIVE": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "COUNT_POSITIVE(expr)",
+    "description": "Count of values greater than 0",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "SUM_POSITIVE": {
+    "args": [
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "SUM_POSITIVE(expr)",
+    "description": "Sum of values greater than 0",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "SUM_NEGATIVE": {
+    "args": [
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "SUM_NEGATIVE(expr)",
+    "description": "Sum of values less than 0",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "SUM_IF": {
+    "args": [
+      "$T",
+      "boolean"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "SUM_IF(expr, condition)",
+    "description": "Sum of expr where condition is true",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "STDDEV": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "STDDEV(expr)",
+    "description": "Standard deviation of values",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "VARIANCE": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "VARIANCE(expr)",
+    "description": "Variance of values",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "VOLATILITY": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "VOLATILITY(expr)",
+    "description": "Standard deviation of returns over entire sequence",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "STREAK": {
+    "args": [
+      "boolean"
+    ],
+    "returnType": "number",
+    "signature": "STREAK(condition)",
+    "description": "Longest consecutive TRUE streak over all rows",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "MAX_DRAWDOWN": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "MAX_DRAWDOWN(expr)",
+    "description": "Maximum drawdown over entire sequence",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "AVG": {
+    "args": [
+      "$T"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "AVG(expr)",
+    "description": "Average (mean) of values",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "AVG_IF": {
+    "args": [
+      "$T",
+      "boolean"
+    ],
+    "generics": {
+      "$T": [
+        "number",
+        "duration"
+      ]
+    },
+    "returnType": "$T",
+    "signature": "AVG_IF(expr, condition)",
+    "description": "Average of expr where condition is true",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "RATE": {
+    "args": [
+      "boolean"
+    ],
+    "returnType": "number",
+    "signature": "RATE(condition)",
+    "description": "Percentage of rows where condition is true",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "RATIO": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "RATIO(a, b)",
+    "description": "Division of two aggregated values (a / b)",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "FACTOR": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "FACTOR(a, b)",
+    "description": "Magnitude comparison between two values (a / b)",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "EDGE_RATIO": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "EDGE_RATIO(win, loss)",
+    "description": "Net edge ratio between two opposing values",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "PERCENT_OF": {
+    "args": [
+      "number",
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "PERCENT_OF(part, total)",
+    "description": "What percent one value is of another",
+    "type": "AGGREGATE",
+    "executionMode": "AST"
+  },
+  "WIN_RATE": {
+    "args": [],
+    "returnType": "number",
+    "signature": "WIN_RATE()",
+    "description": "Winning trades divided by total trades",
+    "type": "AGGREGATE"
+  },
+  "LOSS_RATE": {
+    "args": [],
+    "returnType": "number",
+    "signature": "LOSS_RATE()",
+    "description": "Losing trades divided by total trades",
+    "type": "AGGREGATE"
+  },
+  "PROFIT_FACTOR": {
+    "args": [],
+    "returnType": "number",
+    "signature": "PROFIT_FACTOR()",
+    "description": "Gross profit divided by gross loss",
+    "type": "AGGREGATE"
+  },
+  "LOSS_FACTOR": {
+    "args": [],
+    "returnType": "number",
+    "signature": "LOSS_FACTOR()",
+    "description": "Gross loss divided by gross profit",
+    "type": "AGGREGATE"
+  },
+  "PAYOFF_RATIO": {
+    "args": [],
+    "returnType": "number",
+    "signature": "PAYOFF_RATIO()",
+    "description": "Average win divided by average loss",
+    "type": "AGGREGATE"
+  },
+  "EXPECTANCY": {
+    "args": [],
+    "returnType": "number",
+    "signature": "EXPECTANCY()",
+    "description": "Expected profit per trade (win rate × avg win − loss rate × avg loss)",
+    "type": "AGGREGATE"
+  },
+  "PREV": {
+    "args": [
+      "$T"
+    ],
+    "returnType": "$T",
+    "signature": "PREV(expr)",
+    "description": "Value of expression from previous row",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "SELF": {
+    "args": [],
+    "returnType": "$T",
+    "signature": "SELF()",
+    "description": "Previous computed value of this column",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "CUMSUM": {
+    "args": [
+      "number"
+    ],
+    "returnType": "number",
+    "signature": "CUMSUM(expr)",
+    "description": "Cumulative sum over rows",
+    "type": "PURE",
+    "strategy": "CUMULATIVE",
+    "executionMode": "AST"
+  },
+  "CUMSUM_RESET": {
+    "args": [
+      "number",
+      "boolean"
+    ],
+    "returnType": "number",
+    "signature": "CUMSUM_RESET(expr, condition)",
+    "description": "Accumulate expr but reset when condition is true",
+    "type": "PURE",
+    "strategy": "CUMULATIVE",
+    "executionMode": "AST"
+  },
+  "SECONDS": {
+    "args": [
+      "number"
+    ],
+    "returnType": "duration",
+    "signature": "SECONDS(n)",
+    "description": "Convert seconds to duration",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "DAYS": {
+    "args": [
+      "number"
+    ],
+    "returnType": "duration",
+    "signature": "DAYS(n)",
+    "description": "Convert days to duration",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "HOURS": {
+    "args": [
+      "number"
+    ],
+    "returnType": "duration",
+    "signature": "HOURS(n)",
+    "description": "Convert hours to duration",
+    "type": "PURE",
+    "executionMode": "AST"
+  },
+  "MINUTES": {
+    "args": [
+      "number"
+    ],
+    "returnType": "duration",
+    "signature": "MINUTES(n)",
+    "description": "Convert minutes to duration",
+    "type": "PURE",
+    "executionMode": "AST"
+  }
+}

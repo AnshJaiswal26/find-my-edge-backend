@@ -8,6 +8,7 @@ import com.example.find_my_edge.analytics.model.ChartResult;
 import com.example.find_my_edge.analytics.model.ComputationContext;
 import com.example.find_my_edge.analytics.model.RecomputeResult;
 import com.example.find_my_edge.analytics.service.RecomputeService;
+import com.example.find_my_edge.common.util.JsonUtil;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.workspace.config.chart.ChartConfig;
 import com.example.find_my_edge.workspace.config.chart.SeriesConfig;
@@ -36,6 +37,8 @@ public class RecomputeServiceImpl implements RecomputeService {
     private final StatComputeService statComputeService;
 
     private final DependencyResolver dependencyResolver;
+
+    private final JsonUtil jsonUtil;
 
 //    private final SetupScoreComputeService setupScoreComputeService;
 

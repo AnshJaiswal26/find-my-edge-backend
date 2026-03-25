@@ -9,8 +9,6 @@ import com.example.find_my_edge.workspace.enums.PageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 public class SchemaOrchestratorServiceImpl implements SchemaOrchestratorService {
@@ -30,29 +28,27 @@ public class SchemaOrchestratorServiceImpl implements SchemaOrchestratorService 
                     recomputeService.recomputeOnSchemaCreation(saved.getId());
         }
 
-        return new SchemaUpdate(saved, recomputeResult);
+        return new SchemaUpdate(saved, null, recomputeResult);
     }
 
     @Override
     public SchemaUpdate updateSchemaAndRecompute(String schemaId, Schema schema) {
 
-        Schema saved = schemaService.update(schemaId, schema);
+        SchemaUpdate saved = schemaService.update(schemaId, schema);
 
 
         RecomputeResult recomputeResult = null;
 
-        if (saved.isComputed()) {
-            boolean formulaChanged = !Objects.equals(schema.getIdFormula(), saved.getIdFormula());
-
-            if (formulaChanged) {
-                recomputeResult =
-                        recomputeService.recomputeOnDefinitionChange(
-                                PageType.DASHBOARD.key(),
-                                schemaId
-                        );
-            }
+        if (saved.getSchema().isComputed() && Boolean.TRUE.equals(saved.getIsFormulaChanged())) {
+            recomputeResult =
+                    recomputeService.recomputeOnDefinitionChange(
+                            PageType.DASHBOARD.key(),
+                            schemaId
+                    );
         }
 
-        return new SchemaUpdate(saved, recomputeResult);
+        saved.setRecomputeResult(recomputeResult);
+
+        return saved;
     }
 }

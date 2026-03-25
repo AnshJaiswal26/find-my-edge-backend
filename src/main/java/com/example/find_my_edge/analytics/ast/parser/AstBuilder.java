@@ -2,12 +2,13 @@ package com.example.find_my_edge.analytics.ast.parser;
 
 import com.example.find_my_edge.analytics.ast.enums.NodeType;
 import com.example.find_my_edge.analytics.ast.exception.AstParseException;
+import com.example.find_my_edge.analytics.ast.function.FunctionMeta;
 import com.example.find_my_edge.analytics.ast.function.FunctionDefinition;
 import com.example.find_my_edge.analytics.ast.function.FunctionRegistry;
 import com.example.find_my_edge.analytics.ast.function.enums.FunctionType;
+import com.example.find_my_edge.analytics.ast.function.enums.WindowStrategy;
 import com.example.find_my_edge.analytics.ast.model.AstNode;
 import com.example.find_my_edge.analytics.ast.model.AstResult;
-import com.example.find_my_edge.analytics.ast.reducer.Reducer;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -39,13 +40,10 @@ public class AstBuilder {
                 }
 
                 int actualArgs = t.getArgCount();
-                int expectedArgs = fnDef.getMeta().argTypes().length;
+                int expectedArgs = fnDef.getMeta().getArgs().size();
 
                 if (actualArgs != expectedArgs) {
-                    throw error(
-                            "Function " + name + " expects " + expectedArgs +
-                            " argument(s) but got " + actualArgs
-                    );
+                    throw error("Function " + name + " expects " + expectedArgs + " argument(s) but got " + actualArgs);
                 }
 
                 if (stack.size() < actualArgs) {
@@ -58,8 +56,8 @@ public class AstBuilder {
                     args.addFirst(stack.pop()); // reverse order
                 }
 
-                // 🚫 Prevent nested window
-                if (isWindowFunction(fnDef.getReducer())) {
+                // Prevent nested window rolling functions
+                if (isWindowRollingFunction(fnDef.getMeta())) {
                     for (AstNode arg : args) {
                         if (containsWindowFunction(arg)) {
                             throw error("Nested window functions not allowed in " + name);
@@ -67,15 +65,11 @@ public class AstBuilder {
                     }
                 }
 
-                if(fnDef.getReducer().getField() != null){
+                if (fnDef.getReducer().getField() != null) {
                     dependencies.add(fnDef.getReducer().getField());
                 }
 
-                AstNode node = AstNode.builder()
-                                      .type(NodeType.FUNCTION)
-                                      .fn(name)
-                                      .args(args)
-                                      .build();
+                AstNode node = AstNode.builder().type(NodeType.FUNCTION).fn(name).args(args).build();
 
                 stack.push(node);
                 continue;
@@ -91,10 +85,7 @@ public class AstBuilder {
 
                 dependencies.add(key);
 
-                AstNode node = AstNode.builder()
-                                      .type(NodeType.IDENTIFIER)
-                                      .field(key)
-                                      .build();
+                AstNode node = AstNode.builder().type(NodeType.IDENTIFIER).field(key).build();
 
                 stack.push(node);
                 continue;
@@ -103,10 +94,7 @@ public class AstBuilder {
             /* ---------- STRING ---------- */
             if (t.getType() == Tokenizer.Token.Type.STRING) {
 
-                AstNode node = AstNode.builder()
-                                      .type(NodeType.CONSTANT)
-                                      .valueType("string")
-                                      .value(t.getValue()) // string stored separately if needed
+                AstNode node = AstNode.builder().type(NodeType.CONSTANT).valueType("string").value(t.getValue()) // string stored separately if needed
                                       .build();
 
                 stack.push(node);
@@ -116,11 +104,7 @@ public class AstBuilder {
             /* ---------- NUMBER ---------- */
             if (t.getType() == Tokenizer.Token.Type.NUMBER) {
 
-                AstNode node = AstNode.builder()
-                                      .type(NodeType.CONSTANT)
-                                      .valueType("number")
-                                      .value(Double.valueOf(t.getValue()))
-                                      .build();
+                AstNode node = AstNode.builder().type(NodeType.CONSTANT).valueType("number").value(Double.valueOf(t.getValue())).build();
 
                 stack.push(node);
                 continue;
@@ -139,11 +123,7 @@ public class AstBuilder {
 
                     AstNode arg = stack.pop();
 
-                    AstNode node = AstNode.builder()
-                                          .type(NodeType.UNARY)
-                                          .op("-")
-                                          .arg(arg)
-                                          .build();
+                    AstNode node = AstNode.builder().type(NodeType.UNARY).op("-").arg(arg).build();
 
                     stack.push(node);
                     continue;
@@ -157,12 +137,7 @@ public class AstBuilder {
                 AstNode right = stack.pop();
                 AstNode left = stack.pop();
 
-                AstNode node = AstNode.builder()
-                                      .type(NodeType.BINARY)
-                                      .op(op)
-                                      .left(left)
-                                      .right(right)
-                                      .build();
+                AstNode node = AstNode.builder().type(NodeType.BINARY).op(op).left(left).right(right).build();
 
                 stack.push(node);
             }
@@ -177,8 +152,13 @@ public class AstBuilder {
 
     /* ---------- Helpers ---------- */
 
-    private boolean isWindowFunction(Reducer reducer) {
-        return FunctionType.WINDOW.equals(reducer.getType()); // or enum later
+    private boolean isWindowRollingFunction(FunctionMeta def) {
+        return FunctionType.WINDOW == def.getType() && WindowStrategy.ROLLING == def.getStrategy(); // or enum later
+    }
+
+
+    private boolean isWindowFunction(FunctionMeta def) {
+        return FunctionType.WINDOW == def.getType(); // or enum later
     }
 
     private boolean containsWindowFunction(AstNode node) {
@@ -188,7 +168,7 @@ public class AstBuilder {
         if (node.getType() == NodeType.FUNCTION) {
             FunctionDefinition def = functionRegistry.get(node.getFn());
 
-            if (def != null && isWindowFunction(def.getReducer())) return true;
+            if (def != null && isWindowFunction(def.getMeta())) return true;
 
             for (AstNode arg : node.getArgs()) {
                 if (containsWindowFunction(arg)) return true;
@@ -196,8 +176,7 @@ public class AstBuilder {
         }
 
         if (node.getType() == NodeType.BINARY) {
-            return containsWindowFunction(node.getLeft()) ||
-                   containsWindowFunction(node.getRight());
+            return containsWindowFunction(node.getLeft()) || containsWindowFunction(node.getRight());
         }
 
         if (node.getType() == NodeType.UNARY) {

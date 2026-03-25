@@ -34,5 +34,5 @@ jwt:
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:dr8wgjp8a}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
+  api-key: ${CLOUDINARY_API_KEY:api_key}
+  api-secret: ${CLOUDINARY_API_SECRET:api_secret}
