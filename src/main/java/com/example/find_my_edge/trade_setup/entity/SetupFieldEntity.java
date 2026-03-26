@@ -10,7 +10,6 @@ import lombok.Data;
 public class SetupFieldEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne
@@ -28,6 +27,7 @@ public class SetupFieldEntity {
     @Column(name = "to_value")
     private Double to;
 
+    @Column(columnDefinition = "JSON")
     private String expected; // 100, 200, 300...,  or for categorical: "A", "B", "C"...
 
     @Enumerated(EnumType.STRING)

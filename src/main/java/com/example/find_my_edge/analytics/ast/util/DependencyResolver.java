@@ -15,6 +15,7 @@ public class DependencyResolver {
         Map<String, List<String>> dependsOnMap = new HashMap<>();
 
         for (HasDependencies item : items) {
+
             dependsOnMap.put(
                     item.getId(),
                     item.getDependencies() != null ? item.getDependencies() : Collections.emptyList()

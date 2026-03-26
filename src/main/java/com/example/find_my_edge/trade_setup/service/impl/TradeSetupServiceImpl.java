@@ -153,11 +153,20 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         TradeSetupEntity setup = getSetupOrThrow(setupId);
 
+        String fieldId = UUID.randomUUID().toString();
+
         SetupFieldEntity field = setupModelEntityMapper.toEntity(model);
 
+        field.setId(fieldId);
         field.setTradeSetup(setup);
 
         setup.getFields().add(field);
+
+        List<String> fieldOrder = jsonUtil.fromJsonList(setup.getFieldOrder(), String.class);
+
+        fieldOrder.add(field.getId());
+
+        setup.setFieldOrder(jsonUtil.toJsonList(fieldOrder));
 
         repo.save(setup);
 
@@ -169,7 +178,11 @@ public class TradeSetupServiceImpl implements TradeSetupService {
 
         TradeSetupEntity setup = getSetupOrThrow(setupId);
 
-        SetupFieldEntity existingField = setup.getFields().stream().filter(f -> f.getId().equals(fieldId)).findFirst().orElseThrow(() -> new TradeSetupFieldNotFoundException("Field not found"));
+        SetupFieldEntity existingField = setup.getFields()
+                                              .stream()
+                                              .filter(f -> f.getId().equals(fieldId))
+                                              .findFirst()
+                                              .orElseThrow(() -> new TradeSetupFieldNotFoundException("Field not found"));
 
         SetupField merged = setupModelEntityMapper.toModel(existingField);
 
@@ -186,6 +199,14 @@ public class TradeSetupServiceImpl implements TradeSetupService {
     public void deleteField(String setupId, String fieldId) {
 
         TradeSetupEntity setup = getSetupOrThrow(setupId);
+
+        String fieldOrder = setup.getFieldOrder();
+
+        List<String> order = jsonUtil.fromJsonList(fieldOrder, String.class);
+
+        order.remove(fieldId);
+
+        setup.setFieldOrder(jsonUtil.toJsonList(order));
 
         boolean removed = setup.getFields().removeIf(f -> f.getId().equals(fieldId));
 

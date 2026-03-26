@@ -1,6 +1,7 @@
 package com.example.find_my_edge.analytics.model;
 
 import com.example.find_my_edge.schema.model.Schema;
+import com.example.find_my_edge.trade_setup.model.EvaluationResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,4 +19,5 @@ public class ComputationContext {
     private final Map<String, Schema> schemasById;
     private final List<String> schemaOrder;
 
+    private final Map<String, Map<String, EvaluationResult>> scoreResults;
 }

@@ -9,14 +9,13 @@ import com.example.find_my_edge.schema.mapper.SchemaDtoMapper;
 import com.example.find_my_edge.schema.model.Schema;
 import com.example.find_my_edge.trade_setup.dto.TradeSetupResponse;
 import com.example.find_my_edge.trade_setup.mapper.TradeSetupDtoMapper;
-import com.example.find_my_edge.trade_setup.model.EvaluationResult;
 import com.example.find_my_edge.trade_setup.model.TradeSetup;
 import com.example.find_my_edge.trade_setup.service.TradeSetupService;
-import com.example.find_my_edge.trade_setup.service.impl.SetupScoreComputeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,16 +61,13 @@ public class BootstrapServiceImpl implements BootstrapService {
 //                setupScoreComputeService.computeAllScores(tradeSetups, ctx);
 
         List<String> setupOrders = new ArrayList<>();
-        Map<String, TradeSetupResponse> setupsById =
-                tradeSetups
-                        .stream()
-                        .collect(Collectors.toMap(
-                                         s -> {
-                                             setupOrders.add(s.getId());
-                                             return s.getId();
-                                         }, tradeSetupDtoMapper::toResponse
-                                 )
-                        );
+        Map<String, TradeSetupResponse> setupsById = new HashMap<>();
+
+        tradeSetups.forEach(setup -> {
+            setupOrders.add(setup.getId());
+            setupsById.put(setup.getId(), tradeSetupDtoMapper.toResponse(setup));
+
+        });
 
         return BootstrapResponse.builder()
                                 .schemasById(schemasById)
@@ -79,7 +75,7 @@ public class BootstrapServiceImpl implements BootstrapService {
                                 .tradesById(raw)
                                 .tradeSetupsOrder(setupOrders)
                                 .tradeSetupsById(setupsById)
-//                                .setupScoreResult(setupScoreResult)
+                                .setupScoreResult(ctx.getScoreResults())
                                 .derivedByTradeId(computed)
                                 .tradesOrder(tradesOrder)
                                 .build();

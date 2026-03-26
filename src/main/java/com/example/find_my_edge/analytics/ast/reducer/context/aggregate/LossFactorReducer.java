@@ -73,7 +73,7 @@ public class LossFactorReducer implements Reducer {
 
         if (pnl > 0) {
             state.grossProfit += pnl;
-        } else if (pnl < 0) {
+        } else if (pnl <= 0) {
             state.grossLoss += pnl; // keep negative
         }
 

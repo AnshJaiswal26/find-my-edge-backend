@@ -47,7 +47,7 @@ public class WinRateReducer implements Reducer {
 
     @Override
     public String getField() {
-        return "pnl"; // 👈 important
+        return "pnl";
     }
 
     // ---------- EXECUTION ----------

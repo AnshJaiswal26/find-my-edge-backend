@@ -524,42 +524,48 @@
     "returnType": "number",
     "signature": "WIN_RATE()",
     "description": "Winning trades divided by total trades",
-    "type": "AGGREGATE"
+    "type": "AGGREGATE",
+    "executionMode": "NATIVE"
   },
   "LOSS_RATE": {
     "args": [],
     "returnType": "number",
     "signature": "LOSS_RATE()",
     "description": "Losing trades divided by total trades",
-    "type": "AGGREGATE"
+    "type": "AGGREGATE",
+    "executionMode": "NATIVE"
   },
   "PROFIT_FACTOR": {
     "args": [],
     "returnType": "number",
     "signature": "PROFIT_FACTOR()",
     "description": "Gross profit divided by gross loss",
-    "type": "AGGREGATE"
+    "type": "AGGREGATE",
+    "executionMode": "NATIVE"
   },
   "LOSS_FACTOR": {
     "args": [],
     "returnType": "number",
     "signature": "LOSS_FACTOR()",
     "description": "Gross loss divided by gross profit",
-    "type": "AGGREGATE"
+    "type": "AGGREGATE",
+    "executionMode": "NATIVE"
   },
   "PAYOFF_RATIO": {
     "args": [],
     "returnType": "number",
     "signature": "PAYOFF_RATIO()",
     "description": "Average win divided by average loss",
-    "type": "AGGREGATE"
+    "type": "AGGREGATE",
+    "executionMode": "NATIVE"
   },
   "EXPECTANCY": {
     "args": [],
     "returnType": "number",
     "signature": "EXPECTANCY()",
     "description": "Expected profit per trade (win rate × avg win − loss rate × avg loss)",
-    "type": "AGGREGATE"
+    "type": "AGGREGATE",
+    "executionMode": "NATIVE"
   },
   "PREV": {
     "args": [
@@ -586,7 +592,7 @@
     "returnType": "number",
     "signature": "CUMSUM(expr)",
     "description": "Cumulative sum over rows",
-    "type": "PURE",
+    "type": "WINDOW",
     "strategy": "CUMULATIVE",
     "executionMode": "AST"
   },
@@ -598,7 +604,7 @@
     "returnType": "number",
     "signature": "CUMSUM_RESET(expr, condition)",
     "description": "Accumulate expr but reset when condition is true",
-    "type": "PURE",
+    "type": "WINDOW",
     "strategy": "CUMULATIVE",
     "executionMode": "AST"
   },

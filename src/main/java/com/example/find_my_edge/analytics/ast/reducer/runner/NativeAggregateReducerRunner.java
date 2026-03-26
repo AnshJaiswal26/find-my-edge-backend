@@ -16,7 +16,7 @@ public class NativeAggregateReducerRunner implements ReducerRunnerStrategy {
         // ✅ reducer must define field
         String field = reducer.getField();
         if (field == null) {
-            throw new AstExecutionException(
+        throw new AstExecutionException(
                     "[Native Aggregation Execution Error]",
                     "field not found in reducer '" + reducer.getName() + "'"
             );

@@ -74,6 +74,8 @@ public class SetupScoreComputeService {
 
             EvaluationResult result = evaluate(setup, raw, computed);
 
+            computed.put("tradeScore", result.getScore());
+
             updates
                     .computeIfAbsent(tradeId, k -> new HashMap<>())
                     .put(setup.getId(), result);

@@ -72,7 +72,7 @@ public class LossRateReducer implements Reducer {
 
         state.total++;
 
-        if (pnl < 0) {
+        if (pnl <= 0) {
             state.losses++;
         }
 

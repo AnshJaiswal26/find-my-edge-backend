@@ -1,6 +1,5 @@
 package com.example.find_my_edge.trade_setup.dto;
 
-import com.example.find_my_edge.common.enums.SemanticType;
 import com.example.find_my_edge.trade_setup.enums.Tag;
 import lombok.Data;
 

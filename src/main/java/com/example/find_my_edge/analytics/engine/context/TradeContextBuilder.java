@@ -33,9 +33,13 @@ public class TradeContextBuilder {
     private final SchemaService schemaService;
     private final TradeService tradeService;
 
+//    private final TradeSetupService tradeSetupService;
+//    private final SetupScoreComputeService setupScoreComputeService;
+
     public ComputationContext buildContext() {
         SchemaBundle schemaBundle = schemaService.getAll();
         List<Trade> trades = tradeService.getAll();
+//        List<TradeSetup> setups = tradeSetupService.getAll();
 
         Map<String, Schema> schemasById = schemaBundle.getSchemasById();
         List<String> schemasOrder = schemaBundle.getSchemasOrder();
@@ -47,6 +51,7 @@ public class TradeContextBuilder {
             Map<String, Schema> schemasById,
             List<String> schemasOrder,
             List<Trade> trades
+//            List<TradeSetup> setups
     ) {
         return buildComputationContext(schemasOrder, schemasById, trades);
     }
@@ -55,6 +60,7 @@ public class TradeContextBuilder {
             List<String> schemasOrder,
             Map<String, Schema> schemasById,
             List<Trade> trades
+//            List<TradeSetup> setups
     ) {
 
         Map<String, Map<String, Object>> raw = new HashMap<>();
@@ -62,7 +68,7 @@ public class TradeContextBuilder {
         List<String> tradeOrder = new ArrayList<>();
 
         if (trades == null || trades.isEmpty()) {
-            return new ComputationContext(raw, computed, tradeOrder, schemasById, schemasOrder);
+            return new ComputationContext(raw, computed, tradeOrder, schemasById, schemasOrder, null);
         }
 
         // STEP 1: RAW
@@ -158,7 +164,20 @@ public class TradeContextBuilder {
                 Map.copyOf(computed),
                 List.copyOf(tradeOrder),
                 schemasById,
-                schemasOrder
+                schemasOrder,
+                null
         );
+
+//        Map<String, Map<String, EvaluationResult>> scoreResults =
+//                setupScoreComputeService.computeAllScores(setups, computationContext);
+
+//        return new ComputationContext(
+//                Map.copyOf(raw),
+//                Map.copyOf(computed),
+//                List.copyOf(tradeOrder),
+//                schemasById,
+//                schemasOrder,
+//                scoreResults
+//        );
     }
 }
